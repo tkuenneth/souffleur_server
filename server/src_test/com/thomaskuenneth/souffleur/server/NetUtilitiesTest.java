@@ -7,8 +7,8 @@ public class NetUtilitiesTest {
 
     @Test
     void testServicesAreEqual() {
-        String amazon = NetUtilities.getIpAddressFromAmazon();
-        String myExternalIp = NetUtilities.getIpAddressFromMyExternalIp();
+        String amazon = Utils.getIpAddressFromAmazon();
+        String myExternalIp = Utils.getIpAddressFromMyExternalIp();
         Assertions.assertEquals(amazon, myExternalIp);
     }
 }

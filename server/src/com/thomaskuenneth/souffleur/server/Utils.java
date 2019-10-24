@@ -4,17 +4,16 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class NetUtilities {
+public class Utils {
 
-    private static final Logger LOGGER = Logger.getLogger(NetUtilities.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
 
     public static String getIpAddressFromAmazon() {
         return getIpAddress("https://checkip.amazonaws.com");
@@ -40,28 +39,54 @@ public class NetUtilities {
     }
 
     public static HttpServer createServer() throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+     //   InetAddress address = InetAddress.getLoopbackAddress();
+        InetSocketAddress socketAddress = new InetSocketAddress(8080);
+        HttpServer server = HttpServer.create(socketAddress, 0);
+        server.
         server.createContext("/souffleur", new SouffleurHandler());
         server.setExecutor(null);
         return server;
     }
 
     static class SouffleurHandler implements HttpHandler {
+
+        Robot r;
+
+        SouffleurHandler() {
+            try {
+                r = new Robot();
+            } catch (AWTException e) {
+                LOGGER.log(Level.SEVERE, "Could not create robot", e);
+            }
+        }
+
         @Override
         public void handle(HttpExchange t) throws IOException {
             URI requestUri = t.getRequestURI();
             String path = requestUri.getPath().toLowerCase();
             String response = "???";
             if (path.endsWith(("next"))) {
-                response = "ok";
+                response = "next";
+                sendCursorRight();
             } else if (path.endsWith(("previous"))) {
-                response = "ok";
+                response = "previous";
+                sendCursorLeft();
             }
             byte[] result = response.getBytes();
             t.sendResponseHeaders(200, result.length);
             OutputStream os = t.getResponseBody();
             os.write(result);
             os.close();
+        }
+
+        void sendCursorLeft() {
+            r.keyPress(KeyEvent.VK_LEFT);
+            r.keyRelease(KeyEvent.VK_LEFT);
+        }
+
+        void sendCursorRight() {
+            r.keyPress(KeyEvent.VK_RIGHT);
+            r.keyRelease(KeyEvent.VK_RIGHT);
         }
     }
 }

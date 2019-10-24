@@ -11,7 +11,7 @@ public class Runner {
 
     public static void main(String[] args) {
         try {
-            HttpServer server = NetUtilities.createServer();
+            HttpServer server = Utils.createServer();
             server.start();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to create http server", e);
