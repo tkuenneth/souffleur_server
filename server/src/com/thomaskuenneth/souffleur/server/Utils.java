@@ -39,10 +39,10 @@ public class Utils {
     }
 
     public static HttpServer createServer() throws Exception {
-     //   InetAddress address = InetAddress.getLoopbackAddress();
-        InetSocketAddress socketAddress = new InetSocketAddress(8080);
+        InetAddress inetAddress = InetAddress.getByName("192.168.43.126");
+        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
+        LOGGER.log(Level.INFO, inetAddress.getHostAddress());
         HttpServer server = HttpServer.create(socketAddress, 0);
-        server.
         server.createContext("/souffleur", new SouffleurHandler());
         server.setExecutor(null);
         return server;
