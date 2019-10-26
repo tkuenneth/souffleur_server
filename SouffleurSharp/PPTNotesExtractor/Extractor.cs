@@ -1,7 +1,9 @@
 ﻿using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace PPTNotesExtractor
 {
@@ -78,14 +80,8 @@ namespace PPTNotesExtractor
 
         void WriteJson(string filename, SlideNotes[] notes)
         {
-            foreach (SlideNotes current in notes)
-            {
-                Console.WriteLine(current.Name);
-                foreach (string s in current.Notes)
-                {
-                    Console.WriteLine($"   - {s}");
-                }
-            }
+            string json = JsonConvert.SerializeObject(notes);
+            File.WriteAllText(filename, json);
         }
     }
 }
