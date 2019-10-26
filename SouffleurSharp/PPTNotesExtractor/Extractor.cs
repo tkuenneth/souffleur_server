@@ -1,7 +1,6 @@
 ﻿using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace PPTNotesExtractor
@@ -38,28 +37,38 @@ namespace PPTNotesExtractor
                 }
 
                 List<string> list = new List<string>();
-                Microsoft.Office.Interop.PowerPoint.SlideRange notesPages = slide.NotesPage;
+                SlideRange notesPages = slide.NotesPage;
                 foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in notesPages.Shapes)
                 {
                     if (shape.Type == MsoShapeType.msoPlaceholder)
                     {
-                        if (shape.PlaceholderFormat.Type == Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody)
+                        if (shape.PlaceholderFormat.Type == PpPlaceholderType.ppPlaceholderBody)
                         {
                             if (shape.HasTextFrame == MsoTriState.msoTrue)
                             {
                                 if (shape.TextFrame.HasText == MsoTriState.msoTrue)
                                 {
                                     var textRange = shape.TextFrame.TextRange;
-                                    var text = textRange.Text;
-                                    list.Add(text);
+                                    string[] lines = textRange.Text.Split(new[] { "\r\n", "\r", "\n" },
+                                        StringSplitOptions.None
+                                    );
+                                    foreach (string line in lines)
+                                    {
+                                        if (line.Length > 0)
+                                        {
+                                            list.Add(line);
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                SlideNotes current = new SlideNotes();
-                current.Name = slide.Name;
-                current.Notes = list.ToArray();
+                SlideNotes current = new SlideNotes
+                {
+                    Name = slide.Name,
+                    Notes = list.ToArray()
+                };
                 slideNotes.Add(current);
             }
             app.Quit();
