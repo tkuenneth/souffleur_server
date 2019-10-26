@@ -1,13 +1,18 @@
 package com.thomaskuenneth.souffleur.server;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
-
-import java.awt.*;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,55 +43,34 @@ public class Utils {
         return null;
     }
 
-    public static HttpServer createServer() throws Exception {
-        InetAddress inetAddress = InetAddress.getByName("192.168.43.126");
-        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
-        LOGGER.log(Level.INFO, inetAddress.getHostAddress());
-        HttpServer server = HttpServer.create(socketAddress, 0);
-        server.createContext("/souffleur", new SouffleurHandler());
-        server.setExecutor(null);
-        return server;
+    public static List<String> findIpAddress(String displayName) throws Exception {
+        List<String> result = new ArrayList<>();
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = interfaces.nextElement();
+            if (networkInterface.isUp()) {
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    String name = networkInterface.getDisplayName();
+                    String hostAddress = addr.getHostAddress();
+                    if (displayName.equals(name)) {
+                        result.add(hostAddress);
+                    }
+                    LOGGER.info(String.format("%s: %s", name, hostAddress));
+                }
+            }
+        }
+        return result;
     }
 
-    static class SouffleurHandler implements HttpHandler {
+    public static void sendCursorLeft(Robot r) {
+        r.keyPress(KeyEvent.VK_LEFT);
+        r.keyRelease(KeyEvent.VK_LEFT);
+    }
 
-        Robot r;
-
-        SouffleurHandler() {
-            try {
-                r = new Robot();
-            } catch (AWTException e) {
-                LOGGER.log(Level.SEVERE, "Could not create robot", e);
-            }
-        }
-
-        @Override
-        public void handle(HttpExchange t) throws IOException {
-            URI requestUri = t.getRequestURI();
-            String path = requestUri.getPath().toLowerCase();
-            String response = "???";
-            if (path.endsWith(("next"))) {
-                response = "next";
-                sendCursorRight();
-            } else if (path.endsWith(("previous"))) {
-                response = "previous";
-                sendCursorLeft();
-            }
-            byte[] result = response.getBytes();
-            t.sendResponseHeaders(200, result.length);
-            OutputStream os = t.getResponseBody();
-            os.write(result);
-            os.close();
-        }
-
-        void sendCursorLeft() {
-            r.keyPress(KeyEvent.VK_LEFT);
-            r.keyRelease(KeyEvent.VK_LEFT);
-        }
-
-        void sendCursorRight() {
-            r.keyPress(KeyEvent.VK_RIGHT);
-            r.keyRelease(KeyEvent.VK_RIGHT);
-        }
+    public static void sendCursorRight(Robot r) {
+        r.keyPress(KeyEvent.VK_RIGHT);
+        r.keyRelease(KeyEvent.VK_RIGHT);
     }
 }
