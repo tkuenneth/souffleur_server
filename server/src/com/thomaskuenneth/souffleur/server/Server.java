@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +20,9 @@ public class Server implements HttpHandler {
     private final Robot r;
     private final HttpServer server;
 
-    public Server(String json) throws Exception {
+    public Server(String json, String address) throws Exception {
         r = new Robot();
-        List<String> addresses = Utils.findIpAddress("Intel(R) Dual Band Wireless-AC 8265");
-        server = createServer(addresses.get(0));
+        server = createServer(address);
     }
 
     @Override
@@ -50,8 +48,8 @@ public class Server implements HttpHandler {
         server.start();
     }
 
-    private HttpServer createServer(String name) throws Exception {
-        InetAddress inetAddress = InetAddress.getByName(name);
+    private HttpServer createServer(String address) throws Exception {
+        InetAddress inetAddress = InetAddress.getByName(address);
         InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
         LOGGER.log(Level.INFO, inetAddress.getHostAddress());
         HttpServer server = HttpServer.create(socketAddress, 0);
