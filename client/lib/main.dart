@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(SouffleurClient());
 
-class SouffleurClient extends StatelessWidget {
+class SouffleurClient extends StatefulWidget {
+  @override
+  State<SouffleurClient> createState() => _SouffleurClientState();
+}
+
+class _SouffleurClientState extends State<SouffleurClient> {
+
+  String baseUrl = "";
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,7 +31,7 @@ class SouffleurClient extends StatelessWidget {
               alignment: Alignment.bottomRight,
               child: FlatButton(
                 child: Text("Scan QR-Code"),
-                onPressed: onPressed,
+                onPressed: _onPressed,
               ),
             ),
           ],
@@ -30,5 +40,12 @@ class SouffleurClient extends StatelessWidget {
     );
   }
 
-  onPressed() {}
+  Future _onPressed() async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      setState(() => {
+        baseUrl = barcode
+      });
+    } on PlatformException catch (e) {}
+  }
 }
