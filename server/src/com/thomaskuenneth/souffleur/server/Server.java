@@ -33,14 +33,17 @@ public class Server implements HttpHandler {
         robot = new Robot();
         httpServer = createServer(address);
         slideNotes = readSlideNotes(jsonFile);
-        currentSlide = -1;
+        currentSlide = 0;
     }
 
     @Override
     public void handle(HttpExchange t) {
         URI requestUri = t.getRequestURI();
         String path = requestUri.getPath().toLowerCase();
-        if (path.endsWith(("next"))) {
+        if (path.endsWith(("start"))) {
+            currentSlide = 0;
+            sendNotes(t, currentSlide);
+        } else if (path.endsWith(("next"))) {
             if (updateCurrentSlide(1)) {
                 Utils.sendCursorRight(robot);
             }
@@ -53,7 +56,7 @@ public class Server implements HttpHandler {
         } else if (path.endsWith(("qrcode"))) {
             sendQRCode(t);
         } else {
-            sendStringResult(t, "???");
+            sendNotes(t, currentSlide);
         }
     }
 
