@@ -3,6 +3,8 @@ package com.thomaskuenneth.souffleur.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.Robot;
@@ -12,6 +14,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +25,12 @@ public class Server implements HttpHandler {
 
     private final Robot robot;
     private final HttpServer httpServer;
+    private final SlideNotes[] slideNotes;
 
-    public Server(String json, String address) throws Exception {
+    public Server(String jsonFile, String address) throws Exception {
         robot = new Robot();
         httpServer = createServer(address);
+        slideNotes = readSlideNotes(jsonFile);
     }
 
     @Override
@@ -80,5 +86,33 @@ public class Server implements HttpHandler {
         httpServer.createContext("/souffleur", this);
         httpServer.setExecutor(null);
         return httpServer;
+    }
+
+    private SlideNotes[] readSlideNotes(String filename) throws Exception {
+        List<SlideNotes> slideNotes = new ArrayList<>();
+        String json = Utils.readTextFile(filename);
+        if (json.length() == 0) {
+            throw new RuntimeException(String.format("Could not read json file %s", filename));
+        }
+        JSONArray array = new JSONArray(json);
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject object = array.getJSONObject(i);
+            String name = object.getString("Name");
+            JSONArray jsonNotes = object.getJSONArray("Notes");
+            String[] notes = new String[jsonNotes.length()];
+            for (int j = 0; j < jsonNotes.length(); j++) {
+                String note = jsonNotes.getString(j);
+                notes[j] = note;
+            }
+            SlideNotes current = new SlideNotes();
+            current.name = name;
+            current.notes = notes;
+            slideNotes.add(current);
+        }
+        SlideNotes[] result = new SlideNotes[slideNotes.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = slideNotes.get(i);
+        }
+        return result;
     }
 }

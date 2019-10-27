@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -114,5 +115,19 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "generateQRCode()", e);
         }
         return result;
+    }
+
+    public static String readTextFile(String filename) {
+        StringBuilder sb = new StringBuilder();
+        try (FileReader fr = new FileReader(filename);
+             BufferedReader br = new BufferedReader(fr)) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "readTextFile()", e);
+        }
+        return sb.toString();
     }
 }
