@@ -1,7 +1,15 @@
 package com.thomaskuenneth.souffleur.server;
 
-import java.awt.Robot;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,8 +19,10 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,5 +82,37 @@ public class Utils {
     public static void sendCursorRight(Robot r) {
         r.keyPress(KeyEvent.VK_RIGHT);
         r.keyRelease(KeyEvent.VK_RIGHT);
+    }
+
+    public static BufferedImage generateQRCode(String text) {
+        BufferedImage result = null;
+        try {
+            Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
+            hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix byteMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 400,
+                    400, hintMap);
+            int byteMatrixWidth = byteMatrix.getWidth();
+            int byteMatrixHeight = byteMatrix.getWidth();
+            BufferedImage image = new BufferedImage(byteMatrixWidth, byteMatrixHeight,
+                    BufferedImage.TYPE_INT_RGB);
+            image.createGraphics();
+            Graphics2D graphics = (Graphics2D) image.getGraphics();
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(0, 0, byteMatrixWidth, byteMatrixHeight);
+            graphics.setColor(Color.BLACK);
+            for (int i = 0; i < byteMatrixWidth; i++) {
+                for (int j = 0; j < byteMatrixWidth; j++) {
+                    if (byteMatrix.get(i, j)) {
+                        graphics.fillRect(i, j, 1, 1);
+                    }
+                }
+            }
+            result = image;
+        } catch (WriterException e) {
+            LOGGER.log(Level.SEVERE, "generateQRCode()", e);
+        }
+        return result;
     }
 }

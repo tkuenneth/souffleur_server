@@ -4,7 +4,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import javax.imageio.ImageIO;
 import java.awt.Robot;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -17,44 +19,66 @@ public class Server implements HttpHandler {
 
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
-    private final Robot r;
-    private final HttpServer server;
+    private final Robot robot;
+    private final HttpServer httpServer;
 
     public Server(String json, String address) throws Exception {
-        r = new Robot();
-        server = createServer(address);
+        robot = new Robot();
+        httpServer = createServer(address);
     }
 
     @Override
-    public void handle(HttpExchange t) throws IOException {
+    public void handle(HttpExchange t) {
         URI requestUri = t.getRequestURI();
         String path = requestUri.getPath().toLowerCase();
-        String response = "???";
         if (path.endsWith(("next"))) {
-            response = "next";
-            Utils.sendCursorRight(r);
+            Utils.sendCursorRight(robot);
+            sendStringResult(t, "OK");
         } else if (path.endsWith(("previous"))) {
-            response = "previous";
-            Utils.sendCursorLeft(r);
+            Utils.sendCursorLeft(robot);
+            sendStringResult(t, "OK");
+        } else if (path.endsWith(("qrcode"))) {
+            sendQRCode(t);
+        } else {
+            sendStringResult(t, "???");
         }
-        byte[] result = response.getBytes();
-        t.sendResponseHeaders(200, result.length);
-        OutputStream os = t.getResponseBody();
-        os.write(result);
-        os.close();
     }
 
     public void start() {
-        server.start();
+        httpServer.start();
+    }
+
+    private void sendQRCode(HttpExchange t) {
+        InetSocketAddress address = httpServer.getAddress();
+        String url = String.format("http://%s:%s/souffleur/",
+                address.getHostName(),
+                address.getPort());
+        BufferedImage image = Utils.generateQRCode(url);
+        try (OutputStream os = t.getResponseBody()) {
+            t.sendResponseHeaders(200, 0);
+            ImageIO.write(image, "jpg", os);
+            t.getResponseHeaders().add("Content-Type", "image/jpeg");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "sendQRCode()", e);
+        }
+    }
+
+    private void sendStringResult(HttpExchange t, String text) {
+        byte[] result = text.getBytes();
+        try (OutputStream os = t.getResponseBody()) {
+            t.sendResponseHeaders(200, result.length);
+            os.write(result);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "sendStringResult()", e);
+        }
     }
 
     private HttpServer createServer(String address) throws Exception {
         InetAddress inetAddress = InetAddress.getByName(address);
         InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
-        LOGGER.log(Level.INFO, inetAddress.getHostAddress());
-        HttpServer server = HttpServer.create(socketAddress, 0);
-        server.createContext("/souffleur", this);
-        server.setExecutor(null);
-        return server;
+        HttpServer httpServer = HttpServer.create(socketAddress, 0);
+        httpServer.createContext("/souffleur", this);
+        httpServer.setExecutor(null);
+        return httpServer;
     }
 }
