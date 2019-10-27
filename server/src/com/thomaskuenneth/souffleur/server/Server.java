@@ -27,10 +27,13 @@ public class Server implements HttpHandler {
     private final HttpServer httpServer;
     private final SlideNotes[] slideNotes;
 
+    private int currentSlide;
+
     public Server(String jsonFile, String address) throws Exception {
         robot = new Robot();
         httpServer = createServer(address);
         slideNotes = readSlideNotes(jsonFile);
+        currentSlide = -1;
     }
 
     @Override
@@ -38,11 +41,15 @@ public class Server implements HttpHandler {
         URI requestUri = t.getRequestURI();
         String path = requestUri.getPath().toLowerCase();
         if (path.endsWith(("next"))) {
-            Utils.sendCursorRight(robot);
-            sendStringResult(t, "OK");
+            if (updateCurrentSlide(1)) {
+                Utils.sendCursorRight(robot);
+            }
+            sendNotes(t, currentSlide);
         } else if (path.endsWith(("previous"))) {
-            Utils.sendCursorLeft(robot);
-            sendStringResult(t, "OK");
+            if (updateCurrentSlide(-1)) {
+                Utils.sendCursorLeft(robot);
+            }
+            sendNotes(t, currentSlide);
         } else if (path.endsWith(("qrcode"))) {
             sendQRCode(t);
         } else {
@@ -52,6 +59,22 @@ public class Server implements HttpHandler {
 
     public void start() {
         httpServer.start();
+    }
+
+    private boolean updateCurrentSlide(int offset) {
+        int last = currentSlide;
+        currentSlide += offset;
+        if (currentSlide < 0) {
+            currentSlide = 0;
+        } else if (currentSlide >= slideNotes.length) {
+            currentSlide = slideNotes.length - 1;
+        }
+        return last != currentSlide;
+    }
+
+    private void sendNotes(HttpExchange t, int slide) {
+        JSONObject object = new JSONObject(slideNotes[slide]);
+        sendStringResult(t, object.toString());
     }
 
     private void sendQRCode(HttpExchange t) {
@@ -104,9 +127,7 @@ public class Server implements HttpHandler {
                 String note = jsonNotes.getString(j);
                 notes[j] = note;
             }
-            SlideNotes current = new SlideNotes();
-            current.name = name;
-            current.notes = notes;
+            SlideNotes current = new SlideNotes(name, notes);
             slideNotes.add(current);
         }
         SlideNotes[] result = new SlideNotes[slideNotes.size()];
