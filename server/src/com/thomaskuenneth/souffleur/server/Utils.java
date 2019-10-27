@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URL;
@@ -65,10 +66,11 @@ public class Utils {
                     InetAddress addr = addresses.nextElement();
                     String name = networkInterface.getDisplayName();
                     String hostAddress = addr.getHostAddress();
-                    if (displayName.equals(name)) {
+                    boolean isInet4Address = addr instanceof Inet4Address;
+                    if (displayName.equals(name) && isInet4Address) {
                         result.add(hostAddress);
                     }
-                    LOGGER.info(String.format("%s: %s", name, hostAddress));
+                    LOGGER.info(String.format("%s: %s (%b)", name, hostAddress, isInet4Address));
                 }
             }
         }
