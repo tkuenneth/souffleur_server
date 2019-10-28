@@ -64,6 +64,13 @@ public class Server implements HttpHandler {
         httpServer.start();
     }
 
+    public String getQRCodeAsString() {
+        InetSocketAddress address = httpServer.getAddress();
+        return String.format("http://%s:%s/souffleur/",
+                address.getHostName(),
+                address.getPort());
+    }
+
     private boolean updateCurrentSlide(int offset) {
         int last = currentSlide;
         currentSlide += offset;
@@ -81,11 +88,7 @@ public class Server implements HttpHandler {
     }
 
     private void sendQRCode(HttpExchange t) {
-        InetSocketAddress address = httpServer.getAddress();
-        String url = String.format("http://%s:%s/souffleur/",
-                address.getHostName(),
-                address.getPort());
-        BufferedImage image = Utils.generateQRCode(url);
+        BufferedImage image = Utils.generateQRCode(getQRCodeAsString());
         try (OutputStream os = t.getResponseBody()) {
             t.sendResponseHeaders(200, 0);
             ImageIO.write(image, "jpg", os);

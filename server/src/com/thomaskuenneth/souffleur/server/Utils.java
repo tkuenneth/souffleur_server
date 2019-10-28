@@ -19,6 +19,7 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -131,5 +132,15 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "readTextFile()", e);
         }
         return sb.toString();
+    }
+
+    public static void browse(String url) {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(URI.create(url));
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "browse()", e);
+            }
+        }
     }
 }
