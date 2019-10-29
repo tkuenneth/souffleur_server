@@ -69,7 +69,9 @@ namespace PPTNotesExtractor
                 SlideNotes current = new SlideNotes
                 {
                     Name = slide.Name,
-                    Notes = list.ToArray()
+                    Notes = list.ToArray(),
+                    SlideNumber = slide.SlideNumber,
+                    Total = presentation.Slides.Count
                 };
                 slideNotes.Add(current);
             }
