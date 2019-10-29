@@ -40,8 +40,7 @@ public class Server implements HttpHandler {
     public void handle(HttpExchange t) {
         URI requestUri = t.getRequestURI();
         String path = requestUri.getPath().toLowerCase();
-        if (path.endsWith(("start"))) {
-            currentSlide = 0;
+        if (path.endsWith(("current"))) {
             sendNotes(t, currentSlide);
         } else if (path.endsWith(("next"))) {
             if (updateCurrentSlide(1)) {
@@ -117,7 +116,7 @@ public class Server implements HttpHandler {
         return httpServer;
     }
 
-    private SlideNotes[] readSlideNotes(String filename) throws Exception {
+    private SlideNotes[] readSlideNotes(String filename) {
         List<SlideNotes> slideNotes = new ArrayList<>();
         String json = Utils.readTextFile(filename);
         if (json.length() == 0) {
