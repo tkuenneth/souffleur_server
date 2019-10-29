@@ -124,7 +124,8 @@ public class Server implements HttpHandler {
             throw new RuntimeException(String.format("Could not read json file %s", filename));
         }
         JSONArray array = new JSONArray(json);
-        for (int i = 0; i < array.length(); i++) {
+        int total = array.length();
+        for (int i = 0; i < total; i++) {
             JSONObject object = array.getJSONObject(i);
             String name = object.getString("Name");
             JSONArray jsonNotes = object.getJSONArray("Notes");
@@ -133,7 +134,7 @@ public class Server implements HttpHandler {
                 String note = jsonNotes.getString(j);
                 notes[j] = note;
             }
-            SlideNotes current = new SlideNotes(name, notes);
+            SlideNotes current = new SlideNotes(name, notes, i + 1, total);
             slideNotes.add(current);
         }
         SlideNotes[] result = new SlideNotes[slideNotes.size()];
