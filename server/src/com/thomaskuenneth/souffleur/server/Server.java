@@ -26,14 +26,18 @@ public class Server implements HttpHandler {
     private final Robot robot;
     private final HttpServer httpServer;
     private final SlideNotes[] slideNotes;
+    private final String address;
+    private final int port;
 
     private int currentSlide;
 
-    public Server(String jsonFile, String address) throws Exception {
+    public Server(String jsonFile, String address, int port) throws Exception {
         robot = new Robot();
-        httpServer = createServer(address);
+        httpServer = createServer(address, port);
         slideNotes = readSlideNotes(jsonFile);
         currentSlide = 0;
+        this.address = address;
+        this.port = port;
     }
 
     @Override
@@ -64,10 +68,7 @@ public class Server implements HttpHandler {
     }
 
     public String getQRCodeAsString() {
-        InetSocketAddress address = httpServer.getAddress();
-        return String.format("http://%s:%s/souffleur/",
-                address.getHostName(),
-                address.getPort());
+        return String.format("http://%s:%s/souffleur/", address, port);
     }
 
     private boolean updateCurrentSlide(int offset) {
@@ -107,9 +108,9 @@ public class Server implements HttpHandler {
         }
     }
 
-    private HttpServer createServer(String address) throws Exception {
+    private HttpServer createServer(String address, int port) throws Exception {
         InetAddress inetAddress = InetAddress.getByName(address);
-        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
+        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         HttpServer httpServer = HttpServer.create(socketAddress, 0);
         httpServer.createContext("/souffleur", this);
         httpServer.setExecutor(null);
