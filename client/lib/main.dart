@@ -45,7 +45,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
               children: <Widget>[
                 Expanded(
                   child: Align(
-                    //alignment: Alignment.center,
+                    alignment: Alignment.centerLeft,
                     child: FutureBuilder<SlideNotes>(
                         future: currentSlideNotes,
                         builder: (context, snapshot) {
