@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:barcode_scan/barcode_scan.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(SouffleurClient());
 
@@ -16,7 +16,6 @@ class SouffleurClient extends StatefulWidget {
 }
 
 class _SouffleurClientState extends State<SouffleurClient> {
-  String baseUrl = "";
   Future<SlideNotes> currentSlideNotes;
   var notesGroup = AutoSizeGroup();
 
@@ -38,21 +37,25 @@ class _SouffleurClientState extends State<SouffleurClient> {
               child: Align(
                 //alignment: Alignment.center,
                 child: FutureBuilder<SlideNotes>(
-                  future: currentSlideNotes,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return _getNotes(snapshot.data.notes);
-                    } else {
-                      return FlatButton(
-                        child: Text(
-                          "Scan",
-                          style: TextStyle(fontSize: 72, color: Colors.black),
-                        ),
-                        onPressed: _onPressed,
-                      );
-                    }
-                  },
-                ),
+                    future: currentSlideNotes,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return _getNotes(snapshot.data.notes);
+                      } else {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return FlatButton(
+                            child: Text(
+                              "Scan",
+                              style:
+                                  TextStyle(fontSize: 72, color: Colors.black),
+                            ),
+                            onPressed: _onPressed,
+                          );
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      }
+                    }),
               ),
             ),
           ],
@@ -80,17 +83,25 @@ class _SouffleurClientState extends State<SouffleurClient> {
 
   Future _onPressed() async {
     try {
-      String barcode = await BarcodeScanner.scan();
-      setState(
-          () => {baseUrl = barcode, currentSlideNotes = fetchSlideNotes()});
-    } on PlatformException catch (e) {
+      String lastKnownUrl = await BarcodeScanner.scan();
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString('lastKnownUrl', lastKnownUrl);
+        setState(() {
+          currentSlideNotes = fetchSlideNotes();
+        });
+      });
+    } on Exception catch (e) {
       debugPrint('$e');
     }
   }
 
   Future<SlideNotes> fetchSlideNotes() async {
     try {
-      final response = await http.get(baseUrl + "next");
+      final prefs = await SharedPreferences.getInstance();
+      final lastKnownUrl = prefs.getString('lastKnownUrl');
+      final response = await http
+          .get(lastKnownUrl + "current")
+          .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         return SlideNotes.fromJson(json.decode(response.body));
       }
