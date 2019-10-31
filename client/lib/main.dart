@@ -75,7 +75,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
                       if (snapshot.hasData) {
                         var slideNotes = snapshot.data;
                         return Padding(
-                            padding: EdgeInsets.only(bottom: 8),
+                            padding: EdgeInsets.only(bottom: 4),
                             child: Text(
                               "${slideNotes.slideNumber} / ${slideNotes.total}",
                               style: TextStyle(
@@ -95,14 +95,17 @@ class _SouffleurClientState extends State<SouffleurClient> {
 
   Widget _getNotes(List<String> notes) {
     List<Widget> result = [];
-    notes.forEach((note) => result.add(Padding(
-        padding: EdgeInsets.only(bottom: 16),
-        child: AutoSizeText(
-          note,
-          group: notesGroup,
-          style: TextStyle(fontSize: 72, color: Colors.black),
-          maxLines: 3,
-        ))));
+    notes.forEach((note) {
+      if (result.length > 0) {
+        result.add(SizedBox(height: 16));
+      }
+      result.add(AutoSizeText(
+        note,
+        group: notesGroup,
+        style: TextStyle(fontSize: 72, color: Colors.black),
+        maxLines: 3,
+      ));
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
