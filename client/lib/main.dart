@@ -45,7 +45,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
               children: <Widget>[
                 Expanded(
                   child: Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.center,
                     child: FutureBuilder<SlideNotes>(
                         future: currentSlideNotes,
                         builder: (context, snapshot) {
@@ -106,11 +106,13 @@ class _SouffleurClientState extends State<SouffleurClient> {
         maxLines: 3,
       ));
     });
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: result,
-    );
+    return Align(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: result,
+        ));
   }
 
   Future _onPressed() async {
