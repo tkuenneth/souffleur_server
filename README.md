@@ -7,4 +7,6 @@ So far the following components are available:
 
 **tools\PPTNotesExtractor**: a tool to extract PowerPoint presentation notes
 
-**server**: The Souffleur server
+**server**: The Souffleur server (written in Java)
+
+**client**: The Souffleur app (Flutter)
