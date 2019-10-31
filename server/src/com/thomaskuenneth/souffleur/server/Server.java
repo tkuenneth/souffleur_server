@@ -44,7 +44,10 @@ public class Server implements HttpHandler {
     public void handle(HttpExchange t) {
         URI requestUri = t.getRequestURI();
         String path = requestUri.getPath().toLowerCase();
-        if (path.endsWith(("current"))) {
+        if (path.endsWith(("start"))) {
+            currentSlide = 0;
+            sendNotes(t, currentSlide);
+        } else if (path.endsWith(("current"))) {
             sendNotes(t, currentSlide);
         } else if (path.endsWith(("next"))) {
             if (updateCurrentSlide(1)) {
