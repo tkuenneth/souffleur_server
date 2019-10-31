@@ -67,6 +67,19 @@ class _SouffleurClientState extends State<SouffleurClient> {
                       }),
                 ),
               ),
+              FutureBuilder<SlideNotes>(
+                  future: currentSlideNotes,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      var slideNotes = snapshot.data;
+                      return Text(
+                        "${slideNotes.slideNumber} / ${slideNotes.total}",
+                        style: TextStyle(fontSize: 32, color: Colors.black38),
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  }),
             ],
           ),
         ),
@@ -97,7 +110,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('lastKnownUrl', lastKnownUrl);
         setState(() {
-          currentSlideNotes = fetchSlideNotes("current");
+          currentSlideNotes = fetchSlideNotes("start");
         });
       });
     } on Exception catch (e) {
