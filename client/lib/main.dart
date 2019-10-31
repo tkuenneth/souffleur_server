@@ -39,48 +39,54 @@ class _SouffleurClientState extends State<SouffleurClient> {
         decoration: BoxDecoration(color: Colors.white),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Align(
-                  //alignment: Alignment.center,
-                  child: FutureBuilder<SlideNotes>(
-                      future: currentSlideNotes,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return _getNotes(snapshot.data.notes);
-                        } else {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            return FlatButton(
-                              child: Text(
-                                "Scan",
-                                style: TextStyle(
-                                    fontSize: 72, color: Colors.black),
-                              ),
-                              onPressed: _onPressed,
-                            );
+          child: Padding(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Align(
+                    //alignment: Alignment.center,
+                    child: FutureBuilder<SlideNotes>(
+                        future: currentSlideNotes,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return _getNotes(snapshot.data.notes);
                           } else {
-                            return CircularProgressIndicator();
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              return FlatButton(
+                                child: Text(
+                                  "Scan",
+                                  style: TextStyle(
+                                      fontSize: 72, color: Colors.black),
+                                ),
+                                onPressed: _onPressed,
+                              );
+                            } else {
+                              return CircularProgressIndicator();
+                            }
                           }
-                        }
-                      }),
+                        }),
+                  ),
                 ),
-              ),
-              FutureBuilder<SlideNotes>(
-                  future: currentSlideNotes,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      var slideNotes = snapshot.data;
-                      return Text(
-                        "${slideNotes.slideNumber} / ${slideNotes.total}",
-                        style: TextStyle(fontSize: 32, color: Colors.black38),
-                      );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  }),
-            ],
+                FutureBuilder<SlideNotes>(
+                    future: currentSlideNotes,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        var slideNotes = snapshot.data;
+                        return Padding(
+                            padding: EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              "${slideNotes.slideNumber} / ${slideNotes.total}",
+                              style: TextStyle(
+                                  fontSize: 32, color: Colors.black38),
+                            ));
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    }),
+              ],
+            ),
           ),
         ),
       ),
