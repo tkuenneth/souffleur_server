@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:swipedetector/swipedetector.dart';
 
 void main() => runApp(SouffleurClient());
 
@@ -22,43 +23,52 @@ class _SouffleurClientState extends State<SouffleurClient> {
   @override
   void initState() {
     super.initState();
-    currentSlideNotes = fetchSlideNotes();
+    currentSlideNotes = fetchSlideNotes("current");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Align(
-                //alignment: Alignment.center,
-                child: FutureBuilder<SlideNotes>(
-                    future: currentSlideNotes,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return _getNotes(snapshot.data.notes);
-                      } else {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return FlatButton(
-                            child: Text(
-                              "Scan",
-                              style:
-                                  TextStyle(fontSize: 72, color: Colors.black),
-                            ),
-                            onPressed: _onPressed,
-                          );
+    return SwipeDetector(
+      onSwipeLeft: () => setState(() {
+        currentSlideNotes = fetchSlideNotes("next");
+      }),
+      onSwipeRight: () => setState(() {
+        currentSlideNotes = fetchSlideNotes("previous");
+      }),
+      child: Container(
+        decoration: BoxDecoration(color: Colors.white),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: Align(
+                  //alignment: Alignment.center,
+                  child: FutureBuilder<SlideNotes>(
+                      future: currentSlideNotes,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return _getNotes(snapshot.data.notes);
                         } else {
-                          return CircularProgressIndicator();
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            return FlatButton(
+                              child: Text(
+                                "Scan",
+                                style: TextStyle(
+                                    fontSize: 72, color: Colors.black),
+                              ),
+                              onPressed: _onPressed,
+                            );
+                          } else {
+                            return CircularProgressIndicator();
+                          }
                         }
-                      }
-                    }),
+                      }),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -87,7 +97,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('lastKnownUrl', lastKnownUrl);
         setState(() {
-          currentSlideNotes = fetchSlideNotes();
+          currentSlideNotes = fetchSlideNotes("current");
         });
       });
     } on Exception catch (e) {
@@ -95,12 +105,12 @@ class _SouffleurClientState extends State<SouffleurClient> {
     }
   }
 
-  Future<SlideNotes> fetchSlideNotes() async {
+  Future<SlideNotes> fetchSlideNotes(String suffix) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastKnownUrl = prefs.getString('lastKnownUrl');
       final response = await http
-          .get(lastKnownUrl + "current")
+          .get(lastKnownUrl + suffix)
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         return SlideNotes.fromJson(json.decode(response.body));

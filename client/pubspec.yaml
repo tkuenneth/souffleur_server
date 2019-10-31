@@ -27,6 +27,7 @@ dependencies:
   http: 0.12.0+2
   auto_size_text: ^2.1.0
   shared_preferences: ^0.5.4+3
+  swipedetector: ^1.2.0
 
 dev_dependencies:
   flutter_test:
