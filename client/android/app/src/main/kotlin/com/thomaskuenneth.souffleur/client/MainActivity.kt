@@ -1,4 +1,4 @@
-package com.example.client
+package com.thomaskuenneth.souffleur.client
 
 import android.os.Bundle
 
