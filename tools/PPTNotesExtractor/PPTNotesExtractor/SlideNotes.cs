@@ -11,5 +11,9 @@ namespace PPTNotesExtractor
         public string Name;
 
         public string[] Notes;
+
+        public int SlideNumber;
+
+        public int Total;
     }
 }

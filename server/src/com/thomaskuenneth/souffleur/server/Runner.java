@@ -15,8 +15,14 @@ public class Runner {
                 System.exit(1);
             }
             List<String> addresses = Utils.findIpAddress(args[1]);
-            Server server = new Server(args[0], addresses.get(0));
+            Server server = new Server(args[0], addresses.get(0), 8087);
             server.start();
+            StringBuilder sb = new StringBuilder(server.getQRCodeAsString());
+            if (!sb.toString().endsWith("/")) {
+                sb.append('/');
+            }
+            sb.append("qrcode");
+            Utils.browse(sb.toString());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to create server", e);
         }

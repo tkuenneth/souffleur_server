@@ -26,14 +26,18 @@ public class Server implements HttpHandler {
     private final Robot robot;
     private final HttpServer httpServer;
     private final SlideNotes[] slideNotes;
+    private final String address;
+    private final int port;
 
     private int currentSlide;
 
-    public Server(String jsonFile, String address) throws Exception {
+    public Server(String jsonFile, String address, int port) throws Exception {
         robot = new Robot();
-        httpServer = createServer(address);
+        httpServer = createServer(address, port);
         slideNotes = readSlideNotes(jsonFile);
         currentSlide = 0;
+        this.address = address;
+        this.port = port;
     }
 
     @Override
@@ -42,6 +46,8 @@ public class Server implements HttpHandler {
         String path = requestUri.getPath().toLowerCase();
         if (path.endsWith(("start"))) {
             currentSlide = 0;
+            sendNotes(t, currentSlide);
+        } else if (path.endsWith(("current"))) {
             sendNotes(t, currentSlide);
         } else if (path.endsWith(("next"))) {
             if (updateCurrentSlide(1)) {
@@ -64,6 +70,10 @@ public class Server implements HttpHandler {
         httpServer.start();
     }
 
+    public String getQRCodeAsString() {
+        return String.format("http://%s:%s/souffleur/", address, port);
+    }
+
     private boolean updateCurrentSlide(int offset) {
         int last = currentSlide;
         currentSlide += offset;
@@ -81,11 +91,7 @@ public class Server implements HttpHandler {
     }
 
     private void sendQRCode(HttpExchange t) {
-        InetSocketAddress address = httpServer.getAddress();
-        String url = String.format("http://%s:%s/souffleur/",
-                address.getHostName(),
-                address.getPort());
-        BufferedImage image = Utils.generateQRCode(url);
+        BufferedImage image = Utils.generateQRCode(getQRCodeAsString());
         try (OutputStream os = t.getResponseBody()) {
             t.sendResponseHeaders(200, 0);
             ImageIO.write(image, "jpg", os);
@@ -105,23 +111,24 @@ public class Server implements HttpHandler {
         }
     }
 
-    private HttpServer createServer(String address) throws Exception {
+    private HttpServer createServer(String address, int port) throws Exception {
         InetAddress inetAddress = InetAddress.getByName(address);
-        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, 8087);
+        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         HttpServer httpServer = HttpServer.create(socketAddress, 0);
         httpServer.createContext("/souffleur", this);
         httpServer.setExecutor(null);
         return httpServer;
     }
 
-    private SlideNotes[] readSlideNotes(String filename) throws Exception {
+    private SlideNotes[] readSlideNotes(String filename) {
         List<SlideNotes> slideNotes = new ArrayList<>();
         String json = Utils.readTextFile(filename);
         if (json.length() == 0) {
             throw new RuntimeException(String.format("Could not read json file %s", filename));
         }
         JSONArray array = new JSONArray(json);
-        for (int i = 0; i < array.length(); i++) {
+        int total = array.length();
+        for (int i = 0; i < total; i++) {
             JSONObject object = array.getJSONObject(i);
             String name = object.getString("Name");
             JSONArray jsonNotes = object.getJSONArray("Notes");
@@ -130,7 +137,7 @@ public class Server implements HttpHandler {
                 String note = jsonNotes.getString(j);
                 notes[j] = note;
             }
-            SlideNotes current = new SlideNotes(name, notes);
+            SlideNotes current = new SlideNotes(name, notes, i + 1, total);
             slideNotes.add(current);
         }
         SlideNotes[] result = new SlideNotes[slideNotes.size()];
