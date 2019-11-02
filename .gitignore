@@ -24,3 +24,5 @@ hs_err_pid*
 server/.idea/uiDesigner.xml
 
 **/out/
+**/.DS_Store
+**/Browse.plb
