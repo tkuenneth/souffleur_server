@@ -21,11 +21,8 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,19 +54,27 @@ public class Utils {
     }
 
     public static List<String> findIpAddress(String displayName) throws Exception {
-        List<String> result = new ArrayList<>();
+        return getIpAddress().get(displayName);
+    }
+
+    public static Map<String, List<String>> getIpAddress() throws Exception {
+        Map<String, List<String>> result = new HashMap<>();
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
             if (networkInterface.isUp()) {
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                 while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
                     String name = networkInterface.getDisplayName();
+                    if (!result.containsKey(name)) {
+                        result.put(name, new ArrayList<>());
+                    }
+                    var list = result.get(name);
+                    InetAddress addr = addresses.nextElement();
                     String hostAddress = addr.getHostAddress();
                     boolean isInet4Address = addr instanceof Inet4Address;
-                    if (displayName.equals(name) && isInet4Address) {
-                        result.add(hostAddress);
+                    if (isInet4Address) {
+                        list.add(hostAddress);
                     }
                     LOGGER.info(String.format("%s: %s (%b)", name, hostAddress, isInet4Address));
                 }

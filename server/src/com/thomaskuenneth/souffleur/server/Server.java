@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,18 +24,22 @@ public class Server implements HttpHandler {
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     private final Robot robot;
-    private final HttpServer httpServer;
-    private final SlideNotes[] slideNotes;
-    private final String address;
-    private final int port;
+
+    private  HttpServer httpServer;
+    private  SlideNotes[] slideNotes;
+    private  String address;
+    private  int port;
 
     private int currentSlide;
 
-    public Server(String jsonFile, String address, int port) throws Exception {
+    public Server() throws AWTException {
         robot = new Robot();
+    }
+
+    public Server(String jsonFile, String address, int port) throws Exception {
+        this();
         httpServer = createServer(address, port);
         slideNotes = readSlideNotes(jsonFile);
-        currentSlide = 0;
         this.address = address;
         this.port = port;
     }
@@ -144,6 +148,7 @@ public class Server implements HttpHandler {
         for (int i = 0; i < result.length; i++) {
             result[i] = slideNotes.get(i);
         }
+        currentSlide = 0;
         return result;
     }
 }
