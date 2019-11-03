@@ -25,10 +25,10 @@ public class Server implements HttpHandler {
 
     private final Robot robot;
 
-    private  HttpServer httpServer;
-    private  SlideNotes[] slideNotes;
-    private  String address;
-    private  int port;
+    private HttpServer httpServer;
+    private SlideNotes[] slideNotes;
+    private String address;
+    private int port;
 
     private int currentSlide;
 

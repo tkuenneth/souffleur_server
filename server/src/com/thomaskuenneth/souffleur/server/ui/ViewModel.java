@@ -9,6 +9,9 @@ public class ViewModel {
 
     private Boolean running = null;
     private String jsonFile = null;
+    private String device = null;
+    private String address = null;
+    private String port = null;
 
     public Boolean isRunning() {
         return running;
@@ -28,6 +31,36 @@ public class ViewModel {
         String oldJsonFile = this.jsonFile;
         this.jsonFile = newJsonFile;
         pcs.firePropertyChange("jsonFile", oldJsonFile, newJsonFile);
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String newDevice) {
+        String oldDevice = this.device;
+        this.device = newDevice;
+        pcs.firePropertyChange("device", oldDevice, newDevice);
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String newAddress) {
+        String oldAddress = this.address;
+        this.address = newAddress;
+        pcs.firePropertyChange("address", oldAddress, newAddress);
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String newPort) {
+        String oldPort = this.port;
+        this.port = newPort;
+        pcs.firePropertyChange("port", oldPort, newPort);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener l) {

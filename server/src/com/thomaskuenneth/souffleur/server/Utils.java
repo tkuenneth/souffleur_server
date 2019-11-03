@@ -15,12 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.Inet4Address;
-import java.net.MalformedURLException;
-import java.net.NetworkInterface;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -57,19 +52,16 @@ public class Utils {
         return getIpAddress().get(displayName);
     }
 
-    public static Map<String, List<String>> getIpAddress() throws Exception {
+    public static Map<String, List<String>> getIpAddress() throws SocketException {
         Map<String, List<String>> result = new HashMap<>();
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
             if (networkInterface.isUp()) {
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                List<String> list = new ArrayList<>();
+                String name = networkInterface.getDisplayName();
                 while (addresses.hasMoreElements()) {
-                    String name = networkInterface.getDisplayName();
-                    if (!result.containsKey(name)) {
-                        result.put(name, new ArrayList<>());
-                    }
-                    var list = result.get(name);
                     InetAddress addr = addresses.nextElement();
                     String hostAddress = addr.getHostAddress();
                     boolean isInet4Address = addr instanceof Inet4Address;
@@ -77,6 +69,9 @@ public class Utils {
                         list.add(hostAddress);
                     }
                     LOGGER.info(String.format("%s: %s (%b)", name, hostAddress, isInet4Address));
+                }
+                if (list.size() > 0) {
+                    result.put(name, list);
                 }
             }
         }

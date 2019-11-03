@@ -1,9 +1,17 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
 import com.thomaskuenneth.souffleur.server.Server;
+import com.thomaskuenneth.souffleur.server.Utils;
+
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,37 +21,48 @@ public class SouffleurServerUI extends JFrame {
 
     private final ViewModel viewModel;
     private final Server server;
+    private final Map<String, List<String>> devices;
 
-    public SouffleurServerUI() throws AWTException {
+    public SouffleurServerUI() throws AWTException, SocketException {
         super("Souffleur");
+        setResizable(false);
         viewModel = new ViewModel();
         server = new Server();
-        setContentPane(createContentPane());
+        devices = Utils.getIpAddress();
+        setContentPane(createMainPanel());
+        viewModel.setDevice(devices.keySet().iterator().next());
+        viewModel.setPort("8087");
         viewModel.setRunning(false);
         pack();
     }
 
-    private JPanel createContentPane() {
-        JPanel cp = new JPanel(new BorderLayout());
-        cp.add(createMainPanel(), BorderLayout.CENTER);
-        cp.add(createButtonPanel(), BorderLayout.SOUTH);
-        return cp;
-    }
-
-    private JPanel createMainPanel() {
-        JPanel mainPanel = new JPanel(new GridLayout(3, 1, 8, 9));
-        mainPanel.add(createJsonFileSelector());
-        mainPanel.add(createDeviceSelector());
-        mainPanel.add(createPortSelector());
+    private JComponent createMainPanel() {
+        Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
+        List<Component> updates = new ArrayList<>();
+        updates.add(mainPanel.add(createJsonFileSelector()));
+        updates.add(mainPanel.add(createDeviceSelector()));
+        mainPanel.add(Box.createVerticalGlue());
+        updates.add(mainPanel.add((createButtonPanel())));
+        mainPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int width = getContentPane().getWidth();
+                for (Component c : updates) {
+                    int height = c.getPreferredSize().height;
+                    Dimension size = new Dimension(width, height);
+                    c.setMaximumSize(size);
+                }
+            }
+        });
         return mainPanel;
     }
 
     private JPanel createJsonFileSelector() {
-        JPanel p = new JPanel(new BorderLayout());
-        JTextField tf = new JTextField(40);
-        p.add(tf, BorderLayout.CENTER);
-        JButton b = new JButton("Choose");
-        b.addActionListener(e -> {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JTextField filename = new JTextField(30);
+        panel.add(filename);
+        JButton choose = new JButton("Choose");
+        choose.addActionListener(e -> {
             final JFileChooser fc = new JFileChooser();
             fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fc.setMultiSelectionEnabled(false);
@@ -53,48 +72,69 @@ public class SouffleurServerUI extends JFrame {
                 viewModel.setJsonFile(fc.getSelectedFile().getAbsolutePath());
             }
         });
-        p.add(b, BorderLayout.EAST);
+        panel.add(choose);
         viewModel.addPropertyChangeListener(evt -> {
-            if ("jsonFile".equals(evt.getPropertyName())) {
-                tf.setText(evt.getNewValue().toString());
+            switch (evt.getPropertyName()) {
+                case "jsonFile":
+                    filename.setText(evt.getNewValue().toString());
+                    break;
+                case "running":
+                    boolean running = (boolean) evt.getNewValue();
+                    choose.setEnabled(!running);
+                    filename.setEditable(!running);
+                    break;
             }
         });
-        return p;
+        return panel;
     }
 
     private JPanel createDeviceSelector() {
-        JPanel p = new JPanel();
-        JComboBox<String> devices = new JComboBox<>();
-        p.add(devices);
-        return p;
-    }
-
-    private JPanel createPortSelector() {
-        JPanel p = new JPanel();
-        return p;
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        String[] names = devices.keySet().toArray(new String[]{});
+        JComboBox<String> comboBox = new JComboBox<>(names);
+        comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
+        panel.add(comboBox);
+        JLabel label = new JLabel();
+        panel.add(label);
+        JTextField port = new JTextField(4);
+        panel.add(port);
+        viewModel.addPropertyChangeListener(evt -> {
+            switch (evt.getPropertyName()) {
+                case "device":
+                    String device = evt.getNewValue().toString();
+                    viewModel.setAddress(devices.get(device).get(0));
+                    break;
+                case "address":
+                    label.setText(viewModel.getAddress());
+                    break;
+                case "port":
+                    port.setText(evt.getNewValue().toString());
+                    break;
+                case "running":
+                    boolean running = (boolean) evt.getNewValue();
+                    comboBox.setEnabled(!running);
+                    port.setEditable(!running);
+                    break;
+            }
+        });
+        return panel;
     }
 
     private JPanel createButtonPanel() {
-        JPanel bp = new JPanel(new FlowLayout(FlowLayout.TRAILING, 8, 8));
-        bp.add(createStartStopButton());
-        return bp;
-    }
-
-    private JButton createStartStopButton() {
-        JButton b = new JButton();
-        b.addActionListener(e -> {
-            viewModel.setRunning(!viewModel.isRunning());
-        });
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+        JButton startStop = new JButton();
+        startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
             if ("running".equals(evt.getPropertyName())) {
                 if (Boolean.TRUE.equals(evt.getNewValue())) {
-                    b.setText("Stop");
+                    startStop.setText("Stop");
                 } else {
-                    b.setText("Start");
+                    startStop.setText("Start");
                 }
             }
         });
-        return b;
+        panel.add(startStop);
+        return panel;
     }
 
     public static void main(String[] args) {
@@ -106,7 +146,7 @@ public class SouffleurServerUI extends JFrame {
                 ui.setVisible(true);
             } catch (ClassNotFoundException | InstantiationException
                     | IllegalAccessException | UnsupportedLookAndFeelException
-                    | AWTException e) {
+                    | AWTException | SocketException e) {
                 LOGGER.log(Level.SEVERE, "setLookAndFeel()", e);
             }
         });
