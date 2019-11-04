@@ -162,6 +162,7 @@ public class SouffleurServerUI extends JFrame {
 
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
+        panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         JButton startStop = new JButton();
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
@@ -170,9 +171,7 @@ public class SouffleurServerUI extends JFrame {
                     boolean running = (boolean) evt.getNewValue();
                     if (running) {
                         try {
-                            viewModel.startServer(() -> {
-                                hideQRCode();
-                            });
+                            viewModel.startServer(this::hideQRCode);
                             startStop.setText("Stop");
                             qrCodeDialog = showQRCode();
                         } catch (IOException e) {
