@@ -57,7 +57,7 @@ public class Utils {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
-            if (networkInterface.isUp()) {
+            if ((networkInterface.isUp()) && !networkInterface.isLoopback()) {
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                 List<String> list = new ArrayList<>();
                 String name = networkInterface.getDisplayName();
