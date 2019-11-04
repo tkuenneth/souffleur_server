@@ -11,6 +11,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -169,6 +170,7 @@ public class SouffleurServerUI extends JFrame {
                         try {
                             viewModel.startServer();
                             startStop.setText("Stop");
+                            showQRCode();
                         } catch (IOException e) {
                             LOGGER.log(Level.SEVERE, "startServer()", e);
                             viewModel.setRunning(false);
@@ -185,6 +187,19 @@ public class SouffleurServerUI extends JFrame {
         });
         panel.add(startStop);
         return panel;
+    }
+
+    private void showQRCode() {
+        String url = viewModel.getQRCodeAsString();
+        JDialog dialog = new JDialog(this, true);
+        BufferedImage image = Utils.generateQRCode(url);
+        ImageIcon ii = new ImageIcon(image);
+        dialog.getContentPane().add(new JLabel(ii));
+        dialog.setTitle(url);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setResizable(false);
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {

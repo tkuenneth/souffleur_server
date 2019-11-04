@@ -97,6 +97,10 @@ public class ViewModel {
         server.stop();
     }
 
+    public String getQRCodeAsString() {
+        return server.getQRCodeAsString();
+    }
+
     private void updateStartStopButtonBeEnabled() {
         boolean enabled = false;
         if (port != null) {
