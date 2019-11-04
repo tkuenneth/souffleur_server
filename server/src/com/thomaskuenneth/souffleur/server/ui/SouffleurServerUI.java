@@ -9,7 +9,8 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.File;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -27,6 +28,13 @@ public class SouffleurServerUI extends JFrame {
 
     public SouffleurServerUI() throws AWTException, SocketException {
         super("Souffleur");
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                viewModel.stopServer();
+                System.exit(0);
+            }
+        });
         setResizable(false);
         viewModel = new ViewModel();
         devices = Utils.getIpAddress();
@@ -55,6 +63,7 @@ public class SouffleurServerUI extends JFrame {
                 }
             }
         });
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         return mainPanel;
     }
 
