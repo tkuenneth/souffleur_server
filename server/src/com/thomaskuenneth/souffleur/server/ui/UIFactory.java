@@ -2,6 +2,7 @@ package com.thomaskuenneth.souffleur.server.ui;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
+import java.awt.*;
 import java.text.DecimalFormat;
 
 public class UIFactory {
@@ -16,5 +17,11 @@ public class UIFactory {
         formatter.setAllowsInvalid(true);
         formatter.setCommitsOnValidEdit(true);
         return new JFormattedTextField(formatter);
+    }
+
+    public static JPanel createFlowPanel() {
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING);
+        layout.setAlignOnBaseline(true);
+        return new JPanel(layout);
     }
 }

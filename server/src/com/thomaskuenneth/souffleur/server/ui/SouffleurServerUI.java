@@ -71,7 +71,7 @@ public class SouffleurServerUI extends JFrame {
     }
 
     private JPanel createJsonFileSelector() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel panel = UIFactory.createFlowPanel();
         JTextField filename = new JTextField(30);
         filename.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -122,7 +122,7 @@ public class SouffleurServerUI extends JFrame {
     }
 
     private JPanel createDeviceSelector() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+        JPanel panel = UIFactory.createFlowPanel();
         String[] names = devices.keySet().toArray(new String[]{});
         JComboBox<String> comboBox = new JComboBox<>(names);
         comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
