@@ -1,10 +1,12 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
 import com.thomaskuenneth.souffleur.server.Server;
+import com.thomaskuenneth.souffleur.server.Utils;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.io.IOException;
 
 public class ViewModel {
@@ -16,6 +18,7 @@ public class ViewModel {
     private String device = null;
     private String address = null;
     private Integer port = null;
+    private Boolean startStopButtonEnabled = null;
 
     private final Server server;
 
@@ -41,6 +44,7 @@ public class ViewModel {
         String oldJsonFile = this.jsonFile;
         this.jsonFile = newJsonFile;
         pcs.firePropertyChange("jsonFile", oldJsonFile, newJsonFile);
+        updateStartStopButtonBeEnabled();
     }
 
     public String getDevice() {
@@ -61,6 +65,7 @@ public class ViewModel {
         String oldAddress = this.address;
         this.address = newAddress;
         pcs.firePropertyChange("address", oldAddress, newAddress);
+        updateStartStopButtonBeEnabled();
     }
 
     public Integer getPort() {
@@ -71,6 +76,17 @@ public class ViewModel {
         Integer oldPort = this.port;
         this.port = newPort;
         pcs.firePropertyChange("port", oldPort, newPort);
+        updateStartStopButtonBeEnabled();
+    }
+
+    public Boolean isStartStopButtonEnabled() {
+        return startStopButtonEnabled;
+    }
+
+    public void setStartStopButtonEnabled(Boolean newStartStopButtonEnabled) {
+        Boolean oldStartStopButtonEnabled = this.startStopButtonEnabled;
+        this.startStopButtonEnabled = newStartStopButtonEnabled;
+        pcs.firePropertyChange("startStopButtonEnabled", oldStartStopButtonEnabled, newStartStopButtonEnabled);
     }
 
     public void startServer() throws IOException {
@@ -81,6 +97,14 @@ public class ViewModel {
         server.stop();
     }
 
+    private void updateStartStopButtonBeEnabled() {
+        boolean enabled = false;
+        if (port != null) {
+            File f = new File(Utils.nullSafeString(jsonFile));
+            enabled = f.exists() && f.isFile();
+        }
+        setStartStopButtonEnabled(enabled);
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
 

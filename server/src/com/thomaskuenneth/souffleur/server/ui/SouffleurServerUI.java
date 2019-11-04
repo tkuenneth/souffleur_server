@@ -3,9 +3,13 @@ package com.thomaskuenneth.souffleur.server.ui;
 import com.thomaskuenneth.souffleur.server.Utils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -57,6 +61,26 @@ public class SouffleurServerUI extends JFrame {
     private JPanel createJsonFileSelector() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEADING));
         JTextField filename = new JTextField(30);
+        filename.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                check();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                check();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                check();
+            }
+
+            private void check() {
+                SwingUtilities.invokeLater(() -> viewModel.setJsonFile(filename.getText()));
+            }
+        });
         panel.add(filename);
         JButton choose = new JButton("Choose");
         choose.addActionListener(e -> {
@@ -73,7 +97,7 @@ public class SouffleurServerUI extends JFrame {
         viewModel.addPropertyChangeListener(evt -> {
             switch (evt.getPropertyName()) {
                 case "jsonFile":
-                    filename.setText(evt.getNewValue().toString());
+                    filename.setText(Utils.nullSafeString(evt.getNewValue()));
                     break;
                 case "running":
                     boolean running = (boolean) evt.getNewValue();
@@ -93,7 +117,14 @@ public class SouffleurServerUI extends JFrame {
         panel.add(comboBox);
         JLabel label = new JLabel();
         panel.add(label);
-        JTextField port = new JTextField(4);
+        JTextComponent port = UIFactory.createIntegerField(0, 65535);
+        port.addPropertyChangeListener(evt -> {
+            try {
+                viewModel.setPort(Integer.parseInt(port.getText()));
+            } catch (NumberFormatException ex) {
+                viewModel.setPort(null);
+            }
+        });
         panel.add(port);
         viewModel.addPropertyChangeListener(evt -> {
             switch (evt.getPropertyName()) {
@@ -105,7 +136,7 @@ public class SouffleurServerUI extends JFrame {
                     label.setText(viewModel.getAddress());
                     break;
                 case "port":
-                    port.setText(evt.getNewValue().toString());
+                    port.setText(Utils.nullSafeString(evt.getNewValue()));
                     break;
                 case "running":
                     boolean running = (boolean) evt.getNewValue();
@@ -122,20 +153,25 @@ public class SouffleurServerUI extends JFrame {
         JButton startStop = new JButton();
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
-            if ("running".equals(evt.getPropertyName())) {
-                boolean running = (boolean) evt.getNewValue();
-                if (running) {
-                    try {
-                        viewModel.startServer();
-                        startStop.setText("Stop");
-                    } catch (IOException e) {
-                        LOGGER.log(Level.SEVERE, "startServer()", e);
-                        viewModel.setRunning(false);
+            switch (evt.getPropertyName()) {
+                case "running":
+                    boolean running = (boolean) evt.getNewValue();
+                    if (running) {
+                        try {
+                            viewModel.startServer();
+                            startStop.setText("Stop");
+                        } catch (IOException e) {
+                            LOGGER.log(Level.SEVERE, "startServer()", e);
+                            viewModel.setRunning(false);
+                        }
+                    } else {
+                        viewModel.stopServer();
+                        startStop.setText("Start");
                     }
-                } else {
-                    viewModel.stopServer();
-                    startStop.setText("Start");
-                }
+                    break;
+                case "startStopButtonEnabled":
+                    startStop.setEnabled((boolean) evt.getNewValue());
+                    break;
             }
         });
         panel.add(startStop);

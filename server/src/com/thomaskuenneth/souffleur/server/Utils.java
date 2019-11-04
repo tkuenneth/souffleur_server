@@ -144,4 +144,8 @@ public class Utils {
             }
         }
     }
+
+    public static String nullSafeString(Object s) {
+        return (s == null) ? "" : s.toString();
+    }
 }
