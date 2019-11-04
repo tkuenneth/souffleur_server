@@ -63,7 +63,7 @@ public class Server implements HttpHandler {
         }
     }
 
-    public void start(String jsonFile, String address, int port) throws UnknownHostException, IOException {
+    public void start(String jsonFile, String address, int port) throws IOException {
         InetAddress inetAddress = InetAddress.getByName(address);
         InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         this.slideNotes = readSlideNotes(jsonFile);
@@ -123,11 +123,11 @@ public class Server implements HttpHandler {
         }
     }
 
-    private SlideNotes[] readSlideNotes(String filename) {
+    private SlideNotes[] readSlideNotes(String filename) throws IOException {
         List<SlideNotes> slideNotes = new ArrayList<>();
         String json = Utils.readTextFile(filename);
         if (json.length() == 0) {
-            throw new RuntimeException(String.format("Could not read json file %s", filename));
+            throw new IOException(String.format("Could not read json file %s", filename));
         }
         JSONArray array = new JSONArray(json);
         int total = array.length();

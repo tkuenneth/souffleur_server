@@ -120,18 +120,19 @@ public class Utils {
         return result;
     }
 
-    public static String readTextFile(String filename) {
-        StringBuilder sb = new StringBuilder();
+    public static String readTextFile(String filename) throws IOException {
+        if (filename == null) {
+            throw new IOException("filename is null");
+        }
         try (FileReader fr = new FileReader(filename);
              BufferedReader br = new BufferedReader(fr)) {
+            StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "readTextFile()", e);
+            return sb.toString();
         }
-        return sb.toString();
     }
 
     public static void browse(String url) {

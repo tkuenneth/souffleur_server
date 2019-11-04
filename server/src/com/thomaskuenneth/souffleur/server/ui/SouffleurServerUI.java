@@ -127,11 +127,11 @@ public class SouffleurServerUI extends JFrame {
                 if (running) {
                     try {
                         viewModel.startServer();
+                        startStop.setText("Stop");
                     } catch (IOException e) {
                         LOGGER.log(Level.SEVERE, "startServer()", e);
                         viewModel.setRunning(false);
                     }
-                    startStop.setText("Stop");
                 } else {
                     viewModel.stopServer();
                     startStop.setText("Start");
