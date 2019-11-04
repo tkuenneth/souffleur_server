@@ -27,6 +27,8 @@ public class SouffleurServerUI extends JFrame {
     private final ViewModel viewModel;
     private final Map<String, List<String>> devices;
 
+    private JDialog qrCodeDialog;
+
     public SouffleurServerUI() throws AWTException, SocketException {
         super("Souffleur");
         addWindowListener(new WindowAdapter() {
@@ -168,14 +170,17 @@ public class SouffleurServerUI extends JFrame {
                     boolean running = (boolean) evt.getNewValue();
                     if (running) {
                         try {
-                            viewModel.startServer();
+                            viewModel.startServer(() -> {
+                                hideQRCode();
+                            });
                             startStop.setText("Stop");
-                            showQRCode();
+                            qrCodeDialog = showQRCode();
                         } catch (IOException e) {
                             LOGGER.log(Level.SEVERE, "startServer()", e);
                             viewModel.setRunning(false);
                         }
                     } else {
+                        hideQRCode();
                         viewModel.stopServer();
                         startStop.setText("Start");
                     }
@@ -189,9 +194,10 @@ public class SouffleurServerUI extends JFrame {
         return panel;
     }
 
-    private void showQRCode() {
+    private JDialog showQRCode() {
+        hideQRCode();
         String url = viewModel.getQRCodeAsString();
-        JDialog dialog = new JDialog(this, true);
+        JDialog dialog = new JDialog(this, false);
         BufferedImage image = Utils.generateQRCode(url);
         ImageIcon ii = new ImageIcon(image);
         dialog.getContentPane().add(new JLabel(ii));
@@ -200,6 +206,17 @@ public class SouffleurServerUI extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
         dialog.setVisible(true);
+        return dialog;
+    }
+
+    private void hideQRCode() {
+        if (qrCodeDialog != null) {
+            if (qrCodeDialog.isVisible()) {
+                qrCodeDialog.setVisible(false);
+                qrCodeDialog.dispose();
+            }
+            qrCodeDialog = null;
+        }
     }
 
     public static void main(String[] args) {

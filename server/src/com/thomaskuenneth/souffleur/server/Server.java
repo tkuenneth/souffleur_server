@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class Server implements HttpHandler {
     private SlideNotes[] slideNotes;
     private String address;
     private int port;
+    private Runnable callback;
 
     private int currentSlide;
 
@@ -63,12 +65,13 @@ public class Server implements HttpHandler {
         }
     }
 
-    public void start(String jsonFile, String address, int port) throws IOException {
+    public void start(String jsonFile, String address, int port, Runnable callback) throws IOException {
         InetAddress inetAddress = InetAddress.getByName(address);
         InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         this.slideNotes = readSlideNotes(jsonFile);
         this.address = address;
         this.port = port;
+        this.callback = callback;
         this.httpServer = HttpServer.create(socketAddress, 0);
         this.httpServer.createContext("/souffleur", this);
         this.httpServer.setExecutor(null);
@@ -100,6 +103,10 @@ public class Server implements HttpHandler {
     private void sendNotes(HttpExchange t, int slide) {
         JSONObject object = new JSONObject(slideNotes[slide]);
         sendStringResult(t, object.toString());
+        if (callback != null) {
+            SwingUtilities.invokeLater(callback);
+            callback = null;
+        }
     }
 
     private void sendQRCode(HttpExchange t) {

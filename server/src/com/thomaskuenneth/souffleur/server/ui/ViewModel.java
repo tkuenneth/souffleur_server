@@ -89,8 +89,8 @@ public class ViewModel {
         pcs.firePropertyChange("startStopButtonEnabled", oldStartStopButtonEnabled, newStartStopButtonEnabled);
     }
 
-    public void startServer() throws IOException {
-        server.start(getJsonFile(), getAddress(), getPort());
+    public void startServer(Runnable callback) throws IOException {
+        server.start(getJsonFile(), getAddress(), getPort(), callback);
     }
 
     public void stopServer() {
