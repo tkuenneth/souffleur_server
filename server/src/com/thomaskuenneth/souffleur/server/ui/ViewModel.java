@@ -1,7 +1,11 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
+import com.thomaskuenneth.souffleur.server.Server;
+
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 
 public class ViewModel {
 
@@ -11,7 +15,13 @@ public class ViewModel {
     private String jsonFile = null;
     private String device = null;
     private String address = null;
-    private String port = null;
+    private Integer port = null;
+
+    private final Server server;
+
+    public ViewModel() throws AWTException {
+        server = new Server();
+    }
 
     public Boolean isRunning() {
         return running;
@@ -53,15 +63,26 @@ public class ViewModel {
         pcs.firePropertyChange("address", oldAddress, newAddress);
     }
 
-    public String getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(String newPort) {
-        String oldPort = this.port;
+    public void setPort(Integer newPort) {
+        Integer oldPort = this.port;
         this.port = newPort;
         pcs.firePropertyChange("port", oldPort, newPort);
     }
+
+    public void startServer() throws IOException {
+        server.start(getJsonFile(), getAddress(), getPort());
+    }
+
+    public void stopServer() {
+        server.stop();
+    }
+
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
         pcs.addPropertyChangeListener(l);

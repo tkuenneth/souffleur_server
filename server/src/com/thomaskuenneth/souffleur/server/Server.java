@@ -76,8 +76,10 @@ public class Server implements HttpHandler {
     }
 
     public void stop() {
-        httpServer.stop(0);
-        httpServer = null;
+        if (httpServer != null) {
+            httpServer.stop(0);
+            httpServer = null;
+        }
     }
 
     public String getQRCodeAsString() {

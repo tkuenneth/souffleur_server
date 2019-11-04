@@ -1,16 +1,15 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
-import com.thomaskuenneth.souffleur.server.Server;
 import com.thomaskuenneth.souffleur.server.Utils;
-
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.io.IOException;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,18 +19,16 @@ public class SouffleurServerUI extends JFrame {
     private static final Logger LOGGER = Logger.getLogger(SouffleurServerUI.class.getName());
 
     private final ViewModel viewModel;
-    private final Server server;
     private final Map<String, List<String>> devices;
 
     public SouffleurServerUI() throws AWTException, SocketException {
         super("Souffleur");
         setResizable(false);
         viewModel = new ViewModel();
-        server = new Server();
         devices = Utils.getIpAddress();
         setContentPane(createMainPanel());
         viewModel.setDevice(devices.keySet().iterator().next());
-        viewModel.setPort("8087");
+        viewModel.setPort(8087);
         viewModel.setRunning(false);
         pack();
     }
@@ -126,9 +123,17 @@ public class SouffleurServerUI extends JFrame {
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
             if ("running".equals(evt.getPropertyName())) {
-                if (Boolean.TRUE.equals(evt.getNewValue())) {
+                boolean running = (boolean) evt.getNewValue();
+                if (running) {
+                    try {
+                        viewModel.startServer();
+                    } catch (IOException e) {
+                        LOGGER.log(Level.SEVERE, "startServer()", e);
+                        viewModel.setRunning(false);
+                    }
                     startStop.setText("Stop");
                 } else {
+                    viewModel.stopServer();
                     startStop.setText("Start");
                 }
             }
