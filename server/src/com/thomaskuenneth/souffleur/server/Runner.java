@@ -15,8 +15,8 @@ public class Runner {
                 System.exit(1);
             }
             List<String> addresses = Utils.findIpAddress(args[1]);
-            Server server = new Server(args[0], addresses.get(0), 8087);
-            server.start();
+            Server server = new Server();
+            server.start(args[0], addresses.get(0), 8087);
             StringBuilder sb = new StringBuilder(server.getQRCodeAsString());
             if (!sb.toString().endsWith("/")) {
                 sb.append('/');

@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,14 +35,6 @@ public class Server implements HttpHandler {
 
     public Server() throws AWTException {
         robot = new Robot();
-    }
-
-    public Server(String jsonFile, String address, int port) throws Exception {
-        this();
-        httpServer = createServer(address, port);
-        slideNotes = readSlideNotes(jsonFile);
-        this.address = address;
-        this.port = port;
     }
 
     @Override
@@ -70,8 +63,21 @@ public class Server implements HttpHandler {
         }
     }
 
-    public void start() {
-        httpServer.start();
+    public void start(String jsonFile, String address, int port) throws UnknownHostException, IOException {
+        InetAddress inetAddress = InetAddress.getByName(address);
+        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
+        this.slideNotes = readSlideNotes(jsonFile);
+        this.address = address;
+        this.port = port;
+        this.httpServer = HttpServer.create(socketAddress, 0);
+        this.httpServer.createContext("/souffleur", this);
+        this.httpServer.setExecutor(null);
+        this.httpServer.start();
+    }
+
+    public void stop() {
+        httpServer.stop(0);
+        httpServer = null;
     }
 
     public String getQRCodeAsString() {
@@ -113,15 +119,6 @@ public class Server implements HttpHandler {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }
-    }
-
-    private HttpServer createServer(String address, int port) throws Exception {
-        InetAddress inetAddress = InetAddress.getByName(address);
-        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
-        HttpServer httpServer = HttpServer.create(socketAddress, 0);
-        httpServer.createContext("/souffleur", this);
-        httpServer.setExecutor(null);
-        return httpServer;
     }
 
     private SlideNotes[] readSlideNotes(String filename) {
