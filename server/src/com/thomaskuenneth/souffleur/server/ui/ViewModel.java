@@ -3,7 +3,7 @@ package com.thomaskuenneth.souffleur.server.ui;
 import com.thomaskuenneth.souffleur.server.Server;
 import com.thomaskuenneth.souffleur.server.Utils;
 
-import java.awt.*;
+import java.awt.AWTException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;

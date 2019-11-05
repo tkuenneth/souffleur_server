@@ -7,8 +7,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;

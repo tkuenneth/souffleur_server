@@ -6,8 +6,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.thomaskuenneth.souffleur.server.ui.UIFactory;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import java.awt.Color;
+import java.awt.Desktop;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -15,9 +22,19 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.*;
-import java.util.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -147,5 +164,28 @@ public class Utils {
 
     public static String nullSafeString(Object s) {
         return (s == null) ? "" : s.toString();
+    }
+
+    public static void setIconImages(JFrame f, String[] paths) {
+        List<Image> iconImages = new ArrayList<>();
+        for (String path : paths) {
+            try (InputStream in = UIFactory.class.getResourceAsStream(path)) {
+                iconImages.add(ImageIO.read(in));
+            } catch (IOException | IllegalArgumentException e) {
+                LOGGER.log(Level.SEVERE, "setIconImages()", e);
+            } finally {
+                if (iconImages.size() > 0) {
+                    f.setIconImages(iconImages);
+                }
+            }
+        }
+    }
+
+    private void toDo() {
+        try {
+            Class c = Class.forName("com.apple.eawt.Application", false, null);
+            System.out.println(c);
+        } catch (ClassNotFoundException exception) {
+        }
     }
 }
