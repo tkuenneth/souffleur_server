@@ -110,12 +110,13 @@ public class Utils {
         try {
             Map<EncodeHintType, Object> hintMap = new EnumMap<>(EncodeHintType.class);
             hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+            hintMap.put(EncodeHintType.MARGIN, 1);
             hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix byteMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 400,
                     400, hintMap);
             int byteMatrixWidth = byteMatrix.getWidth();
-            int byteMatrixHeight = byteMatrix.getWidth();
+            int byteMatrixHeight = byteMatrix.getHeight();
             BufferedImage image = new BufferedImage(byteMatrixWidth, byteMatrixHeight,
                     BufferedImage.TYPE_INT_RGB);
             image.createGraphics();

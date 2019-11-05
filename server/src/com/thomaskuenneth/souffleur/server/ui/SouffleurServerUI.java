@@ -22,6 +22,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.awt.AWTException;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -224,7 +225,9 @@ public class SouffleurServerUI extends JFrame {
         JDialog dialog = new JDialog(this, false);
         BufferedImage image = Utils.generateQRCode(url);
         ImageIcon ii = new ImageIcon(image);
-        dialog.getContentPane().add(new JLabel(ii));
+        JPanel contentPane = new JPanel(new BorderLayout());
+        contentPane.add(new JLabel(ii), BorderLayout.CENTER);
+        dialog.setContentPane(contentPane);
         dialog.setTitle(url);
         dialog.pack();
         dialog.setLocationRelativeTo(this);
