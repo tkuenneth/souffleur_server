@@ -37,6 +37,7 @@ public class Server implements HttpHandler {
 
     public Server() throws AWTException {
         robot = new Robot();
+        robot.setAutoWaitForIdle(true);
     }
 
     @Override
