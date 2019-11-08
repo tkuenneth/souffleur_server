@@ -22,6 +22,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -170,23 +172,39 @@ public class Utils {
     public static void setIconImages(JFrame f, String[] paths) {
         List<Image> iconImages = new ArrayList<>();
         for (String path : paths) {
-            try (InputStream in = UIFactory.class.getResourceAsStream(path)) {
-                iconImages.add(ImageIO.read(in));
-            } catch (IOException | IllegalArgumentException e) {
-                LOGGER.log(Level.SEVERE, "setIconImages()", e);
-            } finally {
-                if (iconImages.size() > 0) {
-                    f.setIconImages(iconImages);
-                }
+            var image = loadImage(path);
+            if (image != null) {
+                iconImages.add(image);
             }
+        }
+        if (iconImages.size() > 0) {
+            f.setIconImages(iconImages);
         }
     }
 
-    private void toDo() {
+    public static Image loadImage(String path) {
+        try (InputStream in = UIFactory.class.getResourceAsStream(path)) {
+            return ImageIO.read(in);
+        } catch (IOException | IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "loadImage()", e);
+        }
+        return null;
+    }
+
+    public static boolean isMacOS() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return (os.indexOf("mac") >= 0);
+    }
+
+    public static void setDockIconImage(Image image) {
         try {
             Class c = Class.forName("com.apple.eawt.Application", false, null);
-            System.out.println(c);
-        } catch (ClassNotFoundException exception) {
+            Method getApplication = c.getDeclaredMethod("getApplication");
+            Object _app = getApplication.invoke(null);
+            Method setDockIconImage = c.getDeclaredMethod("setDockIconImage", Image.class);
+            setDockIconImage.invoke(_app, image);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            LOGGER.log(Level.SEVERE, "setDockIconImage()", e);
         }
     }
 }

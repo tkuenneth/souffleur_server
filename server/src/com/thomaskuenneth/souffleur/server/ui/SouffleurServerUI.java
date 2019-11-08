@@ -58,6 +58,12 @@ public class SouffleurServerUI extends JFrame {
                 "/com/thomaskuenneth/souffleur/server/Icon-App-29x29@1x.png",
                 "/com/thomaskuenneth/souffleur/server/Icon-App-20x20@1x.png"};
         Utils.setIconImages(this, iconImages);
+        if (Utils.isMacOS()) {
+            var image = Utils.loadImage(iconImages[0]);
+            if (image != null) {
+                Utils.setDockIconImage(image);
+            }
+        }
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
