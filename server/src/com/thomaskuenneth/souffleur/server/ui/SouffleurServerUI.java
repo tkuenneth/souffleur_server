@@ -7,6 +7,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -71,6 +72,7 @@ public class SouffleurServerUI extends JFrame {
         viewModel.setDevice(devices.keySet().iterator().next());
         viewModel.setPort(8087);
         viewModel.setRunning(false);
+        viewModel.setShowQRCode(true);
         pack();
     }
 
@@ -79,6 +81,7 @@ public class SouffleurServerUI extends JFrame {
         List<Component> updates = new ArrayList<>();
         updates.add(mainPanel.add(createJsonFileSelector()));
         updates.add(mainPanel.add(createDeviceSelector()));
+        updates.add(mainPanel.add(createConfigSwitches()));
         mainPanel.add(Box.createVerticalGlue());
         updates.add(mainPanel.add((createButtonPanel())));
         mainPanel.addComponentListener(new ComponentAdapter() {
@@ -186,6 +189,25 @@ public class SouffleurServerUI extends JFrame {
         return panel;
     }
 
+    private JPanel createConfigSwitches() {
+        JPanel panel = UIFactory.createFlowPanel();
+        JCheckBox cbShowQRCode = new JCheckBox("Show qrcode upon start");
+        cbShowQRCode.addActionListener(e -> viewModel.setShowQRCode(cbShowQRCode.isSelected()));
+        panel.add(cbShowQRCode);
+        viewModel.addPropertyChangeListener(evt -> {
+            switch (evt.getPropertyName()) {
+                case "showQRCode":
+                    cbShowQRCode.setSelected((boolean) evt.getNewValue());
+                    break;
+                case "running":
+                    boolean running = (boolean) evt.getNewValue();
+                    cbShowQRCode.setEnabled(!running);
+                    break;
+            }
+        });
+        return panel;
+    }
+
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
         panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
@@ -199,7 +221,9 @@ public class SouffleurServerUI extends JFrame {
                         try {
                             viewModel.startServer(this::hideQRCode);
                             startStop.setText("Stop");
-                            qrCodeDialog = showQRCode();
+                            if (viewModel.isShowQRCode()) {
+                                qrCodeDialog = showQRCode();
+                            }
                         } catch (IOException e) {
                             LOGGER.log(Level.SEVERE, "startServer()", e);
                             viewModel.setRunning(false);

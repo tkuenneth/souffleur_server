@@ -19,6 +19,7 @@ public class ViewModel {
     private String address = null;
     private Integer port = null;
     private Boolean startStopButtonEnabled = null;
+    private Boolean showQRCode = null;
 
     private final Server server;
 
@@ -87,6 +88,16 @@ public class ViewModel {
         Boolean oldStartStopButtonEnabled = this.startStopButtonEnabled;
         this.startStopButtonEnabled = newStartStopButtonEnabled;
         pcs.firePropertyChange("startStopButtonEnabled", oldStartStopButtonEnabled, newStartStopButtonEnabled);
+    }
+
+    public Boolean isShowQRCode() {
+        return showQRCode;
+    }
+
+    public void setShowQRCode(Boolean newShowQRCode) {
+        Boolean oldShowQRCode = this.showQRCode;
+        this.showQRCode = newShowQRCode;
+        pcs.firePropertyChange("showQRCode", oldShowQRCode, newShowQRCode);
     }
 
     public void startServer(Runnable callback) throws IOException {
