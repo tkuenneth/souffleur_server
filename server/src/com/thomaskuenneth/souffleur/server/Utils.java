@@ -9,7 +9,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.thomaskuenneth.souffleur.server.ui.UIFactory;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Graphics2D;
@@ -22,8 +21,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -169,7 +166,7 @@ public class Utils {
         return (s == null) ? "" : s.toString();
     }
 
-    public static void setIconImages(JFrame f, String[] paths) {
+    public static List<Image> loadIconImages(String[] paths) {
         List<Image> iconImages = new ArrayList<>();
         for (String path : paths) {
             var image = loadImage(path);
@@ -177,9 +174,7 @@ public class Utils {
                 iconImages.add(image);
             }
         }
-        if (iconImages.size() > 0) {
-            f.setIconImages(iconImages);
-        }
+        return iconImages;
     }
 
     public static Image loadImage(String path) {
@@ -189,22 +184,5 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "loadImage()", e);
         }
         return null;
-    }
-
-    public static boolean isMacOS() {
-        String os = System.getProperty("os.name").toLowerCase();
-        return (os.indexOf("mac") >= 0);
-    }
-
-    public static void setDockIconImage(Image image) {
-        try {
-            Class c = Class.forName("com.apple.eawt.Application", false, null);
-            Method getApplication = c.getDeclaredMethod("getApplication");
-            Object _app = getApplication.invoke(null);
-            Method setDockIconImage = c.getDeclaredMethod("setDockIconImage", Image.class);
-            setDockIconImage.invoke(_app, image);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            LOGGER.log(Level.SEVERE, "setDockIconImage()", e);
-        }
     }
 }

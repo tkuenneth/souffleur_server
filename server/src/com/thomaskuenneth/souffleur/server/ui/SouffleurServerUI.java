@@ -27,6 +27,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.Taskbar;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -51,17 +53,17 @@ public class SouffleurServerUI extends JFrame {
 
     public SouffleurServerUI() throws AWTException, SocketException {
         super("Souffleur");
-        var iconImages = new String[]{
+        var filenames = new String[]{
                 "/com/thomaskuenneth/souffleur/server/Icon-App-1024x1024@1x.png",
                 "/com/thomaskuenneth/souffleur/server/Icon-App-76x76@1x.png",
                 "/com/thomaskuenneth/souffleur/server/Icon-App-40x40@1x.png",
                 "/com/thomaskuenneth/souffleur/server/Icon-App-29x29@1x.png",
                 "/com/thomaskuenneth/souffleur/server/Icon-App-20x20@1x.png"};
-        Utils.setIconImages(this, iconImages);
-        if (Utils.isMacOS()) {
-            var image = Utils.loadImage(iconImages[0]);
-            if (image != null) {
-                Utils.setDockIconImage(image);
+        List<Image> images = Utils.loadIconImages(filenames);
+        if (images.size() > 0) {
+            setIconImages(images);
+            if (Taskbar.isTaskbarSupported()) {
+                Taskbar.getTaskbar().setIconImage(images.get(0));
             }
         }
         addWindowListener(new WindowAdapter() {
