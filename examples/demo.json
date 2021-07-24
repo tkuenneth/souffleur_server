@@ -1,0 +1,16 @@
+[
+    {
+        "Name": "Hello",
+        "Notes": [
+            "note 1",
+            "note 2"
+        ]
+    },
+    {
+        "Name": "Souffleur",
+        "Notes": [
+            "Another note",
+            "Yet another"
+        ]
+    }
+]
