@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -17,23 +18,21 @@ class SouffleurClient extends StatefulWidget {
 }
 
 class _SouffleurClientState extends State<SouffleurClient> {
-  Future<SlideNotes> currentSlideNotes;
   var notesGroup = AutoSizeGroup();
 
   @override
   void initState() {
     super.initState();
-    currentSlideNotes = fetchSlideNotes("current");
   }
 
   @override
   Widget build(BuildContext context) {
     return SwipeDetector(
       onSwipeLeft: () => setState(() {
-        currentSlideNotes = fetchSlideNotes("next");
+        fetchSlideNotes("next");
       }),
       onSwipeRight: () => setState(() {
-        currentSlideNotes = fetchSlideNotes("previous");
+        fetchSlideNotes("previous");
       }),
       child: Container(
         decoration: BoxDecoration(color: Colors.white),
@@ -46,11 +45,11 @@ class _SouffleurClientState extends State<SouffleurClient> {
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
-                    child: FutureBuilder<SlideNotes>(
-                        future: currentSlideNotes,
+                    child: FutureBuilder<bool>(
+                        future: fetchSlideNotes("next"),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
-                            return _getNotes(snapshot.data.notes);
+                            return Text("ok");
                           } else {
                             if (snapshot.connectionState ==
                                 ConnectionState.done) {
@@ -69,15 +68,15 @@ class _SouffleurClientState extends State<SouffleurClient> {
                         }),
                   ),
                 ),
-                FutureBuilder<SlideNotes>(
-                    future: currentSlideNotes,
+                FutureBuilder<bool>(
+//                    future: currentSlideNotes,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         var slideNotes = snapshot.data;
                         return Padding(
                             padding: EdgeInsets.only(bottom: 4),
                             child: Text(
-                              "${slideNotes.slideNumber} / ${slideNotes.total}",
+                              "super",
                               style: TextStyle(
                                   fontSize: 32, color: Colors.black38),
                             ));
@@ -93,35 +92,13 @@ class _SouffleurClientState extends State<SouffleurClient> {
     );
   }
 
-  Widget _getNotes(List<String> notes) {
-    List<Widget> result = [];
-    notes.forEach((note) {
-      if (result.length > 0) {
-        result.add(SizedBox(height: 16));
-      }
-      result.add(AutoSizeText(
-        note,
-        group: notesGroup,
-        style: TextStyle(fontSize: 72, color: Colors.black),
-        maxLines: 3,
-      ));
-    });
-    return Align(
-        alignment: Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: result,
-        ));
-  }
-
   Future _onPressed() async {
     try {
-      String lastKnownUrl = await BarcodeScanner.scan();
+      String lastKnownUrl = await BarcodeScanner.scan().toString();
       SharedPreferences.getInstance().then((prefs) {
         prefs.setString('lastKnownUrl', lastKnownUrl);
         setState(() {
-          currentSlideNotes = fetchSlideNotes("start");
+          fetchSlideNotes("start");
         });
       });
     } on Exception catch (e) {
@@ -129,37 +106,19 @@ class _SouffleurClientState extends State<SouffleurClient> {
     }
   }
 
-  Future<SlideNotes> fetchSlideNotes(String suffix) async {
+  Future<bool> fetchSlideNotes(String suffix) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastKnownUrl = prefs.getString('lastKnownUrl');
       final response = await http
-          .get(lastKnownUrl + suffix)
+          .get(Uri.parse(lastKnownUrl + suffix))
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
-        return SlideNotes.fromJson(json.decode(response.body));
+        return true;
       }
     } on Exception catch (e) {
       debugPrint('$e');
     }
-    return null;
-  }
-}
-
-class SlideNotes {
-  final String name;
-  final List<String> notes;
-  final int slideNumber;
-  final int total;
-
-  SlideNotes({this.name, this.notes, this.slideNumber, this.total});
-
-  factory SlideNotes.fromJson(Map<String, dynamic> json) {
-    return SlideNotes(
-      name: json['name'],
-      notes: new List<String>.from(json['notes']),
-      slideNumber: json['slideNumber'],
-      total: json['total'],
-    );
+    return false;
   }
 }
