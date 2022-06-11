@@ -42,6 +42,8 @@ public class Server implements HttpHandler {
             Utils.sendHome(robot);
         } else if (path.endsWith(("qrcode"))) {
             sendQRCode(t);
+        } else if (path.endsWith(("hello"))) {
+            sendStringResult(t, "Hello, world!");
         }
     }
 
@@ -75,6 +77,16 @@ public class Server implements HttpHandler {
             t.getResponseHeaders().add("Content-Type", "image/jpeg");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendQRCode()", e);
+        }
+    }
+
+    private void sendStringResult(HttpExchange t, String text) {
+        byte[] result = text.getBytes();
+        try (OutputStream os = t.getResponseBody()) {
+            t.sendResponseHeaders(200, result.length);
+            os.write(result);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }
     }
 }
