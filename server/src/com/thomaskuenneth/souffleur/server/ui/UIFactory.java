@@ -1,9 +1,8 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
-import javax.swing.JFormattedTextField;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.text.NumberFormatter;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.text.DecimalFormat;
 
 public class UIFactory {

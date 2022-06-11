@@ -9,31 +9,16 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.thomaskuenneth.souffleur.server.ui.UIFactory;
 
 import javax.imageio.ImageIO;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Robot;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.net.*;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,10 +47,6 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "getIpAddress()", e);
         }
         return null;
-    }
-
-    public static List<String> findIpAddress(String displayName) throws Exception {
-        return getIpAddress().get(displayName);
     }
 
     public static Map<String, List<String>> getIpAddress() throws SocketException {
@@ -137,31 +118,6 @@ public class Utils {
         return result;
     }
 
-    public static String readTextFile(String filename) throws IOException {
-        if (filename == null) {
-            throw new IOException("filename is null");
-        }
-        try (FileReader fr = new FileReader(filename);
-             BufferedReader br = new BufferedReader(fr)) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
-        }
-    }
-
-    public static void browse(String url) {
-        if (Desktop.isDesktopSupported()) {
-            try {
-                Desktop.getDesktop().browse(URI.create(url));
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "browse()", e);
-            }
-        }
-    }
-
     public static String nullSafeString(Object s) {
         return (s == null) ? "" : s.toString();
     }
@@ -169,7 +125,7 @@ public class Utils {
     public static List<Image> loadIconImages(String[] paths) {
         List<Image> iconImages = new ArrayList<>();
         for (String path : paths) {
-            var image = loadImage(path);
+            Image image = loadImage(path);
             if (image != null) {
                 iconImages.add(image);
             }
@@ -179,10 +135,26 @@ public class Utils {
 
     public static Image loadImage(String path) {
         try (InputStream in = UIFactory.class.getResourceAsStream(path)) {
-            return ImageIO.read(in);
+            if (in != null)
+                return ImageIO.read(in);
         } catch (IOException | IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "loadImage()", e);
         }
         return null;
+    }
+
+    // See https://stackoverflow.com/a/69160376
+    public static String getDefaultNetworkInterfaceDisplayName() {
+        String displayName = null;
+        try (DatagramSocket s = new DatagramSocket()) {
+            InetAddress remoteAddress = InetAddress.getByName("a.root-servers.net");
+            if (remoteAddress != null) {
+                s.connect(remoteAddress, 80);
+                displayName = NetworkInterface.getByInetAddress(s.getLocalAddress()).getDisplayName();
+            }
+        } catch (UnknownHostException | SocketException e) {
+            LOGGER.log(Level.SEVERE, null, e);
+        }
+        return displayName;
     }
 }

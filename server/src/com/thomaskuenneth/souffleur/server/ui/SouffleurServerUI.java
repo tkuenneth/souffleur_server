@@ -2,33 +2,9 @@ package com.thomaskuenneth.souffleur.server.ui;
 
 import com.thomaskuenneth.souffleur.server.Utils;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.awt.AWTException;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.Taskbar;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -63,7 +39,9 @@ public class SouffleurServerUI extends JFrame {
         if (images.size() > 0) {
             setIconImages(images);
             if (Taskbar.isTaskbarSupported()) {
-                Taskbar.getTaskbar().setIconImage(images.get(0));
+                Taskbar taskbar = Taskbar.getTaskbar();
+                if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE))
+                    taskbar.setIconImage(images.get(0));
             }
         }
         addWindowListener(new WindowAdapter() {
@@ -77,7 +55,6 @@ public class SouffleurServerUI extends JFrame {
         viewModel = new ViewModel();
         devices = Utils.getIpAddress();
         setContentPane(createMainPanel());
-        viewModel.setDevice(devices.keySet().iterator().next());
         viewModel.setPort(8087);
         viewModel.setRunning(false);
         viewModel.setShowQRCode(true);
@@ -87,7 +64,6 @@ public class SouffleurServerUI extends JFrame {
     private JComponent createMainPanel() {
         Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
         List<Component> updates = new ArrayList<>();
-        updates.add(mainPanel.add(createJsonFileSelector()));
         updates.add(mainPanel.add(createDeviceSelector()));
         updates.add(mainPanel.add(createConfigSwitches()));
         mainPanel.add(Box.createVerticalGlue());
@@ -107,58 +83,8 @@ public class SouffleurServerUI extends JFrame {
         return mainPanel;
     }
 
-    private JPanel createJsonFileSelector() {
-        JPanel panel = UIFactory.createFlowPanel();
-        JTextField filename = new JTextField(30);
-        filename.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                check();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                check();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                check();
-            }
-
-            private void check() {
-                SwingUtilities.invokeLater(() -> viewModel.setJsonFile(filename.getText()));
-            }
-        });
-        panel.add(filename);
-        JButton choose = new JButton("Choose");
-        choose.addActionListener(e -> {
-            final JFileChooser fc = new JFileChooser();
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fc.setMultiSelectionEnabled(false);
-            fc.addChoosableFileFilter(new JsonFileFilter());
-            int returnVal = fc.showOpenDialog(this);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                viewModel.setJsonFile(fc.getSelectedFile().getAbsolutePath());
-            }
-        });
-        panel.add(choose);
-        viewModel.addPropertyChangeListener(evt -> {
-            switch (evt.getPropertyName()) {
-                case "jsonFile":
-                    filename.setText(Utils.nullSafeString(evt.getNewValue()));
-                    break;
-                case "running":
-                    boolean running = (boolean) evt.getNewValue();
-                    choose.setEnabled(!running);
-                    filename.setEditable(!running);
-                    break;
-            }
-        });
-        return panel;
-    }
-
     private JPanel createDeviceSelector() {
+        String defaultDevice = Utils.getDefaultNetworkInterfaceDisplayName();
         JPanel panel = UIFactory.createFlowPanel();
         String[] names = devices.keySet().toArray(new String[]{});
         JComboBox<String> comboBox = new JComboBox<>(names);
@@ -177,23 +103,20 @@ public class SouffleurServerUI extends JFrame {
         panel.add(port);
         viewModel.addPropertyChangeListener(evt -> {
             switch (evt.getPropertyName()) {
-                case "device":
+                case "device" -> {
                     String device = evt.getNewValue().toString();
                     viewModel.setAddress(devices.get(device).get(0));
-                    break;
-                case "address":
-                    label.setText(viewModel.getAddress());
-                    break;
-                case "port":
-                    port.setText(Utils.nullSafeString(evt.getNewValue()));
-                    break;
-                case "running":
+                }
+                case "address" -> label.setText(viewModel.getAddress());
+                case "port" -> port.setText(Utils.nullSafeString(evt.getNewValue()));
+                case "running" -> {
                     boolean running = (boolean) evt.getNewValue();
                     comboBox.setEnabled(!running);
                     port.setEditable(!running);
-                    break;
+                }
             }
         });
+        comboBox.setSelectedItem(defaultDevice);
         return panel;
     }
 
@@ -204,13 +127,11 @@ public class SouffleurServerUI extends JFrame {
         panel.add(cbShowQRCode);
         viewModel.addPropertyChangeListener(evt -> {
             switch (evt.getPropertyName()) {
-                case "showQRCode":
-                    cbShowQRCode.setSelected((boolean) evt.getNewValue());
-                    break;
-                case "running":
+                case "showQRCode" -> cbShowQRCode.setSelected((boolean) evt.getNewValue());
+                case "running" -> {
                     boolean running = (boolean) evt.getNewValue();
                     cbShowQRCode.setEnabled(!running);
-                    break;
+                }
             }
         });
         return panel;
@@ -223,11 +144,11 @@ public class SouffleurServerUI extends JFrame {
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
             switch (evt.getPropertyName()) {
-                case "running":
+                case "running" -> {
                     boolean running = (boolean) evt.getNewValue();
                     if (running) {
                         try {
-                            viewModel.startServer(this::hideQRCode);
+                            viewModel.startServer();
                             startStop.setText("Stop");
                             if (viewModel.isShowQRCode()) {
                                 qrCodeDialog = showQRCode();
@@ -241,10 +162,8 @@ public class SouffleurServerUI extends JFrame {
                         viewModel.stopServer();
                         startStop.setText("Start");
                     }
-                    break;
-                case "startStopButtonEnabled":
-                    startStop.setEnabled((boolean) evt.getNewValue());
-                    break;
+                }
+                case "startStopButtonEnabled" -> startStop.setEnabled((boolean) evt.getNewValue());
             }
         });
         panel.add(startStop);
@@ -286,8 +205,8 @@ public class SouffleurServerUI extends JFrame {
                 ui.setLocationRelativeTo(null);
                 ui.setVisible(true);
             } catch (ClassNotFoundException | InstantiationException
-                    | IllegalAccessException | UnsupportedLookAndFeelException
-                    | AWTException | SocketException e) {
+                     | IllegalAccessException | UnsupportedLookAndFeelException
+                     | AWTException | SocketException e) {
                 LOGGER.log(Level.SEVERE, "setLookAndFeel()", e);
             }
         });

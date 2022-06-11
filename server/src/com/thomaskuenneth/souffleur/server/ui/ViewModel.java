@@ -1,12 +1,10 @@
 package com.thomaskuenneth.souffleur.server.ui;
 
 import com.thomaskuenneth.souffleur.server.Server;
-import com.thomaskuenneth.souffleur.server.Utils;
 
-import java.awt.AWTException;
+import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
 import java.io.IOException;
 
 public class ViewModel {
@@ -14,7 +12,6 @@ public class ViewModel {
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     private Boolean running = null;
-    private String jsonFile = null;
     private String device = null;
     private String address = null;
     private Integer port = null;
@@ -35,17 +32,6 @@ public class ViewModel {
         Boolean oldRunning = this.running;
         this.running = newRunning;
         pcs.firePropertyChange("running", oldRunning, newRunning);
-    }
-
-    public String getJsonFile() {
-        return jsonFile;
-    }
-
-    public void setJsonFile(String newJsonFile) {
-        String oldJsonFile = this.jsonFile;
-        this.jsonFile = newJsonFile;
-        pcs.firePropertyChange("jsonFile", oldJsonFile, newJsonFile);
-        updateStartStopButtonBeEnabled();
     }
 
     public String getDevice() {
@@ -100,8 +86,8 @@ public class ViewModel {
         pcs.firePropertyChange("showQRCode", oldShowQRCode, newShowQRCode);
     }
 
-    public void startServer(Runnable callback) throws IOException {
-        server.start(getJsonFile(), getAddress(), getPort(), callback);
+    public void startServer() throws IOException {
+        server.start(getAddress(), getPort());
     }
 
     public void stopServer() {
@@ -114,10 +100,7 @@ public class ViewModel {
 
     private void updateStartStopButtonBeEnabled() {
         boolean enabled = false;
-        if (port != null) {
-            File f = new File(Utils.nullSafeString(jsonFile));
-            enabled = f.exists() && f.isFile();
-        }
+        enabled = port != null;
         setStartStopButtonEnabled(enabled);
     }
 
