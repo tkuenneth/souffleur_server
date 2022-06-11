@@ -85,6 +85,11 @@ public class Utils {
         r.keyRelease(KeyEvent.VK_RIGHT);
     }
 
+    public static void sendHome(Robot r) {
+        r.keyPress(KeyEvent.VK_HOME);
+        r.keyRelease(KeyEvent.VK_HOME);
+    }
+
     public static BufferedImage generateQRCode(String text) {
         BufferedImage result = null;
         try {

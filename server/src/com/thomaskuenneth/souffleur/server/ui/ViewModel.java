@@ -104,8 +104,6 @@ public class ViewModel {
         setStartStopButtonEnabled(enabled);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
-
     public void addPropertyChangeListener(PropertyChangeListener l) {
         pcs.addPropertyChangeListener(l);
     }
