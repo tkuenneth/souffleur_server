@@ -65,15 +65,27 @@ class _SouffleurClientState extends State<SouffleurClient> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton(onPressed: _sendCommandHome, child: Text("Home")),
+        TextButton(
+            onPressed: _sendCommandHome,
+            child: Text("Home",
+                style: TextStyle(fontSize: 72, color: Colors.black))),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(onPressed: _sendCommandPrevious, child: Text("Prev")),
-            TextButton(onPressed: _sendCommandNext, child: Text("Next")),
+            TextButton(
+                onPressed: _sendCommandPrevious,
+                child: Text("Prev",
+                    style: TextStyle(fontSize: 72, color: Colors.black))),
+            TextButton(
+                onPressed: _sendCommandNext,
+                child: Text("Next",
+                    style: TextStyle(fontSize: 72, color: Colors.black))),
           ],
         ),
-        TextButton(onPressed: _sendCommandEnd, child: Text("End")),
+        TextButton(
+            onPressed: _sendCommandEnd,
+            child: Text("End",
+                style: TextStyle(fontSize: 72, color: Colors.black))),
       ],
     );
   }
@@ -122,7 +134,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
     _sendCommand("next");
   }
 
-  void _sendCommand(String cmd) async{
+  void _sendCommand(String cmd) async {
     await _getFromServer(lastKnownUrl, cmd);
   }
 }
