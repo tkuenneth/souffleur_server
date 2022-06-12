@@ -31,54 +31,50 @@ class _SouffleurClientState extends State<SouffleurClient> {
       decoration: BoxDecoration(color: Colors.white),
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsets.only(left: 16, right: 16),
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: FutureBuilder<bool>(
-                      future: _getFromServer(lastKnownUrl, "hello"),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.data == true) {
-                          return Text("ok",
-                              style:
-                                  TextStyle(fontSize: 72, color: Colors.black));
-                        } else {
-                          return TextButton(
-                            child: Text(
-                              "Scan",
-                              style:
-                                  TextStyle(fontSize: 72, color: Colors.black),
-                            ),
-                            onPressed: _scanQRCode,
-                          );
-                        }
-                      }),
-                ),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Align(
+                alignment: Alignment.center,
+                child: FutureBuilder<bool>(
+                    future: _getFromServer(lastKnownUrl, "hello"),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.data == true) {
+                        return _createButtons();
+                      } else {
+                        return TextButton(
+                          child: Text(
+                            "Scan",
+                            style: TextStyle(fontSize: 72, color: Colors.black),
+                          ),
+                          onPressed: _scanQRCode,
+                        );
+                      }
+                    }),
               ),
-              FutureBuilder<bool>(
-//                    future: currentSlideNotes,
-                  builder: (context, snapshot) {
-                if (snapshot.hasData) {
-//                  var slideNotes = snapshot.data;
-                  return Padding(
-                      padding: EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        "super",
-                        style: TextStyle(fontSize: 32, color: Colors.black38),
-                      ));
-                } else {
-                  return SizedBox.shrink();
-                }
-              }),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _createButtons() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton(onPressed: _sendCommandHome, child: Text("Home")),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(onPressed: _sendCommandPrevious, child: Text("Prev")),
+            TextButton(onPressed: _sendCommandNext, child: Text("Next")),
+          ],
+        ),
+        TextButton(onPressed: _sendCommandEnd, child: Text("End")),
+      ],
     );
   }
 
@@ -108,5 +104,25 @@ class _SouffleurClientState extends State<SouffleurClient> {
       debugPrint('$e');
     }
     return false;
+  }
+
+  void _sendCommandHome() {
+    _sendCommand("home");
+  }
+
+  void _sendCommandEnd() {
+    _sendCommand("end");
+  }
+
+  void _sendCommandPrevious() {
+    _sendCommand("previous");
+  }
+
+  void _sendCommandNext() {
+    _sendCommand("next");
+  }
+
+  void _sendCommand(String cmd) async{
+    await _getFromServer(lastKnownUrl, cmd);
   }
 }
