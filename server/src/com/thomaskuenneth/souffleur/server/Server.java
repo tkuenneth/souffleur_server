@@ -40,6 +40,8 @@ public class Server implements HttpHandler {
             Utils.sendCursorLeft(robot);
         } else if (path.endsWith(("home"))) {
             Utils.sendHome(robot);
+        } else if (path.endsWith(("end"))) {
+            Utils.sendEnd(robot);
         } else if (path.endsWith(("qrcode"))) {
             sendQRCode(t);
         } else if (path.endsWith(("hello"))) {

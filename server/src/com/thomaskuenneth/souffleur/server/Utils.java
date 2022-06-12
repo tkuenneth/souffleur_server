@@ -90,6 +90,11 @@ public class Utils {
         r.keyRelease(KeyEvent.VK_HOME);
     }
 
+    public static void sendEnd(Robot r) {
+        r.keyPress(KeyEvent.VK_END);
+        r.keyRelease(KeyEvent.VK_END);
+    }
+
     public static BufferedImage generateQRCode(String text) {
         BufferedImage result = null;
         try {
