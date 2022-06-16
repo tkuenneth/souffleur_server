@@ -20,7 +20,8 @@ class _SouffleurClientState extends State<SouffleurClient> {
     super.initState();
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
-        lastKnownUrl = prefs.getString('lastKnownUrl');
+        lastKnownUrl =
+            "http://192.168.178.33:8087/souffleur"; //prefs.getString('lastKnownUrl');
       });
     });
   }
@@ -64,30 +65,50 @@ class _SouffleurClientState extends State<SouffleurClient> {
   Widget _createButtons() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextButton(
-            onPressed: _sendCommandHome,
-            child: Text("Home",
-                style: TextStyle(fontSize: 72, color: Colors.black))),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-                onPressed: _sendCommandPrevious,
-                child: Text("Prev",
-                    style: TextStyle(fontSize: 72, color: Colors.black))),
-            TextButton(
-                onPressed: _sendCommandNext,
-                child: Text("Next",
-                    style: TextStyle(fontSize: 72, color: Colors.black))),
-          ],
+        Expanded(
+            child: Padding(
+                child: _roundButton(_sendCommandHome, "\u23ee"),
+                padding: EdgeInsets.only(left: 8, right: 8))),
+        Expanded(
+            flex: 3,
+            child: Padding(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                        child: _roundButton(_sendCommandPrevious, "\u25c0")),
+                    Expanded(
+                        child: Padding(
+                            child: _roundButton(_sendCommandNext, "\u25b6"),
+                            padding: EdgeInsets.only(left: 8))),
+                  ],
+                ),
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 8))),
+        Expanded(
+          child: Padding(
+              child: _roundButton(_sendCommandEnd, "\u23ed"),
+              padding: EdgeInsets.only(left: 8, right: 8)),
         ),
-        TextButton(
-            onPressed: _sendCommandEnd,
-            child: Text("End",
-                style: TextStyle(fontSize: 72, color: Colors.black))),
       ],
     );
+  }
+
+  Widget _roundButton(VoidCallback onPressed, String text) {
+    return TextButton(
+        onPressed: onPressed,
+        child: Text(text,
+            style: TextStyle(
+                fontSize: 72,
+                color: Colors.black,
+                textBaseline: TextBaseline.ideographic)),
+        style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: Colors.black)))));
   }
 
   void _scanQRCode() async {

@@ -1,5 +1,5 @@
-name: client
-description: The souffleur client
+name: Souffleur
+description: A cross platform remote control for presentations
 
 version: 1.0.0+1
 
@@ -19,4 +19,4 @@ dev_dependencies:
 
 flutter:
 
-  uses-material-design: false
+  uses-material-design: true
