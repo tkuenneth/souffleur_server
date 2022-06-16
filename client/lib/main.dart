@@ -28,38 +28,48 @@ class _SouffleurClientState extends State<SouffleurClient> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Colors.white),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Align(
-                alignment: Alignment.center,
-                child: FutureBuilder<bool>(
-                    future: _getFromServer(lastKnownUrl, "hello"),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.data == true) {
-                        return _createButtons();
-                      } else {
-                        return TextButton(
-                          child: Text(
-                            "Scan",
-                            style: TextStyle(fontSize: 72, color: Colors.black),
-                          ),
-                          onPressed: _scanQRCode,
-                        );
-                      }
-                    }),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(title: const Text("Souffleur")),
+            body: SafeArea(
+                child: Container(
+                    decoration: BoxDecoration(color: Colors.white),
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Column(
+                          children: <Widget>[
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: FutureBuilder<bool>(
+                                    future:
+                                        _getFromServer(lastKnownUrl, "hello"),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState !=
+                                          ConnectionState.done) {
+                                        return CircularProgressIndicator();
+                                      } else if (snapshot.data == true) {
+                                        return _createButtons();
+                                      } else {
+                                        return TextButton(
+                                          child: Text(
+                                            "Scan",
+                                            style: TextStyle(
+                                                fontSize: 72,
+                                                color: Colors.black),
+                                          ),
+                                          onPressed: _scanQRCode,
+                                        );
+                                      }
+                                    }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )))));
   }
 
   Widget _createButtons() {
@@ -68,9 +78,8 @@ class _SouffleurClientState extends State<SouffleurClient> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-            child: Padding(
-                child: _roundButton(_sendCommandHome, "\u23ee"),
-                padding: EdgeInsets.only(left: 8, right: 8))),
+          child: _roundButton(_sendCommandHome, "\u23ee"),
+        ),
         Expanded(
             flex: 3,
             child: Padding(
@@ -86,11 +95,9 @@ class _SouffleurClientState extends State<SouffleurClient> {
                             padding: EdgeInsets.only(left: 8))),
                   ],
                 ),
-                padding: EdgeInsets.fromLTRB(8, 8, 8, 8))),
+                padding: EdgeInsets.only(top: 8, bottom: 8))),
         Expanded(
-          child: Padding(
-              child: _roundButton(_sendCommandEnd, "\u23ed"),
-              padding: EdgeInsets.only(left: 8, right: 8)),
+          child: _roundButton(_sendCommandEnd, "\u23ed"),
         ),
       ],
     );
