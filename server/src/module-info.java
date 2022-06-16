@@ -1,4 +1,4 @@
-module com.thomaskuenneth.souffleur.server {
+module eu.thomaskuenneth.souffleur.server {
     requires jdk.httpserver;
     requires java.desktop;
     requires java.logging;
