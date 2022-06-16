@@ -26,3 +26,5 @@ server/.idea/uiDesigner.xml
 **/out/
 **/.DS_Store
 **/Browse.plb
+server/stdout.txt
+server/stderr.txt
