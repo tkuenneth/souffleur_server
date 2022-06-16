@@ -20,7 +20,7 @@ public class UIFactory {
     }
 
     public static JPanel createFlowPanel() {
-        FlowLayout layout = new FlowLayout(FlowLayout.LEADING);
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, 16, 8);
         layout.setAlignOnBaseline(true);
         return new JPanel(layout);
     }
