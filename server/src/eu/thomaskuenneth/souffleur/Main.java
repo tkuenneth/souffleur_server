@@ -138,8 +138,7 @@ public class Main extends JFrame {
     }
 
     private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.TRAILING));
-        panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
+        JPanel panel = new JPanel(new BorderLayout());
         JButton startStop = new JButton();
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
@@ -166,7 +165,10 @@ public class Main extends JFrame {
                 case "startStopButtonEnabled" -> startStop.setEnabled((boolean) evt.getNewValue());
             }
         });
-        panel.add(startStop);
+        JLabel versionLabel = new JLabel(String.format("Version %s", VERSION));
+        versionLabel.setVerticalAlignment(SwingConstants.BOTTOM);
+        panel.add(versionLabel, BorderLayout.CENTER);
+        panel.add(startStop, BorderLayout.EAST);
         return panel;
     }
 
