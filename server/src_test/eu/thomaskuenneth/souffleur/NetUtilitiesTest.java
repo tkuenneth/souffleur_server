@@ -1,4 +1,4 @@
-package com.thomaskuenneth.souffleur.server;
+package eu.thomaskuenneth.souffleur;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

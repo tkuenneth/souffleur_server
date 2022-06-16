@@ -1,6 +1,4 @@
-package com.thomaskuenneth.souffleur.server.ui;
-
-import com.thomaskuenneth.souffleur.server.Server;
+package eu.thomaskuenneth.souffleur;
 
 import java.awt.*;
 import java.beans.PropertyChangeListener;

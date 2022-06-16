@@ -1,4 +1,4 @@
-package com.thomaskuenneth.souffleur.server;
+package eu.thomaskuenneth.souffleur;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -6,7 +6,6 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.thomaskuenneth.souffleur.server.ui.UIFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

@@ -1,4 +1,4 @@
-package com.thomaskuenneth.souffleur.server;
+package eu.thomaskuenneth.souffleur;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

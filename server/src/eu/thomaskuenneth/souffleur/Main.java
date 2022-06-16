@@ -1,6 +1,4 @@
-package com.thomaskuenneth.souffleur.server.ui;
-
-import com.thomaskuenneth.souffleur.server.Utils;
+package eu.thomaskuenneth.souffleur;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -18,23 +16,25 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SouffleurServerUI extends JFrame {
+public class Main extends JFrame {
 
-    private static final Logger LOGGER = Logger.getLogger(SouffleurServerUI.class.getName());
+    public static final String VERSION = "1.0.0";
+
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     private final ViewModel viewModel;
     private final Map<String, List<String>> devices;
 
     private JDialog qrCodeDialog;
 
-    public SouffleurServerUI() throws AWTException, SocketException {
+    public Main() throws AWTException, SocketException {
         super("Souffleur");
         var filenames = new String[]{
-                "/com/thomaskuenneth/souffleur/server/Icon-App-1024x1024@1x.png",
-                "/com/thomaskuenneth/souffleur/server/Icon-App-76x76@1x.png",
-                "/com/thomaskuenneth/souffleur/server/Icon-App-40x40@1x.png",
-                "/com/thomaskuenneth/souffleur/server/Icon-App-29x29@1x.png",
-                "/com/thomaskuenneth/souffleur/server/Icon-App-20x20@1x.png"};
+                "/eu/thomaskuenneth/souffleur/Icon-App-1024x1024@1x.png",
+                "/eu/thomaskuenneth/souffleur/Icon-App-76x76@1x.png",
+                "/eu/thomaskuenneth/souffleur/Icon-App-40x40@1x.png",
+                "/eu/thomaskuenneth/souffleur/Icon-App-29x29@1x.png",
+                "/eu/thomaskuenneth/souffleur/Icon-App-20x20@1x.png"};
         List<Image> images = Utils.loadIconImages(filenames);
         if (images.size() > 0) {
             setIconImages(images);
@@ -201,7 +201,7 @@ public class SouffleurServerUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                SouffleurServerUI ui = new SouffleurServerUI();
+                Main ui = new Main();
                 ui.setLocationRelativeTo(null);
                 ui.setVisible(true);
             } catch (ClassNotFoundException | InstantiationException

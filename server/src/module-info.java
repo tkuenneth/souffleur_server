@@ -5,5 +5,5 @@ module com.thomaskuenneth.souffleur.server {
     requires org.json;
     requires com.google.zxing;
 
-    exports com.thomaskuenneth.souffleur.server;
+    exports eu.thomaskuenneth.souffleur;
 }

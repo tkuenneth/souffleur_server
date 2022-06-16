@@ -1,4 +1,4 @@
-package com.thomaskuenneth.souffleur.server.ui;
+package eu.thomaskuenneth.souffleur;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
