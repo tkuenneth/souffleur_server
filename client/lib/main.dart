@@ -14,10 +14,18 @@ class SouffleurClient extends StatefulWidget {
 
 class _SouffleurClientState extends State<SouffleurClient> {
   var lastKnownUrl = "";
+  ThemeData theme;
 
   @override
   void initState() {
     super.initState();
+    var window = WidgetsBinding.instance.window;
+    _updateThemeData(window.platformBrightness);
+    window.onPlatformBrightnessChanged = () {
+      setState(() {
+        _updateThemeData(window.platformBrightness);
+      });
+    };
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
         lastKnownUrl =
@@ -29,11 +37,12 @@ class _SouffleurClientState extends State<SouffleurClient> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        theme: theme,
         home: Scaffold(
             appBar: AppBar(title: const Text("Souffleur")),
             body: SafeArea(
                 child: Container(
-                    decoration: BoxDecoration(color: Colors.white),
+                    decoration: BoxDecoration(color: theme.colorScheme.surface),
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: Directionality(
@@ -56,9 +65,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
                                         return TextButton(
                                           child: Text(
                                             "Scan",
-                                            style: TextStyle(
-                                                fontSize: 72,
-                                                color: Colors.black),
+                                            style: TextStyle(fontSize: 72),
                                           ),
                                           onPressed: _scanQRCode,
                                         );
@@ -104,7 +111,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
   }
 
   Widget _roundButton(VoidCallback onPressed, String text) {
-    var color = Theme.of(context).buttonTheme.colorScheme.primary;
+    var color = theme.colorScheme.primary;
     return TextButton(
         onPressed: onPressed,
         child: Text(text,
@@ -165,5 +172,9 @@ class _SouffleurClientState extends State<SouffleurClient> {
 
   void _sendCommand(String cmd) async {
     await _getFromServer(lastKnownUrl, cmd);
+  }
+
+  void _updateThemeData(Brightness brightness) {
+    theme = ThemeData(brightness: brightness);
   }
 }
