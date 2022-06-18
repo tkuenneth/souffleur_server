@@ -17,15 +17,23 @@ import java.util.logging.Logger;
 
 public class Server implements HttpHandler {
 
+    public static final String END = "end";
+    public static final String NEXT = "next";
+    public static final String PREVIOUS = "previous";
+    public static final String HOME = "home";
+    public static final String QRCODE = "qrcode";
+    public static final String HELLO = "hello";
     private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
     private final Robot robot;
+    private final ServerCallback callback;
 
     private HttpServer httpServer;
     private String address;
     private int port;
 
-    public Server() throws AWTException {
+    public Server(ServerCallback callback) throws AWTException {
+        this.callback = callback;
         robot = new Robot();
         robot.setAutoWaitForIdle(true);
     }
@@ -33,19 +41,30 @@ public class Server implements HttpHandler {
     @Override
     public void handle(HttpExchange t) {
         URI requestUri = t.getRequestURI();
-        String path = requestUri.getPath().toLowerCase();
-        if (path.endsWith(("next"))) {
-            Utils.sendCursorRight(robot);
-        } else if (path.endsWith(("previous"))) {
-            Utils.sendCursorLeft(robot);
-        } else if (path.endsWith(("home"))) {
-            Utils.sendHome(robot);
-        } else if (path.endsWith(("end"))) {
-            Utils.sendEnd(robot);
-        } else if (path.endsWith(("qrcode"))) {
-            sendQRCode(t);
-        } else if (path.endsWith(("hello"))) {
-            sendStringResult(t, "Hello, world!");
+        String path = requestUri.getPath();
+        switch (path.substring(path.lastIndexOf('/') + 1).toLowerCase()) {
+            case HOME -> {
+                Utils.sendHome(robot);
+                callback.commandReceived(HOME);
+            }
+            case PREVIOUS -> {
+                Utils.sendCursorLeft(robot);
+                callback.commandReceived(PREVIOUS);
+            }
+            case NEXT -> {
+                Utils.sendCursorRight(robot);
+                callback.commandReceived(NEXT);
+            }
+            case END -> {
+                Utils.sendEnd(robot);
+                callback.commandReceived(END);
+            }
+            case QRCODE -> {
+                sendQRCode(t);
+            }
+            case HELLO -> {
+                sendStringResult(t, "Hello, world!");
+            }
         }
     }
 

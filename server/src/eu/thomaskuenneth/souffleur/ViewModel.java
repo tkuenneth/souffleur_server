@@ -1,5 +1,6 @@
 package eu.thomaskuenneth.souffleur;
 
+import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -16,14 +17,45 @@ public class ViewModel {
     private Boolean startStopButtonEnabled = null;
     private Boolean showQRCode = null;
 
+    private String lastCommand = null;
+
+    private Thread indicatorThread = null;
+
     private final Server server;
 
     public ViewModel() throws AWTException {
-        server = new Server();
+        server = new Server(command -> {
+            if (indicatorThread != null)
+                indicatorThread.interrupt();
+            indicatorThread = new Thread(() -> {
+                SwingUtilities.invokeLater(() -> {
+                    setLastCommand(command);
+                });
+                try {
+                    Thread.sleep(2000);
+                    SwingUtilities.invokeLater(() -> {
+                        setLastCommand(null);
+                    });
+                } catch (InterruptedException e) {
+                    // no action required nor wanted
+                }
+            });
+            indicatorThread.start();
+        });
     }
 
     public Boolean isRunning() {
         return running;
+    }
+
+    public void setLastCommand(String newLastCommand) {
+        String oldLastCommand = this.lastCommand;
+        this.lastCommand = newLastCommand;
+        pcs.firePropertyChange("lastCommand", oldLastCommand, newLastCommand);
+    }
+
+    public String getLastCommand() {
+        return lastCommand;
     }
 
     public void setRunning(Boolean newRunning) {

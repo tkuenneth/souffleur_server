@@ -67,6 +67,7 @@ public class Main extends JFrame {
         updates.add(mainPanel.add(createDeviceSelector()));
         updates.add(mainPanel.add(createConfigSwitches()));
         mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(createIndicators());
         updates.add(mainPanel.add((createButtonPanel())));
         mainPanel.addComponentListener(new ComponentAdapter() {
             @Override
@@ -170,6 +171,31 @@ public class Main extends JFrame {
         panel.add(versionLabel, BorderLayout.CENTER);
         panel.add(startStop, BorderLayout.EAST);
         return panel;
+    }
+
+    private JPanel createIndicators() {
+        JPanel panel = UIFactory.createFlowPanel();
+        panel.add(createIndicator(Server.HOME));
+        panel.add(createIndicator(Server.PREVIOUS));
+        panel.add(createIndicator(Server.NEXT));
+        panel.add(createIndicator(Server.END));
+        return panel;
+    }
+
+    private JLabel createIndicator(String indicator) {
+        Map<String, String> symbols = Map.of(
+                Server.HOME, "\u23ee",
+                Server.PREVIOUS, "\u25c0",
+                Server.NEXT, "\u25b6",
+                Server.END, "\u23ed"
+        );
+        JLabel label = new JLabel(symbols.get(indicator));
+        viewModel.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals("lastCommand")) {
+                label.setForeground(indicator.equals(evt.getNewValue()) ? Color.red : UIManager.getColor("Label.foreground"));
+            }
+        });
+        return label;
     }
 
     private JDialog showQRCode() {
