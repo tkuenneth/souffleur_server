@@ -97,9 +97,7 @@ public class ViewModel {
     }
 
     private void updateStartStopButtonBeEnabled() {
-        boolean enabled = false;
-        enabled = port != null;
-        setStartStopButtonEnabled(enabled);
+        setStartStopButtonEnabled(port != null);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
