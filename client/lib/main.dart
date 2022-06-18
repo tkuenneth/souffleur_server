@@ -104,18 +104,19 @@ class _SouffleurClientState extends State<SouffleurClient> {
   }
 
   Widget _roundButton(VoidCallback onPressed, String text) {
+    var color = Theme.of(context).buttonTheme.colorScheme.primary;
     return TextButton(
         onPressed: onPressed,
         child: Text(text,
             style: TextStyle(
                 fontSize: 72,
-                color: Colors.black,
+                color: color,
                 textBaseline: TextBaseline.ideographic)),
         style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: Colors.black)))));
+                    side: BorderSide(color: color)))));
   }
 
   void _scanQRCode() async {
