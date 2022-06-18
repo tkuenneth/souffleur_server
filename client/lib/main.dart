@@ -28,8 +28,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
     };
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
-        lastKnownUrl =
-            "http://192.168.178.33:8087/souffleur"; //prefs.getString('lastKnownUrl');
+        lastKnownUrl = prefs.getString('lastKnownUrl');
       });
     });
   }
