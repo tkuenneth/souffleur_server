@@ -31,6 +31,7 @@ public class Server implements HttpHandler {
     private HttpServer httpServer;
     private String address;
     private int port;
+    private String secret;
 
     public Server(ServerCallback callback) throws AWTException {
         this.callback = callback;
@@ -68,15 +69,17 @@ public class Server implements HttpHandler {
         }
     }
 
-    public void start(String address, int port) throws IOException {
+    public void start(String address, int port, String secret) throws IOException {
         InetAddress inetAddress = InetAddress.getByName(address);
         InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         this.address = address;
         this.port = port;
+        this.secret = secret;
         this.httpServer = HttpServer.create(socketAddress, 0);
-        this.httpServer.createContext("/souffleur", this);
+        this.httpServer.createContext("/souffleur/" + secret, this);
         this.httpServer.setExecutor(null);
         this.httpServer.start();
+        LOGGER.log(Level.INFO, getQRCodeAsString());
     }
 
     public void stop() {
@@ -87,7 +90,7 @@ public class Server implements HttpHandler {
     }
 
     public String getQRCodeAsString() {
-        return String.format("http://%s:%s/souffleur/", address, port);
+        return String.format("http://%s:%s/souffleur/%s/", address, port, secret);
     }
 
     private void sendQRCode(HttpExchange t) {

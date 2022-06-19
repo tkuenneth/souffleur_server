@@ -13,17 +13,22 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 public class Main extends JFrame {
 
-    public static final String VERSION = "1.0.1";
+    public static final String VERSION = "1.0.2";
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final String KEY_SECRET = "secret";
+    private static final String KEY_SHOW_QRCODE = "showQrcode";
 
     private final ViewModel viewModel;
     private final Map<String, List<String>> devices;
+    private final Preferences prefs;
 
     private JDialog qrCodeDialog;
 
@@ -57,7 +62,15 @@ public class Main extends JFrame {
         setContentPane(createMainPanel());
         viewModel.setPort(8087);
         viewModel.setRunning(false);
-        viewModel.setShowQRCode(true);
+        prefs = Preferences.userNodeForPackage(this.getClass());
+        String secret = prefs.get(KEY_SECRET, null);
+        if (secret == null) {
+            secret = UUID.randomUUID().toString();
+            prefs.put(KEY_SECRET, secret);
+        }
+        viewModel.setSecret(secret);
+        viewModel.setShowQRCode(prefs.getBoolean(KEY_SHOW_QRCODE, true));
+        viewModel.observeShowQRCode(value -> prefs.putBoolean(KEY_SHOW_QRCODE, value));
         pack();
     }
 
@@ -170,6 +183,7 @@ public class Main extends JFrame {
         versionLabel.setVerticalAlignment(SwingConstants.BOTTOM);
         panel.add(versionLabel, BorderLayout.CENTER);
         panel.add(startStop, BorderLayout.EAST);
+        panel.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
         return panel;
     }
 
@@ -208,7 +222,7 @@ public class Main extends JFrame {
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.add(new JLabel(ii), BorderLayout.CENTER);
         dialog.setContentPane(contentPane);
-        dialog.setTitle(url);
+        dialog.setTitle("Souffleur - QR code");
         dialog.pack();
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);

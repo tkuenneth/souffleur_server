@@ -4,6 +4,7 @@ module eu.thomaskuenneth.souffleur.server {
     requires java.logging;
     requires org.json;
     requires com.google.zxing;
+    requires java.prefs;
 
     exports eu.thomaskuenneth.souffleur;
 }

@@ -5,6 +5,7 @@ import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class ViewModel {
 
@@ -15,9 +16,11 @@ public class ViewModel {
     private String address = null;
     private Integer port = null;
     private Boolean startStopButtonEnabled = null;
-    private Boolean showQRCode = null;
 
+    private static final String SHOW_QR_CODE = "showQRCode";
+    private Boolean showQRCode = null;
     private String lastCommand = null;
+    private String secret = null;
 
     private Thread indicatorThread = null;
 
@@ -42,6 +45,16 @@ public class ViewModel {
             });
             indicatorThread.start();
         });
+    }
+
+    public void setSecret(String newSecret) {
+        String oldSecret = this.secret;
+        this.secret = newSecret;
+        pcs.firePropertyChange("secret", oldSecret, newSecret);
+    }
+
+    public String getSecret() {
+        return secret;
     }
 
     public Boolean isRunning() {
@@ -113,11 +126,24 @@ public class ViewModel {
     public void setShowQRCode(Boolean newShowQRCode) {
         Boolean oldShowQRCode = this.showQRCode;
         this.showQRCode = newShowQRCode;
-        pcs.firePropertyChange("showQRCode", oldShowQRCode, newShowQRCode);
+        pcs.firePropertyChange(SHOW_QR_CODE, oldShowQRCode, newShowQRCode);
     }
 
+    public void observeShowQRCode(Consumer<Boolean> callback) {
+        observe(SHOW_QR_CODE, callback);
+    }
+
+    private <T> void observe(String propertyName, Consumer<T> callback) {
+        pcs.addPropertyChangeListener(propertyName, evt -> {
+            if (propertyName.equals(evt.getPropertyName())) {
+                callback.accept((T) evt.getNewValue());
+            }
+        });
+    }
+
+
     public void startServer() throws IOException {
-        server.start(getAddress(), getPort());
+        server.start(getAddress(), getPort(), getSecret());
     }
 
     public void stopServer() {
