@@ -47,18 +47,22 @@ public class Server implements HttpHandler {
             case HOME -> {
                 Utils.sendHome(robot);
                 callback.commandReceived(HOME);
+                sendStatus(t, 200);
             }
             case PREVIOUS -> {
                 Utils.sendCursorLeft(robot);
                 callback.commandReceived(PREVIOUS);
+                sendStatus(t, 200);
             }
             case NEXT -> {
                 Utils.sendCursorRight(robot);
                 callback.commandReceived(NEXT);
+                sendStatus(t, 200);
             }
             case END -> {
                 Utils.sendEnd(robot);
                 callback.commandReceived(END);
+                sendStatus(t, 200);
             }
             case QRCODE -> {
                 sendQRCode(t);
@@ -109,6 +113,15 @@ public class Server implements HttpHandler {
         try (OutputStream os = t.getResponseBody()) {
             t.sendResponseHeaders(200, result.length);
             os.write(result);
+            t.getResponseHeaders().add("Content-Type", "text/plain");
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "sendStringResult()", e);
+        }
+    }
+
+    private void sendStatus(HttpExchange t, int status) {
+        try (OutputStream os = t.getResponseBody()) {
+            t.sendResponseHeaders(status, 0);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }

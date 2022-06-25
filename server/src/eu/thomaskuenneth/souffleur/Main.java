@@ -20,7 +20,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends JFrame {
 
-    public static final String VERSION = "1.0.2";
+    public static final String VERSION = "1.0.3";
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String KEY_SECRET = "secret";
