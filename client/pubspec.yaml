@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  barcode_scan: any
+  barcode_scan2: any
   http: ^0.13.4
   shared_preferences: ^2.0.15
 
