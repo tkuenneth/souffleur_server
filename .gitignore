@@ -28,3 +28,4 @@ server/.idea/uiDesigner.xml
 **/Browse.plb
 server/stdout.txt
 server/stderr.txt
+client/.flutter-plugins-dependencies
