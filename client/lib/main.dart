@@ -1,4 +1,4 @@
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,10 +10,7 @@ class SouffleurClient extends StatefulWidget {
   State<SouffleurClient> createState() => _SouffleurClientState();
 }
 
-enum _Status { waiting, ok, not_successful }
-
 class _SouffleurClientState extends State<SouffleurClient> {
-  _Status status = _Status.waiting;
   String lastKnownUrl = "";
   ThemeData theme;
 
@@ -43,10 +40,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
   void updateLastKnownUrl(String url) {
     setState(() {
       lastKnownUrl = url;
-      if (!isLastKnownUrlValid()) {
-        status = _Status.waiting;
-      } else
-        _sendCommandHello();
+      if (isLastKnownUrlValid()) _sendCommandHello();
     });
   }
 
@@ -55,94 +49,102 @@ class _SouffleurClientState extends State<SouffleurClient> {
     return MaterialApp(
         theme: theme,
         home: Builder(builder: (BuildContext context) {
-          return _getScaffold();
+          return Scaffold(
+              appBar: AppBar(
+                title: const Text("Souffleur"),
+                actions: [
+                  PopupMenuButton(itemBuilder: (context) {
+                    return [
+                      PopupMenuItem<int>(
+                        value: 0,
+                        child: Text("Scan"),
+                      ),
+                    ];
+                  }, onSelected: (value) {
+                    if (value == 0) {
+                      _scanQRCode();
+                    }
+                  }),
+                ],
+              ),
+              body: Builder(builder: (BuildContext context) {
+                return _createBody(context);
+              }));
         }));
   }
 
-  Widget _getScaffold() {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text("Souffleur"),
-          actions: [
-            PopupMenuButton(itemBuilder: (context) {
-              return [
-                PopupMenuItem<int>(
-                  value: 0,
-                  child: Text("Scan"),
-                ),
-              ];
-            }, onSelected: (value) {
-              if (value == 0) {
-                _scanQRCode();
-              }
-            }),
-          ],
-        ),
-        body: SafeArea(
-            child: Container(
-                decoration: BoxDecoration(color: theme?.colorScheme?.surface),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: _createContentArea(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ))));
-  }
-
-  Widget _createContentArea() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: _createRoundedButton(_sendCommandHome, "\u23ee"),
-        ),
-        Expanded(
-            flex: 3,
+  Widget _createBody(BuildContext context) {
+    return SafeArea(
+        child: Container(
+            decoration: BoxDecoration(color: theme?.colorScheme?.surface),
             child: Padding(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+              padding: EdgeInsets.all(16),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Column(
+                  children: <Widget>[
                     Expanded(
-                        child: _createRoundedButton(
-                            _sendCommandPrevious, "\u25c0")),
-                    Expanded(
-                        child: Padding(
-                            child: _createRoundedButton(
-                                _sendCommandNext, "\u25b6"),
-                            padding: EdgeInsets.only(left: 8))),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: _createRoundedButton(
+                                  _sendCommandHome, "\u23ee", context),
+                            ),
+                            Expanded(
+                                flex: 3,
+                                child: Padding(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                            child: _createRoundedButton(
+                                                _sendCommandPrevious,
+                                                "\u25c0",
+                                                context)),
+                                        Expanded(
+                                            child: Padding(
+                                                child: _createRoundedButton(
+                                                    _sendCommandNext,
+                                                    "\u25b6",
+                                                    context),
+                                                padding:
+                                                    EdgeInsets.only(left: 8))),
+                                      ],
+                                    ),
+                                    padding:
+                                        EdgeInsets.only(top: 8, bottom: 8))),
+                            Expanded(
+                              child: _createRoundedButton(
+                                  _sendCommandEnd, "\u23ed", context),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                padding: EdgeInsets.only(top: 8, bottom: 8))),
-        Expanded(
-          child: _createRoundedButton(_sendCommandEnd, "\u23ed"),
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 16, left: 16, right: 16),
-          child: Center(
-              child: Text(
-            status.name,
-          )),
-        )
-      ],
-    );
+              ),
+            )));
   }
 
-  Widget _createRoundedButton(VoidCallback onPressed, String text) {
+  Widget _createRoundedButton(
+      Future<bool> command(), String text, BuildContext context) {
     var color = theme?.colorScheme?.primary;
     return TextButton(
-        onPressed: onPressed,
+        onPressed: () async {
+          if (await command() == false) {
+            final snackBar =
+                SnackBar(content: const Text("Server did not respond"));
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        },
         child: Text(text,
             style: TextStyle(
                 fontSize: 72,
@@ -166,45 +168,40 @@ class _SouffleurClientState extends State<SouffleurClient> {
     }
   }
 
-  void _getFromServer(String lastKnownUrl, String suffix) async {
-    _Status newStatus = _Status.not_successful;
+  Future<bool> _getFromServer(String lastKnownUrl, String suffix) async {
     try {
       final response = await http
           .get(Uri.parse(lastKnownUrl + suffix))
           .timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        newStatus = _Status.ok;
-      }
+      if (response.statusCode == 200) return true;
     } on Exception catch (e) {
       debugPrint('$e');
     }
-    setState(() {
-      status = newStatus;
-    });
+    return false;
   }
 
-  void _sendCommandHello() {
-    _sendCommand("hello");
+  Future<bool> _sendCommandHello() {
+    return _sendCommand("hello");
   }
 
-  void _sendCommandHome() {
-    _sendCommand("home");
+  Future<bool> _sendCommandHome() {
+    return _sendCommand("home");
   }
 
-  void _sendCommandEnd() {
-    _sendCommand("end");
+  Future<bool> _sendCommandEnd() {
+    return _sendCommand("end");
   }
 
-  void _sendCommandPrevious() {
-    _sendCommand("previous");
+  Future<bool> _sendCommandPrevious() {
+    return _sendCommand("previous");
   }
 
-  void _sendCommandNext() {
-    _sendCommand("next");
+  Future<bool> _sendCommandNext() {
+    return _sendCommand("next");
   }
 
-  void _sendCommand(String cmd) async {
-    if (isLastKnownUrlValid()) _getFromServer(lastKnownUrl, cmd);
+  Future<bool> _sendCommand(String cmd) async {
+    return _getFromServer(lastKnownUrl, cmd);
   }
 
   void _updateThemeData(Brightness brightness) {
