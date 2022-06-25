@@ -27,9 +27,9 @@ class _SouffleurClientState extends State<SouffleurClient> {
       };
     }
     SharedPreferences.getInstance().then((prefs) {
-      // updateLastKnownUrl(prefs.getString('lastKnownUrl'));
-      updateLastKnownUrl(
-          "http://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
+      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
+      // updateLastKnownUrl(
+      //     "http://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
     });
   }
 
@@ -86,52 +86,53 @@ class _SouffleurClientState extends State<SouffleurClient> {
                     Expanded(
                       child: Align(
                         alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: _createRoundedButton(
-                                  _sendCommandHome, "\u23ee", context),
-                            ),
-                            Expanded(
-                                flex: 3,
-                                child: Padding(
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                            child: _createRoundedButton(
-                                                _sendCommandPrevious,
-                                                "\u25c0",
-                                                context)),
-                                        Expanded(
-                                            child: Padding(
-                                                child: _createRoundedButton(
-                                                    _sendCommandNext,
-                                                    "\u25b6",
-                                                    context),
-                                                padding:
-                                                    EdgeInsets.only(left: 8))),
-                                      ],
-                                    ),
-                                    padding:
-                                        EdgeInsets.only(top: 8, bottom: 8))),
-                            Expanded(
-                              child: _createRoundedButton(
-                                  _sendCommandEnd, "\u23ed", context),
-                            )
-                          ],
-                        ),
+                        child: _createButtons(context),
                       ),
                     ),
                   ],
                 ),
               ),
             )));
+  }
+
+  Widget _createButtons(BuildContext context) {
+    if (isLastKnownUrlValid())
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _createRoundedButton(_sendCommandHome, "\u23ee", context),
+          ),
+          Expanded(
+              flex: 3,
+              child: Padding(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: _createRoundedButton(
+                              _sendCommandPrevious, "\u25c0", context)),
+                      Expanded(
+                          child: Padding(
+                              child: _createRoundedButton(
+                                  _sendCommandNext, "\u25b6", context),
+                              padding: EdgeInsets.only(left: 8))),
+                    ],
+                  ),
+                  padding: EdgeInsets.only(top: 8, bottom: 8))),
+          Expanded(
+            child: _createRoundedButton(_sendCommandEnd, "\u23ed", context),
+          )
+        ],
+      );
+    else
+      return Text("Please scan QR code",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 48,
+          ));
   }
 
   Widget _createRoundedButton(
@@ -161,8 +162,11 @@ class _SouffleurClientState extends State<SouffleurClient> {
     try {
       var scanResult = await BarcodeScanner.scan();
       var prefs = await SharedPreferences.getInstance();
-      prefs.setString('lastKnownUrl', scanResult.rawContent);
-      updateLastKnownUrl(scanResult.rawContent);
+      String strResult = scanResult.rawContent;
+      if (strResult.isNotEmpty) {
+        prefs.setString('lastKnownUrl', strResult);
+        updateLastKnownUrl(scanResult.rawContent);
+      }
     } on Exception catch (e) {
       debugPrint('$e');
     }
