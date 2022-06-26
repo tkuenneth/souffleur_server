@@ -1,7 +1,10 @@
 package eu.thomaskuenneth.souffleur;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.awt.AWTEventMulticaster;
+import java.awt.AWTException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -26,8 +29,11 @@ public class ViewModel {
 
     private final Server server;
 
+    private ActionListener closeQRcodePopupactionListener = null;
+
     public ViewModel() throws AWTException {
         server = new Server(command -> {
+            if (Server.HELLO.equals(command)) fireCloseQRcodePopup();
             if (indicatorThread != null)
                 indicatorThread.interrupt();
             indicatorThread = new Thread(() -> {
@@ -164,5 +170,19 @@ public class ViewModel {
 
     public void removePropertyChangeListener(PropertyChangeListener l) {
         pcs.removePropertyChangeListener(l);
+    }
+
+    public synchronized void addCloseQRcodePopupActionListener(ActionListener l) {
+        closeQRcodePopupactionListener = AWTEventMulticaster.add(closeQRcodePopupactionListener, l);
+    }
+
+    public synchronized void removeCloseQRcodePopupActionListener(ActionListener l) {
+        closeQRcodePopupactionListener = AWTEventMulticaster.remove(closeQRcodePopupactionListener, l);
+    }
+
+    public void fireCloseQRcodePopup() {
+        if (closeQRcodePopupactionListener != null) {
+            closeQRcodePopupactionListener.actionPerformed(new ActionEvent(this, 0, "closeQRcodePopup"));
+        }
     }
 }

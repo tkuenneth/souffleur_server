@@ -1,5 +1,7 @@
 package eu.thomaskuenneth.souffleur;
 
+import mdlaf.MaterialLookAndFeel;
+
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -20,7 +22,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends JFrame {
 
-    public static final String VERSION = "1.0.3";
+    public static final String VERSION = "1.0.4";
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String KEY_SECRET = "secret";
@@ -71,6 +73,7 @@ public class Main extends JFrame {
         viewModel.setSecret(secret);
         viewModel.setShowQRCode(prefs.getBoolean(KEY_SHOW_QRCODE, true));
         viewModel.observeShowQRCode(value -> prefs.putBoolean(KEY_SHOW_QRCODE, value));
+        viewModel.addCloseQRcodePopupActionListener(evt -> hideQRCode());
         pack();
     }
 
@@ -194,6 +197,8 @@ public class Main extends JFrame {
         panel.add(createIndicator(Server.PREVIOUS));
         panel.add(createIndicator(Server.NEXT));
         panel.add(createIndicator(Server.END));
+        panel.add(Box.createHorizontalStrut(16));
+        panel.add(createIndicator(Server.HELLO));
         return panel;
     }
 
@@ -202,7 +207,8 @@ public class Main extends JFrame {
                 Server.HOME, "\u23ee",
                 Server.PREVIOUS, "\u25c0",
                 Server.NEXT, "\u25b6",
-                Server.END, "\u23ed"
+                Server.END, "\u23ed",
+                Server.HELLO, new String(Character.toChars(0x0001F44B))
         );
         JLabel label = new JLabel(symbols.get(indicator));
         viewModel.addPropertyChangeListener(evt -> {
@@ -243,12 +249,11 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                UIManager.setLookAndFeel(new MaterialLookAndFeel(new CustomizedMaterialTheme()));
                 Main ui = new Main();
                 ui.setLocationRelativeTo(null);
                 ui.setVisible(true);
-            } catch (ClassNotFoundException | InstantiationException
-                     | IllegalAccessException | UnsupportedLookAndFeelException
+            } catch (UnsupportedLookAndFeelException
                      | AWTException | SocketException e) {
                 LOGGER.log(Level.SEVERE, "setLookAndFeel()", e);
             }

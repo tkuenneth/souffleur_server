@@ -5,6 +5,7 @@ module eu.thomaskuenneth.souffleur.server {
     requires org.json;
     requires com.google.zxing;
     requires java.prefs;
+    requires io.github.vincenzopalazzo.materialuiswing;
 
     exports eu.thomaskuenneth.souffleur;
 }

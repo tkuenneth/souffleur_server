@@ -5,7 +5,8 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,6 +70,7 @@ public class Server implements HttpHandler {
             }
             case HELLO -> {
                 sendStringResult(t, "Hello, world!");
+                callback.commandReceived(HELLO);
             }
         }
     }
