@@ -7,12 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
 import java.util.function.Consumer;
 
 public class ViewModel {
 
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     private Boolean running = null;
     private String device = null;
@@ -37,14 +36,10 @@ public class ViewModel {
             if (indicatorThread != null)
                 indicatorThread.interrupt();
             indicatorThread = new Thread(() -> {
-                SwingUtilities.invokeLater(() -> {
-                    setLastCommand(command);
-                });
+                SwingUtilities.invokeLater(() -> setLastCommand(command));
                 try {
                     Thread.sleep(2000);
-                    SwingUtilities.invokeLater(() -> {
-                        setLastCommand(null);
-                    });
+                    SwingUtilities.invokeLater(() -> setLastCommand(null));
                 } catch (InterruptedException e) {
                     // no action required nor wanted
                 }
@@ -147,9 +142,8 @@ public class ViewModel {
         });
     }
 
-
-    public void startServer() throws IOException {
-        server.start(getAddress(), getPort(), getSecret());
+    public boolean startServer() {
+        return server.start(getAddress(), getPort(), getSecret());
     }
 
     public void stopServer() {

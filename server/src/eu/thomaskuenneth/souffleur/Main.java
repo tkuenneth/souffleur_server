@@ -10,7 +10,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.prefs.Preferences;
 
 public class Main extends JFrame {
 
-    public static final String VERSION = "1.0.4";
+    public static final String VERSION = "1.0.5";
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String KEY_SECRET = "secret";
@@ -163,15 +162,18 @@ public class Main extends JFrame {
                 case "running" -> {
                     boolean running = (boolean) evt.getNewValue();
                     if (running) {
-                        try {
-                            viewModel.startServer();
+                        if (viewModel.startServer()) {
                             startStop.setText("Stop");
                             if (viewModel.isShowQRCode()) {
                                 qrCodeDialog = showQRCode();
                             }
-                        } catch (IOException e) {
-                            LOGGER.log(Level.SEVERE, "startServer()", e);
+                        } else {
+                            JOptionPane.showMessageDialog(this,
+                                    "Could not start server",
+                                    "Souffleur",
+                                    JOptionPane.WARNING_MESSAGE);
                             viewModel.setRunning(false);
+                            LOGGER.log(Level.SEVERE, "startServer() failed");
                         }
                     } else {
                         hideQRCode();
