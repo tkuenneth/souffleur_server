@@ -1,16 +1,22 @@
+import 'dart:io';
+
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(SouffleurClient());
+void main() {
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(SouffleurClient());
+}
 
 class SouffleurClient extends StatefulWidget {
   @override
   State<SouffleurClient> createState() => _SouffleurClientState();
 }
 
-class _SouffleurClientState extends State<SouffleurClient> {
+class _SouffleurClientState extends State<SouffleurClient>
+    with WidgetsBindingObserver {
   String lastKnownUrl = "";
   ThemeData theme;
 
@@ -27,10 +33,22 @@ class _SouffleurClientState extends State<SouffleurClient> {
       };
     }
     SharedPreferences.getInstance().then((prefs) {
-      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
-      // updateLastKnownUrl(
-      //     "http://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
+//      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
+      updateLastKnownUrl(
+          "https://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
     });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _sendCommandHello();
   }
 
   bool isLastKnownUrlValid() {
@@ -40,7 +58,7 @@ class _SouffleurClientState extends State<SouffleurClient> {
   void updateLastKnownUrl(String url) {
     setState(() {
       lastKnownUrl = url;
-      if (isLastKnownUrlValid()) _sendCommandHello();
+      _sendCommandHello();
     });
   }
 
@@ -173,14 +191,15 @@ class _SouffleurClientState extends State<SouffleurClient> {
   }
 
   Future<bool> _getFromServer(String lastKnownUrl, String suffix) async {
-    try {
-      final response = await http
-          .get(Uri.parse(lastKnownUrl + suffix))
-          .timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) return true;
-    } on Exception catch (e) {
-      debugPrint('$e');
-    }
+    if (isLastKnownUrlValid())
+      try {
+        final response = await http
+            .get(Uri.parse(lastKnownUrl + suffix))
+            .timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) return true;
+      } on Exception catch (e) {
+        debugPrint('$e');
+      }
     return false;
   }
 
@@ -210,5 +229,14 @@ class _SouffleurClientState extends State<SouffleurClient> {
 
   void _updateThemeData(Brightness brightness) {
     theme = ThemeData(brightness: brightness);
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
