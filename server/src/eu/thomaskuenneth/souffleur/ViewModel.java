@@ -12,6 +12,7 @@ public class ViewModel {
 
     private Boolean running = null;
     private String device = null;
+    private static final String ADDRESS = "address";
     private String address = null;
     private Integer port = null;
     private Boolean startStopButtonEnabled = null;
@@ -95,8 +96,12 @@ public class ViewModel {
     public void setAddress(String newAddress) {
         String oldAddress = getAddress();
         this.address = newAddress;
-        pcs.firePropertyChange("address", oldAddress, newAddress);
+        pcs.firePropertyChange(ADDRESS, oldAddress, newAddress);
         updateStartStopButtonBeEnabled();
+    }
+
+    public void observeAddress(Consumer<String> callback) {
+        observe(ADDRESS, callback);
     }
 
     public Integer getPort() {

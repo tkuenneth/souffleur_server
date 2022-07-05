@@ -109,8 +109,9 @@ public class Main extends JFrame {
         JComboBox<String> comboBox = new JComboBox<>(names);
         comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
         panel.add(comboBox);
-        JLabel label = new JLabel();
-        panel.add(label);
+        JLabel address = new JLabel();
+        panel.add(address);
+        viewModel.observeAddress(value -> address.setText(viewModel.getAddress()));
         JTextComponent port = UIFactory.createIntegerField(0, 65535);
         port.addPropertyChangeListener(evt -> {
             try {
@@ -126,7 +127,6 @@ public class Main extends JFrame {
                     String device = evt.getNewValue().toString();
                     viewModel.setAddress(devices.get(device).get(0));
                 }
-                case "address" -> label.setText(viewModel.getAddress());
                 case "port" -> port.setText(Utils.nullSafeString(evt.getNewValue()));
                 case "running" -> {
                     boolean running = (boolean) evt.getNewValue();
