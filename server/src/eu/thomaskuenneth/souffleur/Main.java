@@ -202,11 +202,7 @@ public class Main extends JFrame {
                 Server.HELLO, new String(Character.toChars(0x0001F44B))
         );
         JLabel label = new JLabel(symbols.get(indicator));
-        viewModel.addPropertyChangeListener(evt -> {
-            if (evt.getPropertyName().equals("lastCommand")) {
-                label.setForeground(indicator.equals(evt.getNewValue()) ? Color.red : UIManager.getColor("Label.foreground"));
-            }
-        });
+        viewModel.observeLastCommand(value -> label.setForeground(indicator.equals(value) ? Color.red : UIManager.getColor("Label.foreground")));
         return label;
     }
 

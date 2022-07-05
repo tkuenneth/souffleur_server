@@ -18,6 +18,7 @@ public class ViewModel {
 
     private static final String SHOW_QR_CODE = "showQRCode";
     private Boolean showQRCode = null;
+    private static final String LAST_COMMAND = "lastCommand";
     private String lastCommand = null;
     private String secret = null;
 
@@ -60,11 +61,15 @@ public class ViewModel {
     public void setLastCommand(String newLastCommand) {
         String oldLastCommand = getLastCommand();
         this.lastCommand = newLastCommand;
-        pcs.firePropertyChange("lastCommand", oldLastCommand, newLastCommand);
+        pcs.firePropertyChange(LAST_COMMAND, oldLastCommand, newLastCommand);
     }
 
     public String getLastCommand() {
         return lastCommand;
+    }
+
+    public void observeLastCommand(Consumer<String> callback) {
+        observe(LAST_COMMAND, callback);
     }
 
     public void setRunning(Boolean newRunning) {
