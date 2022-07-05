@@ -4,6 +4,7 @@
 - Using https
 - Returning 404 upon unrecognized requests
 - Removed *qrcode* message
+- Refined the server user interface
 
 ## 1.0.4
 

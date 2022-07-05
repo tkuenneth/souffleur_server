@@ -1,10 +1,7 @@
 package eu.thomaskuenneth.souffleur;
 
 import javax.swing.SwingUtilities;
-import java.awt.AWTEventMulticaster;
 import java.awt.AWTException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.function.Consumer;
@@ -28,11 +25,9 @@ public class ViewModel {
 
     private final Server server;
 
-    private ActionListener closeQRcodePopupactionListener = null;
-
     public ViewModel() throws AWTException {
         server = new Server(command -> {
-            if (Server.HELLO.equals(command)) fireCloseQRcodePopup();
+            if (Server.HELLO.equals(command)) setShowQRCode(false);
             if (indicatorThread != null)
                 indicatorThread.interrupt();
             indicatorThread = new Thread(() -> {
@@ -63,7 +58,7 @@ public class ViewModel {
     }
 
     public void setLastCommand(String newLastCommand) {
-        String oldLastCommand = this.lastCommand;
+        String oldLastCommand = getLastCommand();
         this.lastCommand = newLastCommand;
         pcs.firePropertyChange("lastCommand", oldLastCommand, newLastCommand);
     }
@@ -83,7 +78,7 @@ public class ViewModel {
     }
 
     public void setDevice(String newDevice) {
-        String oldDevice = this.device;
+        String oldDevice = getDevice();
         this.device = newDevice;
         pcs.firePropertyChange("device", oldDevice, newDevice);
     }
@@ -93,7 +88,7 @@ public class ViewModel {
     }
 
     public void setAddress(String newAddress) {
-        String oldAddress = this.address;
+        String oldAddress = getAddress();
         this.address = newAddress;
         pcs.firePropertyChange("address", oldAddress, newAddress);
         updateStartStopButtonBeEnabled();
@@ -115,7 +110,7 @@ public class ViewModel {
     }
 
     public void setStartStopButtonEnabled(Boolean newStartStopButtonEnabled) {
-        Boolean oldStartStopButtonEnabled = this.startStopButtonEnabled;
+        Boolean oldStartStopButtonEnabled = isStartStopButtonEnabled();
         this.startStopButtonEnabled = newStartStopButtonEnabled;
         pcs.firePropertyChange("startStopButtonEnabled", oldStartStopButtonEnabled, newStartStopButtonEnabled);
     }
@@ -125,7 +120,7 @@ public class ViewModel {
     }
 
     public void setShowQRCode(Boolean newShowQRCode) {
-        Boolean oldShowQRCode = this.showQRCode;
+        Boolean oldShowQRCode = isShowQRCode();
         this.showQRCode = newShowQRCode;
         pcs.firePropertyChange(SHOW_QR_CODE, oldShowQRCode, newShowQRCode);
     }
@@ -164,19 +159,5 @@ public class ViewModel {
 
     public void removePropertyChangeListener(PropertyChangeListener l) {
         pcs.removePropertyChangeListener(l);
-    }
-
-    public synchronized void addCloseQRcodePopupActionListener(ActionListener l) {
-        closeQRcodePopupactionListener = AWTEventMulticaster.add(closeQRcodePopupactionListener, l);
-    }
-
-    public synchronized void removeCloseQRcodePopupActionListener(ActionListener l) {
-        closeQRcodePopupactionListener = AWTEventMulticaster.remove(closeQRcodePopupactionListener, l);
-    }
-
-    public void fireCloseQRcodePopup() {
-        if (closeQRcodePopupactionListener != null) {
-            closeQRcodePopupactionListener.actionPerformed(new ActionEvent(this, 0, "closeQRcodePopup"));
-        }
     }
 }

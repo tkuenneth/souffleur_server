@@ -25,11 +25,9 @@ public class Main extends JFrame {
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String KEY_SECRET = "secret";
-    private static final String KEY_SHOW_QRCODE = "showQrcode";
 
     private final ViewModel viewModel;
     private final Map<String, List<String>> devices;
-    private final Preferences prefs;
 
     private JDialog qrCodeDialog;
 
@@ -63,16 +61,19 @@ public class Main extends JFrame {
         setContentPane(createMainPanel());
         viewModel.setPort(8087);
         viewModel.setRunning(false);
-        prefs = Preferences.userNodeForPackage(this.getClass());
+        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
         String secret = prefs.get(KEY_SECRET, null);
         if (secret == null) {
             secret = UUID.randomUUID().toString();
             prefs.put(KEY_SECRET, secret);
         }
         viewModel.setSecret(secret);
-        viewModel.setShowQRCode(prefs.getBoolean(KEY_SHOW_QRCODE, true));
-        viewModel.observeShowQRCode(value -> prefs.putBoolean(KEY_SHOW_QRCODE, value));
-        viewModel.addCloseQRcodePopupActionListener(evt -> hideQRCode());
+        viewModel.observeShowQRCode(value -> {
+            if (value)
+                showQRCode();
+            else
+                hideQRCode();
+        });
         pack();
     }
 
@@ -80,10 +81,12 @@ public class Main extends JFrame {
         Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
         List<Component> updates = new ArrayList<>();
         updates.add(mainPanel.add(createDeviceSelector()));
-        updates.add(mainPanel.add(createConfigSwitches()));
-        mainPanel.add(Box.createVerticalGlue());
+        mainPanel.add(Box.createVerticalStrut(16));
+        mainPanel.add(createStartStopButtonPanel());
+        mainPanel.add(Box.createVerticalStrut(16));
         mainPanel.add(createIndicators());
-        updates.add(mainPanel.add((createButtonPanel())));
+        mainPanel.add(Box.createVerticalGlue());
+        updates.add(mainPanel.add((createVersionLabelPanel())));
         mainPanel.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -136,25 +139,8 @@ public class Main extends JFrame {
         return panel;
     }
 
-    private JPanel createConfigSwitches() {
-        JPanel panel = UIFactory.createFlowPanel();
-        JCheckBox cbShowQRCode = new JCheckBox("Show qrcode upon start");
-        cbShowQRCode.addActionListener(e -> viewModel.setShowQRCode(cbShowQRCode.isSelected()));
-        panel.add(cbShowQRCode);
-        viewModel.addPropertyChangeListener(evt -> {
-            switch (evt.getPropertyName()) {
-                case "showQRCode" -> cbShowQRCode.setSelected((boolean) evt.getNewValue());
-                case "running" -> {
-                    boolean running = (boolean) evt.getNewValue();
-                    cbShowQRCode.setEnabled(!running);
-                }
-            }
-        });
-        return panel;
-    }
-
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+    private JPanel createStartStopButtonPanel() {
+        JPanel panel = new JPanel();
         JButton startStop = new JButton();
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
         viewModel.addPropertyChangeListener(evt -> {
@@ -164,9 +150,7 @@ public class Main extends JFrame {
                     if (running) {
                         if (viewModel.startServer()) {
                             startStop.setText("Stop");
-                            if (viewModel.isShowQRCode()) {
-                                qrCodeDialog = showQRCode();
-                            }
+                            viewModel.setShowQRCode(true);
                         } else {
                             JOptionPane.showMessageDialog(this,
                                     "Could not start server",
@@ -176,7 +160,7 @@ public class Main extends JFrame {
                             LOGGER.log(Level.SEVERE, "startServer() failed");
                         }
                     } else {
-                        hideQRCode();
+                        viewModel.setShowQRCode(false);
                         viewModel.stopServer();
                         startStop.setText("Start");
                     }
@@ -184,23 +168,28 @@ public class Main extends JFrame {
                 case "startStopButtonEnabled" -> startStop.setEnabled((boolean) evt.getNewValue());
             }
         });
+        panel.add(startStop);
+        return panel;
+    }
+
+    private JPanel createVersionLabelPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
         JLabel versionLabel = new JLabel(String.format("Version %s", VERSION));
         versionLabel.setVerticalAlignment(SwingConstants.BOTTOM);
         panel.add(versionLabel, BorderLayout.CENTER);
-        panel.add(startStop, BorderLayout.EAST);
-        panel.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
         return panel;
     }
 
     private JPanel createIndicators() {
-        JPanel panel = UIFactory.createFlowPanel();
-        panel.setBorder(BorderFactory.createTitledBorder("Command indicators"));
-        panel.add(createIndicator(Server.HOME));
-        panel.add(createIndicator(Server.PREVIOUS));
-        panel.add(createIndicator(Server.NEXT));
-        panel.add(createIndicator(Server.END));
-        panel.add(Box.createHorizontalStrut(16));
-        panel.add(createIndicator(Server.HELLO));
+        JPanel indicatorsPanel = UIFactory.createFlowPanel();
+        indicatorsPanel.add(createIndicator(Server.HOME));
+        indicatorsPanel.add(createIndicator(Server.PREVIOUS));
+        indicatorsPanel.add(createIndicator(Server.NEXT));
+        indicatorsPanel.add(createIndicator(Server.END));
+        indicatorsPanel.add(Box.createHorizontalStrut(16));
+        indicatorsPanel.add(createIndicator(Server.HELLO));
+        JPanel panel = new JPanel();
+        panel.add(indicatorsPanel);
         return panel;
     }
 
@@ -221,7 +210,7 @@ public class Main extends JFrame {
         return label;
     }
 
-    private JDialog showQRCode() {
+    private void showQRCode() {
         hideQRCode();
         String url = viewModel.getQRCodeAsString();
         JDialog dialog = new JDialog(this, false);
@@ -235,7 +224,7 @@ public class Main extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setResizable(false);
         dialog.setVisible(true);
-        return dialog;
+        qrCodeDialog = dialog;
     }
 
     private void hideQRCode() {
