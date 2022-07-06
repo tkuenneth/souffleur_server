@@ -100,10 +100,6 @@ public class ViewModel {
         updateStartStopButtonBeEnabled();
     }
 
-    public void observeAddress(Consumer<String> callback) {
-        observe(ADDRESS, callback);
-    }
-
     public Integer getPort() {
         return port;
     }
@@ -139,6 +135,10 @@ public class ViewModel {
         observe(SHOW_QR_CODE, callback);
     }
 
+    public String getQRCodeAsString() {
+        return String.format("https://%s:%s/souffleur/%s/", getAddress(), getPort(), getSecret());
+    }
+
     private <T> void observe(String propertyName, Consumer<T> callback) {
         pcs.addPropertyChangeListener(propertyName, evt -> {
             if (propertyName.equals(evt.getPropertyName())) {
@@ -155,19 +155,11 @@ public class ViewModel {
         server.stop();
     }
 
-    public String getQRCodeAsString() {
-        return server.getQRCodeAsString();
-    }
-
     private void updateStartStopButtonBeEnabled() {
         setStartStopButtonEnabled(port != null);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
         pcs.addPropertyChangeListener(l);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        pcs.removePropertyChangeListener(l);
     }
 }

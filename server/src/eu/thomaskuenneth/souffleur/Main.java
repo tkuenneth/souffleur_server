@@ -59,6 +59,7 @@ public class Main extends JFrame {
         viewModel = new ViewModel();
         devices = Utils.getIpAddress();
         setContentPane(createMainPanel());
+        viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
         viewModel.setPort(8087);
         viewModel.setRunning(false);
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -103,15 +104,11 @@ public class Main extends JFrame {
     }
 
     private JPanel createDeviceSelector() {
-        String defaultDevice = Utils.getDefaultNetworkInterfaceDisplayName();
         JPanel panel = UIFactory.createFlowPanel();
         String[] names = devices.keySet().toArray(new String[]{});
         JComboBox<String> comboBox = new JComboBox<>(names);
         comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
         panel.add(comboBox);
-        JLabel address = new JLabel();
-        panel.add(address);
-        viewModel.observeAddress(value -> address.setText(viewModel.getAddress()));
         JTextComponent port = UIFactory.createIntegerField(0, 65535);
         port.addPropertyChangeListener(evt -> {
             try {
@@ -135,7 +132,6 @@ public class Main extends JFrame {
                 }
             }
         });
-        comboBox.setSelectedItem(defaultDevice);
         return panel;
     }
 

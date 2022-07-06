@@ -33,9 +33,6 @@ public class Server implements HttpHandler {
     private final ServerCallback callback;
 
     private HttpsServer httpServer;
-    private String address;
-    private int port;
-    private String secret;
 
     public Server(ServerCallback callback) throws AWTException {
         this.callback = callback;
@@ -82,9 +79,6 @@ public class Server implements HttpHandler {
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
             InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
-            this.address = address;
-            this.port = port;
-            this.secret = secret;
             this.httpServer = HttpsServer.create(socketAddress, 0);
             SSLContext sslContext = SSLContext.getInstance("TLS");
             char[] password = "password".toCharArray();
@@ -111,7 +105,6 @@ public class Server implements HttpHandler {
             this.httpServer.createContext("/souffleur/" + secret, this);
             this.httpServer.setExecutor(null);
             this.httpServer.start();
-            LOGGER.log(Level.INFO, getQRCodeAsString());
             success = true;
         } catch (IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException |
                  UnrecoverableKeyException | CertificateException e) {
@@ -125,10 +118,6 @@ public class Server implements HttpHandler {
             httpServer.stop(0);
             httpServer = null;
         }
-    }
-
-    public String getQRCodeAsString() {
-        return String.format("https://%s:%s/souffleur/%s/", address, port, secret);
     }
 
     private void sendStringResult(HttpExchange t, String text) {
