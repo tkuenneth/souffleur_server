@@ -19,6 +19,7 @@ class _SouffleurClientState extends State<SouffleurClient>
     with WidgetsBindingObserver {
   String lastKnownUrl = "";
   ThemeData theme;
+  BuildContext scaffoldContext;
 
   @override
   void initState() {
@@ -86,6 +87,7 @@ class _SouffleurClientState extends State<SouffleurClient>
                 ],
               ),
               body: Builder(builder: (BuildContext context) {
+                scaffoldContext = context;
                 return _createBody(context);
               }));
         }));
@@ -154,16 +156,10 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   Widget _createRoundedButton(
-      Future<bool> command(), String text, BuildContext context) {
+      void command(), String text, BuildContext context) {
     var color = theme?.colorScheme?.primary;
     return TextButton(
-        onPressed: () async {
-          if (await command() == false) {
-            final snackBar =
-                SnackBar(content: const Text("Server did not respond"));
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          }
-        },
+        onPressed: command,
         child: Text(text,
             style: TextStyle(
                 fontSize: 72,
@@ -190,41 +186,43 @@ class _SouffleurClientState extends State<SouffleurClient>
     }
   }
 
-  Future<bool> _getFromServer(String lastKnownUrl, String suffix) async {
-    if (isLastKnownUrlValid())
+  void _getFromServer(String lastKnownUrl, String suffix) async {
+    if (isLastKnownUrlValid()) {
       try {
         final response = await http
             .get(Uri.parse(lastKnownUrl + suffix))
-            .timeout(const Duration(seconds: 5));
-        if (response.statusCode == 200) return true;
+            .timeout(const Duration(seconds: 2));
+        if (response.statusCode == 200) return;
       } on Exception catch (e) {
         debugPrint('$e');
       }
-    return false;
+      final snackBar = SnackBar(content: const Text("Server did not respond"));
+      ScaffoldMessenger.of(scaffoldContext).showSnackBar(snackBar);
+    }
   }
 
-  Future<bool> _sendCommandHello() {
-    return _sendCommand("hello");
+  void _sendCommandHello() {
+    _sendCommand("hello");
   }
 
-  Future<bool> _sendCommandHome() {
-    return _sendCommand("home");
+  void _sendCommandHome() {
+    _sendCommand("home");
   }
 
-  Future<bool> _sendCommandEnd() {
-    return _sendCommand("end");
+  void _sendCommandEnd() {
+    _sendCommand("end");
   }
 
-  Future<bool> _sendCommandPrevious() {
-    return _sendCommand("previous");
+  void _sendCommandPrevious() {
+    _sendCommand("previous");
   }
 
-  Future<bool> _sendCommandNext() {
-    return _sendCommand("next");
+  void _sendCommandNext() {
+    _sendCommand("next");
   }
 
-  Future<bool> _sendCommand(String cmd) async {
-    return _getFromServer(lastKnownUrl, cmd);
+  void _sendCommand(String cmd) async {
+    _getFromServer(lastKnownUrl, cmd);
   }
 
   void _updateThemeData(Brightness brightness) {
