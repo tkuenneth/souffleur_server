@@ -160,11 +160,13 @@ class _SouffleurClientState extends State<SouffleurClient>
     var color = theme?.colorScheme?.primary;
     return TextButton(
         onPressed: command,
-        child: Text(text,
-            style: TextStyle(
-                fontSize: 72,
-                color: color,
-                textBaseline: TextBaseline.ideographic)),
+        child: FittedBox(
+            fit: BoxFit.contain,
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: 72,
+                    color: color,
+                    textBaseline: TextBaseline.ideographic))),
         style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
