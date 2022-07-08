@@ -29,3 +29,4 @@ server/.idea/uiDesigner.xml
 server/stdout.txt
 server/stderr.txt
 client/.flutter-plugins-dependencies
+client/android/key.properties
