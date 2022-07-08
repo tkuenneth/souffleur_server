@@ -1,8 +1,9 @@
 package eu.thomaskuenneth.souffleur;
 
-import javax.swing.*;
+import javax.swing.JFormattedTextField;
+import javax.swing.JPanel;
 import javax.swing.text.NumberFormatter;
-import java.awt.*;
+import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 
 public class UIFactory {
@@ -14,9 +15,11 @@ public class UIFactory {
         formatter.setValueClass(Integer.class);
         formatter.setMinimum(min);
         formatter.setMaximum(max);
-        formatter.setAllowsInvalid(true);
+        formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
-        return new JFormattedTextField(formatter);
+        final JFormattedTextField textField = new JFormattedTextField(formatter);
+        textField.setColumns(4);
+        return textField;
     }
 
     public static JPanel createFlowPanel() {
