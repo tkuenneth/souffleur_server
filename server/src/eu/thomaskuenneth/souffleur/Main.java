@@ -25,11 +25,14 @@ public class Main extends JFrame {
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String KEY_SECRET = "secret";
+    private static final String KEY_PORT = "port";
 
     private final ViewModel viewModel;
     private final Map<String, List<String>> devices;
 
     private JDialog qrCodeDialog;
+
+    private final Preferences prefs;
 
     public Main() throws AWTException, SocketException {
         super("Souffleur");
@@ -60,15 +63,15 @@ public class Main extends JFrame {
         devices = Utils.getIpAddress();
         setContentPane(createMainPanel());
         viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
-        viewModel.setPort(8087);
         viewModel.setRunning(false);
-        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+        prefs = Preferences.userNodeForPackage(this.getClass());
         String secret = prefs.get(KEY_SECRET, null);
         if (secret == null) {
             secret = UUID.randomUUID().toString();
             prefs.put(KEY_SECRET, secret);
         }
         viewModel.setSecret(secret);
+        viewModel.setPort(prefs.getInt(KEY_PORT, 8087));
         viewModel.observeShowQRCode(value -> {
             if (value)
                 showQRCode();
@@ -113,6 +116,8 @@ public class Main extends JFrame {
         viewModel.observePort(value -> {
             port.setText(Utils.nullSafeString(value));
             viewModel.setStartStopButtonEnabled(value != null);
+            if (value != null)
+                prefs.putInt(KEY_PORT, value);
         });
         port.addPropertyChangeListener(evt -> {
             try {
@@ -126,9 +131,7 @@ public class Main extends JFrame {
             comboBox.setEnabled(!value);
             port.setEditable(!value);
         });
-        viewModel.observeDevice(value -> {
-            viewModel.setAddress(devices.get(value).get(0));
-        });
+        viewModel.observeDevice(value -> viewModel.setAddress(devices.get(value).get(0)));
         return panel;
     }
 
