@@ -112,7 +112,7 @@ public class Main extends JFrame {
         JTextComponent port = UIFactory.createIntegerField(0, 65535);
         viewModel.observePort(value -> {
             port.setText(Utils.nullSafeString(value));
-            updateStartStopButtonBeEnabled();
+            viewModel.setStartStopButtonEnabled(value != null);
         });
         port.addPropertyChangeListener(evt -> {
             try {
@@ -128,7 +128,6 @@ public class Main extends JFrame {
         });
         viewModel.observeDevice(value -> {
             viewModel.setAddress(devices.get(value).get(0));
-//            updateStartStopButtonBeEnabled();
         });
         return panel;
     }
@@ -219,10 +218,6 @@ public class Main extends JFrame {
             }
             qrCodeDialog = null;
         }
-    }
-
-    private void updateStartStopButtonBeEnabled() {
-        viewModel.setStartStopButtonEnabled(viewModel.getPort() != null);
     }
 
     public static void main(String[] args) {
