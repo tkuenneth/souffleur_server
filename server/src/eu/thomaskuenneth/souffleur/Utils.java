@@ -14,10 +14,8 @@ import java.awt.Image;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -27,30 +25,7 @@ public class Utils {
 
     private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
 
-    public static String getIpAddressFromAmazon() {
-        return getIpAddress("https://checkip.amazonaws.com");
-    }
-
-    public static String getIpAddressFromMyExternalIp() {
-        return getIpAddress("https://myexternalip.com/raw");
-    }
-
-    public static String getIpAddress(String service) {
-        try {
-            URL url = new URL(service);
-            try (InputStream is = url.openStream();
-                 BufferedReader in = new BufferedReader(new InputStreamReader(is))) {
-                return in.readLine();
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "getIpAddress()", e);
-            }
-        } catch (MalformedURLException e) {
-            LOGGER.log(Level.SEVERE, "getIpAddress()", e);
-        }
-        return null;
-    }
-
-    public static String getIpAddress1(String defaultNetworkInterfaceDisplayName) throws SocketException {
+    public static String getIpAddress(String defaultNetworkInterfaceDisplayName) throws SocketException {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();

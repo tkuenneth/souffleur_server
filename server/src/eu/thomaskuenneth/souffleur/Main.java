@@ -67,7 +67,7 @@ public class Main extends JFrame {
             prefs.put(KEY_SECRET, secret);
         }
         viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
-        viewModel.setAddress(Utils.getIpAddress1(viewModel.getDevice()));
+        viewModel.setAddress(Utils.getIpAddress(viewModel.getDevice()));
         viewModel.setRunning(false);
         viewModel.setSecret(secret);
         viewModel.setPort(prefs.getInt(KEY_PORT, 8087));
