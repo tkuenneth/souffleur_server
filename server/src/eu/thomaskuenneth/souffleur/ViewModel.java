@@ -117,6 +117,10 @@ public class ViewModel {
         pcs.firePropertyChange(ADDRESS, oldAddress, newAddress);
     }
 
+    public void observeAddress(Consumer<String> callback) {
+        observe(ADDRESS, callback);
+    }
+
     public Integer getPort() {
         return port;
     }
@@ -163,19 +167,20 @@ public class ViewModel {
         return String.format("https://%s:%s/souffleur/%s/", getAddress(), getPort(), getSecret());
     }
 
-    private <T> void observe(String propertyName, Consumer<T> callback) {
-        pcs.addPropertyChangeListener(propertyName, evt -> {
-            if (propertyName.equals(evt.getPropertyName())) {
-                callback.accept((T) evt.getNewValue());
-            }
-        });
-    }
-
     public boolean startServer() {
         return server.start(getAddress(), getPort(), getSecret());
     }
 
     public void stopServer() {
         server.stop();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void observe(String propertyName, Consumer<T> callback) {
+        pcs.addPropertyChangeListener(propertyName, evt -> {
+            if (propertyName.equals(evt.getPropertyName())) {
+                callback.accept((T) evt.getNewValue());
+            }
+        });
     }
 }

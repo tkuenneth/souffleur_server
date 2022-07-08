@@ -2,6 +2,7 @@ package eu.thomaskuenneth.souffleur;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.text.NumberFormatter;
 import java.awt.FlowLayout;
 import java.text.DecimalFormat;
@@ -22,9 +23,15 @@ public class UIFactory {
         return textField;
     }
 
-    public static JPanel createFlowPanel() {
-        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, 16, 8);
+    public static JPanel createFlowPanel(int hgap) {
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, hgap, 8);
         layout.setAlignOnBaseline(true);
         return new JPanel(layout);
+    }
+
+    public static JTextField createNonEditableTextField() {
+        JTextField textField = new JTextField();
+        textField.setEditable(false);
+        return textField;
     }
 }

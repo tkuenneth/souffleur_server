@@ -28,7 +28,6 @@ public class Main extends JFrame {
     private static final String KEY_PORT = "port";
 
     private final ViewModel viewModel;
-    private final Map<String, List<String>> devices;
 
     private JDialog qrCodeDialog;
 
@@ -60,16 +59,16 @@ public class Main extends JFrame {
         });
         setResizable(false);
         viewModel = new ViewModel();
-        devices = Utils.getIpAddress();
         setContentPane(createMainPanel());
-        viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
-        viewModel.setRunning(false);
         prefs = Preferences.userNodeForPackage(this.getClass());
         String secret = prefs.get(KEY_SECRET, null);
         if (secret == null) {
             secret = UUID.randomUUID().toString();
             prefs.put(KEY_SECRET, secret);
         }
+        viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
+        viewModel.setAddress(Utils.getIpAddress1(viewModel.getDevice()));
+        viewModel.setRunning(false);
         viewModel.setSecret(secret);
         viewModel.setPort(prefs.getInt(KEY_PORT, 8087));
         viewModel.observeShowQRCode(value -> {
@@ -84,7 +83,7 @@ public class Main extends JFrame {
     private JComponent createMainPanel() {
         Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
         List<Component> updates = new ArrayList<>();
-        updates.add(mainPanel.add(createDeviceSelector()));
+        updates.add(mainPanel.add(createConnectionInfo()));
         mainPanel.add(Box.createVerticalStrut(16));
         mainPanel.add(createStartStopButtonPanel());
         mainPanel.add(Box.createVerticalStrut(16));
@@ -106,12 +105,14 @@ public class Main extends JFrame {
         return mainPanel;
     }
 
-    private JPanel createDeviceSelector() {
-        JPanel panel = UIFactory.createFlowPanel();
-        String[] names = devices.keySet().toArray(new String[]{});
-        JComboBox<String> comboBox = new JComboBox<>(names);
-        comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
-        panel.add(comboBox);
+    private JPanel createConnectionInfo() {
+        JPanel panel = UIFactory.createFlowPanel(8);
+        JTextField device = UIFactory.createNonEditableTextField();
+        viewModel.observeDevice((device::setText));
+        panel.add(device);
+        JTextField address = UIFactory.createNonEditableTextField();
+        viewModel.observeAddress(address::setText);
+        panel.add(address);
         JTextComponent port = UIFactory.createIntegerField(0, 65535);
         viewModel.observePort(value -> {
             port.setText(Utils.nullSafeString(value));
@@ -127,11 +128,7 @@ public class Main extends JFrame {
             }
         });
         panel.add(port);
-        viewModel.observeRunning(value -> {
-            comboBox.setEnabled(!value);
-            port.setEditable(!value);
-        });
-        viewModel.observeDevice(value -> viewModel.setAddress(devices.get(value).get(0)));
+        viewModel.observeRunning(value -> port.setEditable(!value));
         return panel;
     }
 
@@ -171,7 +168,7 @@ public class Main extends JFrame {
     }
 
     private JPanel createIndicators() {
-        JPanel indicatorsPanel = UIFactory.createFlowPanel();
+        JPanel indicatorsPanel = UIFactory.createFlowPanel(16);
         indicatorsPanel.add(createIndicator(Server.HOME));
         indicatorsPanel.add(createIndicator(Server.PREVIOUS));
         indicatorsPanel.add(createIndicator(Server.NEXT));

@@ -8,7 +8,10 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -16,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.List;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,30 +50,20 @@ public class Utils {
         return null;
     }
 
-    public static Map<String, List<String>> getIpAddress() throws SocketException {
-        Map<String, List<String>> result = new HashMap<>();
+    public static String getIpAddress1(String defaultNetworkInterfaceDisplayName) throws SocketException {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
             if ((networkInterface.isUp()) && !networkInterface.isLoopback()) {
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-                List<String> list = new ArrayList<>();
-                String name = networkInterface.getDisplayName();
-                while (addresses.hasMoreElements()) {
-                    InetAddress addr = addresses.nextElement();
-                    String hostAddress = addr.getHostAddress();
-                    boolean isInet4Address = addr instanceof Inet4Address;
-                    if (isInet4Address) {
-                        list.add(hostAddress);
+                if (defaultNetworkInterfaceDisplayName.equals(networkInterface.getDisplayName()))
+                    if (addresses.hasMoreElements()) {
+                        InetAddress address = addresses.nextElement();
+                        return address.getHostAddress();
                     }
-                    LOGGER.info(String.format("%s: %s (%b)", name, hostAddress, isInet4Address));
-                }
-                if (list.size() > 0) {
-                    result.put(name, list);
-                }
             }
         }
-        return result;
+        return null;
     }
 
     public static void sendCursorLeft(Robot r) {
