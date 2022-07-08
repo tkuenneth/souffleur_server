@@ -110,6 +110,10 @@ public class Main extends JFrame {
         comboBox.addItemListener(e -> viewModel.setDevice((String) e.getItem()));
         panel.add(comboBox);
         JTextComponent port = UIFactory.createIntegerField(0, 65535);
+        viewModel.observePort(value -> {
+            port.setText(Utils.nullSafeString(value));
+            updateStartStopButtonBeEnabled();
+        });
         port.addPropertyChangeListener(evt -> {
             try {
                 viewModel.setPort(Integer.parseInt(port.getText()));
@@ -118,19 +122,13 @@ public class Main extends JFrame {
             }
         });
         panel.add(port);
-        viewModel.addPropertyChangeListener(evt -> {
-            switch (evt.getPropertyName()) {
-                case "device" -> {
-                    String device = evt.getNewValue().toString();
-                    viewModel.setAddress(devices.get(device).get(0));
-                }
-                case "port" -> port.setText(Utils.nullSafeString(evt.getNewValue()));
-                case "running" -> {
-                    boolean running = (boolean) evt.getNewValue();
-                    comboBox.setEnabled(!running);
-                    port.setEditable(!running);
-                }
-            }
+        viewModel.observeRunning(value -> {
+            comboBox.setEnabled(!value);
+            port.setEditable(!value);
+        });
+        viewModel.observeDevice(value -> {
+            viewModel.setAddress(devices.get(value).get(0));
+//            updateStartStopButtonBeEnabled();
         });
         return panel;
     }
@@ -139,31 +137,25 @@ public class Main extends JFrame {
         JPanel panel = new JPanel();
         JButton startStop = new JButton();
         startStop.addActionListener(e -> viewModel.setRunning(!viewModel.isRunning()));
-        viewModel.addPropertyChangeListener(evt -> {
-            switch (evt.getPropertyName()) {
-                case "running" -> {
-                    boolean running = (boolean) evt.getNewValue();
-                    if (running) {
-                        if (viewModel.startServer()) {
-                            startStop.setText("Stop");
-                            viewModel.setShowQRCode(true);
-                        } else {
-                            JOptionPane.showMessageDialog(this,
-                                    "Could not start server",
-                                    "Souffleur",
-                                    JOptionPane.WARNING_MESSAGE);
-                            viewModel.setRunning(false);
-                            LOGGER.log(Level.SEVERE, "startServer() failed");
-                        }
-                    } else {
-                        viewModel.setShowQRCode(false);
-                        viewModel.stopServer();
-                        startStop.setText("Start");
-                    }
+        viewModel.observeRunning(value -> {
+            viewModel.setShowQRCode(value);
+            if (value) {
+                if (viewModel.startServer()) {
+                    startStop.setText("Stop");
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Could not start server",
+                            "Souffleur",
+                            JOptionPane.WARNING_MESSAGE);
+                    viewModel.setRunning(false);
+                    LOGGER.log(Level.SEVERE, "startServer() failed");
                 }
-                case "startStopButtonEnabled" -> startStop.setEnabled((boolean) evt.getNewValue());
+            } else {
+                viewModel.stopServer();
+                startStop.setText("Start");
             }
         });
+        viewModel.observeStartStopButtonEnabled(startStop::setEnabled);
         panel.add(startStop);
         return panel;
     }
@@ -227,6 +219,10 @@ public class Main extends JFrame {
             }
             qrCodeDialog = null;
         }
+    }
+
+    private void updateStartStopButtonBeEnabled() {
+        viewModel.setStartStopButtonEnabled(viewModel.getPort() != null);
     }
 
     public static void main(String[] args) {

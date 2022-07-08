@@ -2,7 +2,6 @@ package eu.thomaskuenneth.souffleur;
 
 import javax.swing.SwingUtilities;
 import java.awt.AWTException;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.function.Consumer;
 
@@ -10,17 +9,28 @@ public class ViewModel {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
+    private static final String RUNNING = "running";
     private Boolean running = null;
+
+    private static final String DEVICE = "device";
     private String device = null;
+
     private static final String ADDRESS = "address";
     private String address = null;
+
+    private static final String PORT = "port";
     private Integer port = null;
+
+    private static final String START_STOP_BUTTON_ENABLED = "startStopButtonEnabled";
     private Boolean startStopButtonEnabled = null;
 
     private static final String SHOW_QR_CODE = "showQRCode";
     private Boolean showQRCode = null;
+
     private static final String LAST_COMMAND = "lastCommand";
     private String lastCommand = null;
+
+    private static final String SECRET = "secret";
     private String secret = null;
 
     private Thread indicatorThread = null;
@@ -29,7 +39,7 @@ public class ViewModel {
 
     public ViewModel() throws AWTException {
         server = new Server(command -> {
-            if (Server.HELLO.equals(command)) setShowQRCode(false);
+            setShowQRCode(false);
             if (indicatorThread != null)
                 indicatorThread.interrupt();
             indicatorThread = new Thread(() -> {
@@ -45,18 +55,18 @@ public class ViewModel {
         });
     }
 
-    public void setSecret(String newSecret) {
-        String oldSecret = this.secret;
-        this.secret = newSecret;
-        pcs.firePropertyChange("secret", oldSecret, newSecret);
-    }
-
     public String getSecret() {
         return secret;
     }
 
-    public Boolean isRunning() {
-        return running;
+    public void setSecret(String newSecret) {
+        String oldSecret = this.secret;
+        this.secret = newSecret;
+        pcs.firePropertyChange(SECRET, oldSecret, newSecret);
+    }
+
+    public String getLastCommand() {
+        return lastCommand;
     }
 
     public void setLastCommand(String newLastCommand) {
@@ -65,18 +75,22 @@ public class ViewModel {
         pcs.firePropertyChange(LAST_COMMAND, oldLastCommand, newLastCommand);
     }
 
-    public String getLastCommand() {
-        return lastCommand;
-    }
-
     public void observeLastCommand(Consumer<String> callback) {
         observe(LAST_COMMAND, callback);
+    }
+
+    public Boolean isRunning() {
+        return running;
     }
 
     public void setRunning(Boolean newRunning) {
         Boolean oldRunning = this.running;
         this.running = newRunning;
-        pcs.firePropertyChange("running", oldRunning, newRunning);
+        pcs.firePropertyChange(RUNNING, oldRunning, newRunning);
+    }
+
+    public void observeRunning(Consumer<Boolean> callback) {
+        observe(RUNNING, callback);
     }
 
     public String getDevice() {
@@ -86,7 +100,11 @@ public class ViewModel {
     public void setDevice(String newDevice) {
         String oldDevice = getDevice();
         this.device = newDevice;
-        pcs.firePropertyChange("device", oldDevice, newDevice);
+        pcs.firePropertyChange(DEVICE, oldDevice, newDevice);
+    }
+
+    public void observeDevice(Consumer<String> callback) {
+        observe(DEVICE, callback);
     }
 
     public String getAddress() {
@@ -97,7 +115,6 @@ public class ViewModel {
         String oldAddress = getAddress();
         this.address = newAddress;
         pcs.firePropertyChange(ADDRESS, oldAddress, newAddress);
-        updateStartStopButtonBeEnabled();
     }
 
     public Integer getPort() {
@@ -107,8 +124,11 @@ public class ViewModel {
     public void setPort(Integer newPort) {
         Integer oldPort = this.port;
         this.port = newPort;
-        pcs.firePropertyChange("port", oldPort, newPort);
-        updateStartStopButtonBeEnabled();
+        pcs.firePropertyChange(PORT, oldPort, newPort);
+    }
+
+    public void observePort(Consumer<Integer> callback) {
+        observe(PORT, callback);
     }
 
     public Boolean isStartStopButtonEnabled() {
@@ -118,7 +138,11 @@ public class ViewModel {
     public void setStartStopButtonEnabled(Boolean newStartStopButtonEnabled) {
         Boolean oldStartStopButtonEnabled = isStartStopButtonEnabled();
         this.startStopButtonEnabled = newStartStopButtonEnabled;
-        pcs.firePropertyChange("startStopButtonEnabled", oldStartStopButtonEnabled, newStartStopButtonEnabled);
+        pcs.firePropertyChange(START_STOP_BUTTON_ENABLED, oldStartStopButtonEnabled, newStartStopButtonEnabled);
+    }
+
+    public void observeStartStopButtonEnabled(Consumer<Boolean> callback) {
+        observe(START_STOP_BUTTON_ENABLED, callback);
     }
 
     public Boolean isShowQRCode() {
@@ -153,13 +177,5 @@ public class ViewModel {
 
     public void stopServer() {
         server.stop();
-    }
-
-    private void updateStartStopButtonBeEnabled() {
-        setStartStopButtonEnabled(port != null);
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        pcs.addPropertyChangeListener(l);
     }
 }
