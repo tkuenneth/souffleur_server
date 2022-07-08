@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  HttpOverrides.global = MyHttpOverrides();
   runApp(SouffleurClient());
 }
 
@@ -24,6 +23,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   @override
   void initState() {
     super.initState();
+    HttpOverrides.global = SouffleurHttpOverrides(this);
     var window = WidgetsBinding.instance?.window;
     if (window != null) {
       _updateThemeData(window.platformBrightness);
@@ -232,11 +232,16 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 }
 
-class MyHttpOverrides extends HttpOverrides {
+class SouffleurHttpOverrides extends HttpOverrides {
+  _SouffleurClientState state;
+
+  SouffleurHttpOverrides(_SouffleurClientState this.state);
+
   @override
   HttpClient createHttpClient(SecurityContext context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
+          (X509Certificate cert, String host, int port) =>
+              state.lastKnownUrl.contains(host);
   }
 }
