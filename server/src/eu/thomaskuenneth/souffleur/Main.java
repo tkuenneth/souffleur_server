@@ -29,7 +29,7 @@ public class Main extends JFrame {
 
     private final ViewModel viewModel;
 
-    private JDialog qrCodeDialog;
+    private JFrame qrCodeFrame;
 
     private final Preferences prefs;
 
@@ -195,28 +195,32 @@ public class Main extends JFrame {
 
     private void showQRCode() {
         hideQRCode();
-        String url = viewModel.getQRCodeAsString();
-        JDialog dialog = new JDialog(this, false);
-        BufferedImage image = Utils.generateQRCode(url);
-        ImageIcon ii = new ImageIcon(image);
+        JFrame frame = new JFrame();
+        frame.setUndecorated(true);
+        BufferedImage image = Utils.generateQRCode(viewModel.getQRCodeAsString());
+        ImageIcon imageIcon = new ImageIcon(image);
         JPanel contentPane = new JPanel(new BorderLayout());
-        contentPane.add(new JLabel(ii), BorderLayout.CENTER);
-        dialog.setContentPane(contentPane);
-        dialog.setTitle("Souffleur - QR code");
-        dialog.pack();
-        dialog.setLocationRelativeTo(this);
-        dialog.setResizable(false);
-        dialog.setVisible(true);
-        qrCodeDialog = dialog;
+        contentPane.add(new JLabel(imageIcon), BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel();
+        JButton close = new JButton("Stop");
+        close.addActionListener(e -> viewModel.setRunning(false));
+        buttonPanel.add(close);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+        frame.setContentPane(contentPane);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+        frame.setVisible(true);
+        qrCodeFrame = frame;
     }
 
     private void hideQRCode() {
-        if (qrCodeDialog != null) {
-            if (qrCodeDialog.isVisible()) {
-                qrCodeDialog.setVisible(false);
-                qrCodeDialog.dispose();
+        if (qrCodeFrame != null) {
+            if (qrCodeFrame.isVisible()) {
+                qrCodeFrame.setVisible(false);
+                qrCodeFrame.dispose();
             }
-            qrCodeDialog = null;
+            qrCodeFrame = null;
         }
     }
 
