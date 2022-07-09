@@ -4,6 +4,9 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const String _souffleurHomepage = "https://github.com/tkuenneth/souffleur";
 
 void main() {
   runApp(SouffleurClient());
@@ -34,9 +37,9 @@ class _SouffleurClientState extends State<SouffleurClient>
       };
     }
     SharedPreferences.getInstance().then((prefs) {
-//      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
-      updateLastKnownUrl(
-          "https://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
+      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
+      // updateLastKnownUrl(
+      //     "https://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
     });
     WidgetsBinding.instance.addObserver(this);
   }
@@ -53,7 +56,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   bool isLastKnownUrlValid() {
-    return lastKnownUrl.contains("http");
+    return lastKnownUrl != null && lastKnownUrl.contains("http");
   }
 
   void updateLastKnownUrl(String url) {
@@ -147,12 +150,49 @@ class _SouffleurClientState extends State<SouffleurClient>
           )
         ],
       );
-    else
-      return Text("Please scan QR code",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 48,
-          ));
+    else {
+      final TextTheme theme = Theme.of(context).textTheme;
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: Text("Welcome to Souffleur",
+                  textAlign: TextAlign.center, style: theme.headline4)),
+          Text("The app is not linked with a Souffleur server. Please visit",
+              textAlign: TextAlign.center, style: theme.bodyLarge),
+          GestureDetector(
+            child: Padding(
+                padding: EdgeInsets.only(top: 16, bottom: 16),
+                child: Text(
+                  _souffleurHomepage,
+                  style: theme.bodyLarge
+                      .copyWith(decoration: TextDecoration.underline),
+                )),
+            onTap: () async {
+              try {
+                await launchUrl(Uri.parse(_souffleurHomepage));
+              } catch (err) {
+                debugPrint('Something bad happened');
+              }
+            },
+          ),
+          Text(
+              "to download and install one on your Linux, macOS, or Windows machine.",
+              textAlign: TextAlign.center,
+              style: theme.bodyLarge),
+          Padding(
+            padding: EdgeInsets.only(top: 16, bottom: 8),
+            child: Text(
+                "Click below to scan the QR code your Souffleur server is showing on screen.",
+                textAlign: TextAlign.center,
+                style: theme.bodyLarge),
+          ),
+          TextButton(onPressed: _scanQRCode, child: Text("Scan")),
+        ],
+      );
+    }
   }
 
   Widget _createRoundedButton(
@@ -235,7 +275,7 @@ class _SouffleurClientState extends State<SouffleurClient>
 class SouffleurHttpOverrides extends HttpOverrides {
   _SouffleurClientState state;
 
-  SouffleurHttpOverrides(_SouffleurClientState this.state);
+  SouffleurHttpOverrides(this.state);
 
   @override
   HttpClient createHttpClient(SecurityContext context) {
