@@ -179,12 +179,11 @@ public class Main extends JFrame {
     }
 
     private JPanel createIndicators() {
-        JPanel indicatorsPanel = UIFactory.createFlowPanel(16);
+        JPanel indicatorsPanel = UIFactory.createFlowPanel(24);
         indicatorsPanel.add(createIndicator(Server.HOME));
         indicatorsPanel.add(createIndicator(Server.PREVIOUS));
         indicatorsPanel.add(createIndicator(Server.NEXT));
         indicatorsPanel.add(createIndicator(Server.END));
-        indicatorsPanel.add(Box.createHorizontalStrut(16));
         indicatorsPanel.add(createIndicator(Server.HELLO));
         JPanel panel = new JPanel();
         panel.add(indicatorsPanel);
@@ -193,12 +192,11 @@ public class Main extends JFrame {
 
     private JLabel createIndicator(String indicator) {
         Map<String, String> symbols = Map.of(
-                Server.HOME, "\u23ee",
-                Server.PREVIOUS, "\u25c0",
-                Server.NEXT, "\u25b6",
-                Server.END, "\u23ed",
-                Server.HELLO, new String(Character.toChars(0x0001F44B))
-        );
+                Server.HOME, "|<",
+                Server.PREVIOUS, "<",
+                Server.NEXT, ">",
+                Server.END, ">|",
+                Server.HELLO, ";-)");
         JLabel label = new JLabel(symbols.get(indicator));
         viewModel.observeLastCommand(value -> label.setForeground(indicator.equals(value) ? Color.red : UIManager.getColor("Label.foreground")));
         return label;
