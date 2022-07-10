@@ -16,30 +16,16 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Utils {
 
     private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
-
-    public static String getIpAddress(String defaultNetworkInterfaceDisplayName) throws SocketException {
-        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-        while (interfaces.hasMoreElements()) {
-            NetworkInterface networkInterface = interfaces.nextElement();
-            if ((networkInterface.isUp()) && !networkInterface.isLoopback()) {
-                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-                if (defaultNetworkInterfaceDisplayName.equals(networkInterface.getDisplayName()))
-                    if (addresses.hasMoreElements()) {
-                        InetAddress address = addresses.nextElement();
-                        return address.getHostAddress();
-                    }
-            }
-        }
-        return null;
-    }
 
     public static void sendCursorLeft(Robot r) {
         r.keyPress(KeyEvent.VK_LEFT);
@@ -117,20 +103,5 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "loadImage()", e);
         }
         return null;
-    }
-
-    // See https://stackoverflow.com/a/69160376
-    public static String getDefaultNetworkInterfaceDisplayName() {
-        String displayName = null;
-        try (DatagramSocket s = new DatagramSocket()) {
-            InetAddress remoteAddress = InetAddress.getByName("a.root-servers.net");
-            if (remoteAddress != null) {
-                s.connect(remoteAddress, 80);
-                displayName = NetworkInterface.getByInetAddress(s.getLocalAddress()).getDisplayName();
-            }
-        } catch (UnknownHostException | SocketException e) {
-            LOGGER.log(Level.SEVERE, null, e);
-        }
-        return displayName;
     }
 }

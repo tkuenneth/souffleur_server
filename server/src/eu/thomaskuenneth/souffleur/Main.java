@@ -8,7 +8,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,8 +64,7 @@ public class Main extends JFrame {
             secret = UUID.randomUUID().toString();
             prefs.put(KEY_SECRET, secret);
         }
-        viewModel.setDevice(Utils.getDefaultNetworkInterfaceDisplayName());
-        viewModel.setAddress(Utils.getIpAddress(viewModel.getDevice()));
+        setDeviceAndAddress();
         viewModel.setRunning(false);
         viewModel.setSecret(secret);
         viewModel.setPort(prefs.getInt(KEY_PORT, 8087));
@@ -76,6 +75,20 @@ public class Main extends JFrame {
                 hideQRCode();
         });
         pack();
+    }
+
+    // See https://stackoverflow.com/a/69160376
+    private void setDeviceAndAddress() {
+        try (DatagramSocket s = new DatagramSocket()) {
+            InetAddress remoteAddress = InetAddress.getByName("a.root-servers.net");
+            if (remoteAddress != null) {
+                s.connect(remoteAddress, 80);
+                viewModel.setAddress(s.getLocalAddress().getHostAddress());
+                viewModel.setDevice(NetworkInterface.getByInetAddress(s.getLocalAddress()).getDisplayName());
+            }
+        } catch (UnknownHostException | SocketException e) {
+            LOGGER.log(Level.SEVERE, null, e);
+        }
     }
 
     private JComponent createMainPanel() {
