@@ -1,10 +1,11 @@
 # What's new?
 
 ## 1.0.5
+- Again using the system look and feel
 - Using https
 - Returning 404 upon unrecognized requests
 - Removed *qrcode* message
-- Refined the server user interface
+- Refined both server and client user interfaces
 
 ## 1.0.4
 

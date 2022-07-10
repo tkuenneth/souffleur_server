@@ -1,7 +1,5 @@
 package eu.thomaskuenneth.souffleur;
 
-import mdlaf.MaterialLookAndFeel;
-
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -227,12 +225,12 @@ public class Main extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(new MaterialLookAndFeel(new CustomizedMaterialTheme()));
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 Main ui = new Main();
                 ui.setLocationRelativeTo(null);
                 ui.setVisible(true);
-            } catch (UnsupportedLookAndFeelException
-                     | AWTException | SocketException e) {
+            } catch (UnsupportedLookAndFeelException | AWTException | IllegalAccessException | SocketException |
+                     InstantiationException | ClassNotFoundException e) {
                 LOGGER.log(Level.SEVERE, "setLookAndFeel()", e);
             }
         });
