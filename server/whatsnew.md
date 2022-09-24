@@ -1,5 +1,9 @@
 # What's new?
 
+## 1.0.6
+
+- Start migration to Compose for Desktop
+
 ## 1.0.5
 - Again using the system look and feel
 - Using https

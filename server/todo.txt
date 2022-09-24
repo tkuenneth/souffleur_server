@@ -1,2 +1,1 @@
 - Background of app icons should be transparent
-- Check if java -Xdock:icon=/path/myIcon.png myApp still works
