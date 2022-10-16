@@ -8,11 +8,10 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.net.*;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -31,8 +30,10 @@ public class SwingMain extends JFrame {
 
     private final Preferences prefs;
 
-    public SwingMain() throws AWTException, SocketException {
+    public SwingMain(ViewModel viewModel, Preferences prefs) throws AWTException, SocketException {
         super("Souffleur");
+        this.viewModel = viewModel;
+        this.prefs = prefs;
         var filenames = new String[]{
                 "/eu/thomaskuenneth/souffleur/Icon-App-1024x1024@1x.png",
                 "/eu/thomaskuenneth/souffleur/Icon-App-76x76@1x.png",
@@ -55,40 +56,13 @@ public class SwingMain extends JFrame {
                 System.exit(0);
             }
         });
-        setResizable(false);
-        viewModel = new ViewModel();
         setContentPane(createMainPanel());
-        prefs = Preferences.userNodeForPackage(this.getClass());
-        String secret = prefs.get(KEY_SECRET, null);
-        if (secret == null) {
-            secret = UUID.randomUUID().toString();
-            prefs.put(KEY_SECRET, secret);
-        }
-        setDeviceAndAddress();
-        viewModel.setRunning(false);
-        viewModel.setSecret(secret);
-        viewModel.setPort(prefs.getInt(KEY_PORT, 8087));
         viewModel.observeShowQRCode(value -> {
             if (value)
                 showQRCode();
             else
                 hideQRCode();
         });
-        pack();
-    }
-
-    // See https://stackoverflow.com/a/69160376
-    private void setDeviceAndAddress() {
-        try (DatagramSocket s = new DatagramSocket()) {
-            InetAddress remoteAddress = InetAddress.getByName("a.root-servers.net");
-            if (remoteAddress != null) {
-                s.connect(remoteAddress, 80);
-                viewModel.setAddress(s.getLocalAddress().getHostAddress());
-                viewModel.setDevice(NetworkInterface.getByInetAddress(s.getLocalAddress()).getDisplayName());
-            }
-        } catch (UnknownHostException | SocketException e) {
-            LOGGER.log(Level.SEVERE, null, e);
-        }
     }
 
     private JComponent createMainPanel() {
@@ -233,19 +207,5 @@ public class SwingMain extends JFrame {
             }
             qrCodeFrame = null;
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                SwingMain ui = new SwingMain();
-                ui.setLocationRelativeTo(null);
-                ui.setVisible(true);
-            } catch (UnsupportedLookAndFeelException | AWTException | IllegalAccessException | SocketException |
-                     InstantiationException | ClassNotFoundException e) {
-                LOGGER.log(Level.SEVERE, "setLookAndFeel()", e);
-            }
-        });
     }
 }
