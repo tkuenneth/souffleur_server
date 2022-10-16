@@ -61,6 +61,7 @@ fun MainWindow(viewModel: ViewModel) {
     val isPreviousActive by remember(lastCommand) { mutableStateOf(Server.PREVIOUS == lastCommand) }
     val isEndActive by remember(lastCommand) { mutableStateOf(Server.END == lastCommand) }
     val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
+    val isRunning by viewModel.observeAsState<Boolean>("running")
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -83,7 +84,7 @@ fun MainWindow(viewModel: ViewModel) {
                     modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                    Text("text")
+                    Text(text = if (isRunning) "Stop" else "Start")
                 }
                 Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                     IndicatorIcon(indicator = Server.HOME, isActive = isHomeActive)
