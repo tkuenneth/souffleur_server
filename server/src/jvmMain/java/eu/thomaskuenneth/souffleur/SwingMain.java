@@ -17,11 +17,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-public class Main extends JFrame {
+public class SwingMain extends JFrame {
 
     public static final String VERSION = "1.0.6";
 
-    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SwingMain.class.getName());
     private static final String KEY_SECRET = "secret";
     private static final String KEY_PORT = "port";
 
@@ -31,7 +31,7 @@ public class Main extends JFrame {
 
     private final Preferences prefs;
 
-    public Main() throws AWTException, SocketException {
+    public SwingMain() throws AWTException, SocketException {
         super("Souffleur");
         var filenames = new String[]{
                 "/eu/thomaskuenneth/souffleur/Icon-App-1024x1024@1x.png",
@@ -93,6 +93,7 @@ public class Main extends JFrame {
 
     private JComponent createMainPanel() {
         Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
+        mainPanel.setAlignmentX(CENTER_ALIGNMENT);
         List<Component> updates = new ArrayList<>();
         updates.add(mainPanel.add(createConnectionInfo()));
         mainPanel.add(Box.createVerticalStrut(16));
@@ -198,7 +199,8 @@ public class Main extends JFrame {
                 Server.END, ">|",
                 Server.HELLO, ";-)");
         JLabel label = new JLabel(symbols.get(indicator));
-        viewModel.observeLastCommand(value -> label.setForeground(indicator.equals(value) ? Color.red : UIManager.getColor("Label.foreground")));
+        viewModel.observeLastCommand(value -> label.setForeground(indicator.equals(value) ? Color.red
+                : UIManager.getColor("Label.foreground")));
         return label;
     }
 
@@ -237,7 +239,7 @@ public class Main extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                Main ui = new Main();
+                SwingMain ui = new SwingMain();
                 ui.setLocationRelativeTo(null);
                 ui.setVisible(true);
             } catch (UnsupportedLookAndFeelException | AWTException | IllegalAccessException | SocketException |
