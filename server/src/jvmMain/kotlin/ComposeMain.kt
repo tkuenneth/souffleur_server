@@ -1,9 +1,6 @@
 package eu.thomaskuenneth.souffleur
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -13,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
 import java.awt.AWTException
 import java.net.SocketException
@@ -57,10 +56,12 @@ fun MainWindow(viewModel: ViewModel) {
     //   val qrCodeVisible by viewModel.observeAsState<Boolean>("showQRCode")
     val lastCommand by viewModel.observeAsState<String?>("lastCommand")
     val isRunning by viewModel.observeAsState<Boolean>("running")
-
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxSize().padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 FirstColumn(device, address, port)
                 SecondColumn(lastCommand, isRunning)
             }
@@ -88,13 +89,13 @@ fun FirstColumn(device: String, address: String, port: MutableState<String>) {
 }
 
 @Composable
-fun SecondColumn(lastCommand: String?, isRunning: Boolean) {
+fun RowScope.SecondColumn(lastCommand: String?, isRunning: Boolean) {
     val isHomeActive by remember(lastCommand) { mutableStateOf(Server.HOME == lastCommand) }
     val isNextActive by remember(lastCommand) { mutableStateOf(Server.NEXT == lastCommand) }
     val isPreviousActive by remember(lastCommand) { mutableStateOf(Server.PREVIOUS == lastCommand) }
     val isEndActive by remember(lastCommand) { mutableStateOf(Server.END == lastCommand) }
     val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
-    Column {
+    Column(modifier = Modifier.weight(1.0f)) {
         Button(
             onClick = {},
             modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
@@ -179,7 +180,8 @@ fun main() {
     }
     singleWindowApplication(
         title = "Souffleur",
-        icon = icon
+        icon = icon,
+       state = WindowState(size = DpSize(600.dp, 300.dp))
     ) {
         MainWindow(viewModel)
     }
