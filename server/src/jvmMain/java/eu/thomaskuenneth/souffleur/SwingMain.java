@@ -16,13 +16,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import static eu.thomaskuenneth.souffleur.ComposeMainKt.KEY_PORT;
+import static eu.thomaskuenneth.souffleur.ComposeMainKt.VERSION;
+
 public class SwingMain extends JFrame {
 
-    public static final String VERSION = "1.0.6";
-
     private static final Logger LOGGER = Logger.getLogger(SwingMain.class.getName());
-    private static final String KEY_SECRET = "secret";
-    private static final String KEY_PORT = "port";
 
     private final ViewModel viewModel;
 

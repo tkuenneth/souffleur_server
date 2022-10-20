@@ -23,8 +23,10 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.UnsupportedLookAndFeelException
 
-private const val KEY_SECRET = "secret"
-private const val KEY_PORT = "port"
+
+const val VERSION = "1.0.6"
+const val KEY_SECRET = "secret"
+const val KEY_PORT = "port"
 
 @Composable
 fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
@@ -179,9 +181,9 @@ fun main() {
         }
     }
     singleWindowApplication(
-        title = "Souffleur",
+        title = "Souffleur $VERSION",
         icon = icon,
-       state = WindowState(size = DpSize(600.dp, 300.dp))
+        state = WindowState(size = DpSize(600.dp, 300.dp))
     ) {
         MainWindow(viewModel)
     }
