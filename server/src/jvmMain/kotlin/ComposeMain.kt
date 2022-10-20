@@ -1,5 +1,7 @@
 package eu.thomaskuenneth.souffleur
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -7,6 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
@@ -55,17 +58,23 @@ fun MainWindow(viewModel: ViewModel) {
     viewModel.observePort {
         port.value = it.toString()
     }
-    //   val qrCodeVisible by viewModel.observeAsState<Boolean>("showQRCode")
+    val qrCodeVisible by viewModel.observeAsState<Boolean>("showQRCode")
     val lastCommand by viewModel.observeAsState<String?>("lastCommand")
     val isRunning by viewModel.observeAsState<Boolean>("running")
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FirstColumn(device, address, port)
-                SecondColumn(lastCommand, isRunning)
+            Crossfade(targetState = qrCodeVisible) { isVisible ->
+                when (isVisible) {
+                    false -> Row(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FirstColumn(device, address, port)
+                        SecondColumn(lastCommand, isRunning)
+                    }
+
+                    true -> Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
+                }
             }
         }
     }
