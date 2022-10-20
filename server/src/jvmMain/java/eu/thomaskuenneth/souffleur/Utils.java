@@ -55,8 +55,8 @@ public class Utils {
             hintMap.put(EncodeHintType.MARGIN, 1);
             hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix byteMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 400,
-                    400, hintMap);
+            BitMatrix byteMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 200,
+                    200, hintMap);
             int byteMatrixWidth = byteMatrix.getWidth();
             int byteMatrixHeight = byteMatrix.getHeight();
             BufferedImage image = new BufferedImage(byteMatrixWidth, byteMatrixHeight,

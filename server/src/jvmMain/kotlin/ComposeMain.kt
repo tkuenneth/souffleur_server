@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
@@ -73,7 +74,11 @@ fun MainWindow(viewModel: ViewModel) {
                         SecondColumn(lastCommand, isRunning)
                     }
 
-                    true -> Box(modifier = Modifier.fillMaxSize().background(color = Color.Red))
+                    true -> Box(modifier = Modifier.fillMaxSize()) {
+                        SwingPanel(factory = {
+                            SwingMain.createQRCodeComponent(viewModel)
+                        })
+                    }
                 }
             }
         }

@@ -64,6 +64,19 @@ public class SwingMain extends JFrame {
         });
     }
 
+    public static JComponent createQRCodeComponent(ViewModel viewModel) {
+        BufferedImage image = Utils.generateQRCode(viewModel.getQRCodeAsString());
+        ImageIcon imageIcon = new ImageIcon(image);
+        JPanel contentPane = new JPanel(new BorderLayout());
+        contentPane.add(new JLabel(imageIcon), BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel();
+        JButton close = new JButton("Stop");
+        close.addActionListener(e -> viewModel.setRunning(false));
+        buttonPanel.add(close);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+        return contentPane;
+    }
+
     private JComponent createMainPanel() {
         Box mainPanel = new Box(BoxLayout.PAGE_AXIS);
         mainPanel.setAlignmentX(CENTER_ALIGNMENT);
@@ -181,16 +194,7 @@ public class SwingMain extends JFrame {
         hideQRCode();
         JFrame frame = new JFrame();
         frame.setUndecorated(true);
-        BufferedImage image = Utils.generateQRCode(viewModel.getQRCodeAsString());
-        ImageIcon imageIcon = new ImageIcon(image);
-        JPanel contentPane = new JPanel(new BorderLayout());
-        contentPane.add(new JLabel(imageIcon), BorderLayout.CENTER);
-        JPanel buttonPanel = new JPanel();
-        JButton close = new JButton("Stop");
-        close.addActionListener(e -> viewModel.setRunning(false));
-        buttonPanel.add(close);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-        frame.setContentPane(contentPane);
+        frame.setContentPane(createQRCodeComponent(viewModel));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
