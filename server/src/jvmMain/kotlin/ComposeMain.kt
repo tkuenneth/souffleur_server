@@ -32,10 +32,10 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
     Icon(
         modifier = modifier,
         imageVector = when (indicator) {
-            Server.HOME -> Icons.Default.Home
-            Server.PREVIOUS -> Icons.Default.ArrowBack
-            Server.NEXT -> Icons.Default.ArrowForward
-            Server.END -> Icons.Default.ExitToApp
+            Server.HOME -> Icons.Default.FirstPage
+            Server.PREVIOUS -> Icons.Default.NavigateBefore
+            Server.NEXT -> Icons.Default.NavigateNext
+            Server.END -> Icons.Default.LastPage
             else -> Icons.Default.Favorite
         },
         contentDescription = indicator,

@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -27,6 +26,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("com.google.zxing:javase:3.4.1")
+                implementation( "org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
             }
         }
         val jvmTest by getting
