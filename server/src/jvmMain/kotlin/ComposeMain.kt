@@ -50,66 +50,80 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 fun MainWindow(viewModel: ViewModel) {
     val device by viewModel.observeAsState<String>("device")
     val address by viewModel.observeAsState<String>("address")
-    var port by remember { mutableStateOf(viewModel.port.toString()) }
+    var port = remember { mutableStateOf(viewModel.port.toString()) }
     viewModel.observePort {
-        port = it.toString()
+        port.value = it.toString()
     }
     //   val qrCodeVisible by viewModel.observeAsState<Boolean>("showQRCode")
     val lastCommand by viewModel.observeAsState<String?>("lastCommand")
+    val isRunning by viewModel.observeAsState<Boolean>("running")
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxSize().padding(16.dp)) {
+                FirstColumn(device, address, port)
+                SecondColumn(lastCommand, isRunning)
+            }
+        }
+    }
+}
+
+@Composable
+fun FirstColumn(device: String, address: String, port: MutableState<String>) {
+    Column {
+        InfoText(
+            label = "Device", info = device
+        )
+        InfoText(
+            label = "Address", info = address,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        OutlinedTextField(value = port.value,
+            modifier = Modifier.padding(top = 16.dp),
+            onValueChange = { newValue ->
+                port.value = newValue.filter { it.isDigit() }
+            },
+            label = { Text(text = "Port") })
+    }
+}
+
+@Composable
+fun SecondColumn(lastCommand: String?, isRunning: Boolean) {
     val isHomeActive by remember(lastCommand) { mutableStateOf(Server.HOME == lastCommand) }
     val isNextActive by remember(lastCommand) { mutableStateOf(Server.NEXT == lastCommand) }
     val isPreviousActive by remember(lastCommand) { mutableStateOf(Server.PREVIOUS == lastCommand) }
     val isEndActive by remember(lastCommand) { mutableStateOf(Server.END == lastCommand) }
     val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
-    val isRunning by viewModel.observeAsState<Boolean>("running")
-
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            Column {
-                InfoText(
-                    label = "Device", info = device
-                )
-                InfoText(
-                    label = "Address", info = address,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-                OutlinedTextField(value = port,
-                    modifier = Modifier.padding(top = 16.dp),
-                    onValueChange = { newValue ->
-                        port = newValue.filter { it.isDigit() }
-                    },
-                    label = { Text(text = "Port") })
-                Button(
-                    onClick = {},
-                    modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Text(text = if (isRunning) "Stop" else "Start")
-                }
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    IndicatorIcon(indicator = Server.HOME, isActive = isHomeActive)
-                    IndicatorIcon(
-                        indicator = Server.PREVIOUS,
-                        isActive = isPreviousActive,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                    IndicatorIcon(
-                        indicator = Server.NEXT,
-                        isActive = isNextActive,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                    IndicatorIcon(
-                        indicator = Server.END,
-                        isActive = isEndActive,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                    IndicatorIcon(
-                        indicator = Server.HELLO,
-                        isActive = isHelloActive,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
+    Column {
+        Button(
+            onClick = {},
+            modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = if (isRunning) "Stop" else "Start")
+        }
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            IndicatorIcon(indicator = Server.HOME, isActive = isHomeActive)
+            IndicatorIcon(
+                indicator = Server.PREVIOUS,
+                isActive = isPreviousActive,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            IndicatorIcon(
+                indicator = Server.NEXT,
+                isActive = isNextActive,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            IndicatorIcon(
+                indicator = Server.END,
+                isActive = isEndActive,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            IndicatorIcon(
+                indicator = Server.HELLO,
+                isActive = isHelloActive,
+                modifier = Modifier.padding(start = 16.dp)
+            )
         }
     }
 }
