@@ -83,6 +83,9 @@ fun MainControlsScreen(viewModel: ViewModel) {
     }
     val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
     val isRunning by viewModel.observeAsState<Boolean>(RUNNING)
+    viewModel.observeRunning {
+        viewModel.isShowQRCode = isRunning
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().weight(1.0F).padding(16.dp),
@@ -223,15 +226,15 @@ fun main() {
     SwingUtilities.invokeLater {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-            val ui = SwingMain(viewModel, prefs)
+            // val ui = SwingMain(viewModel, prefs)
             setDeviceAndAddress(viewModel = viewModel)
             viewModel.isRunning = false
             viewModel.secret = secret
             viewModel.port = prefs.getInt(KEY_PORT, 8087)
             viewModel.isShowQRCode = false
-            ui.setLocationRelativeTo(null)
-            ui.pack()
-            ui.isVisible = true
+//            ui.setLocationRelativeTo(null)
+//            ui.pack()
+//            ui.isVisible = true
         } catch (e: UnsupportedLookAndFeelException) {
             LOGGER.log(Level.SEVERE, "setLookAndFeel()", e)
         } catch (e: AWTException) {
