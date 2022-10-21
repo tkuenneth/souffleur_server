@@ -109,6 +109,7 @@ public class Server implements HttpHandler {
         } catch (IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException |
                  UnrecoverableKeyException | CertificateException e) {
             LOGGER.log(Level.SEVERE, null, e);
+            stop();
         }
         return success;
     }
@@ -118,6 +119,10 @@ public class Server implements HttpHandler {
             httpServer.stop(0);
             httpServer = null;
         }
+    }
+
+    public boolean isStarted() {
+        return httpServer != null;
     }
 
     private void sendStringResult(HttpExchange t, String text) {
