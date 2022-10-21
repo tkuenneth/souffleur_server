@@ -14,8 +14,9 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.singleWindowApplication
+import androidx.compose.ui.window.application
 import eu.thomaskuenneth.souffleur.ViewModel.*
 import java.awt.AWTException
 import java.net.SocketException
@@ -26,7 +27,6 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.UnsupportedLookAndFeelException
 import kotlin.math.min
-import kotlin.system.exitProcess
 
 
 const val VERSION = "1.0.6"
@@ -246,20 +246,22 @@ fun main() {
             LOGGER.log(Level.SEVERE, "setLookAndFeel()", e)
         }
     }
-    val icon = useResource("/eu/thomaskuenneth/souffleur/Icon-App-76x76@1x.png") {
-        it.buffered().use { stream ->
-            BitmapPainter(loadImageBitmap(stream))
+    application {
+        val icon = useResource("/eu/thomaskuenneth/souffleur/appicon.png") {
+            it.buffered().use { stream ->
+                BitmapPainter(loadImageBitmap(stream))
+            }
+        }
+        Window(
+            onCloseRequest = {
+                viewModel.stopServer()
+                exitApplication()
+            },
+            title = "Souffleur",
+            icon = icon,
+            state = WindowState(size = DpSize(600.dp, 320.dp)),
+        ) {
+            MainScreen(viewModel)
         }
     }
-    singleWindowApplication(
-        title = "Souffleur",
-        icon = icon,
-        exitProcessOnExit = false,
-        state = WindowState(size = DpSize(600.dp, 320.dp)),
-    ) {
-        MainScreen(viewModel)
-    }
-    // This feels a bit hacky, need to refactor some day
-    viewModel.stopServer()
-    exitProcess(0)
 }
