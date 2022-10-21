@@ -61,7 +61,7 @@ fun MainScreen(viewModel: ViewModel) {
         Surface(modifier = Modifier.fillMaxSize()) {
             Crossfade(targetState = qrCodeVisible) { isVisible ->
                 when (isVisible) {
-                    false -> TwoColumnScreen(viewModel)
+                    false -> MainControlsScreen(viewModel)
                     true -> QRCodeScreen(viewModel)
                 }
             }
@@ -70,7 +70,7 @@ fun MainScreen(viewModel: ViewModel) {
 }
 
 @Composable
-fun TwoColumnScreen(viewModel: ViewModel) {
+fun MainControlsScreen(viewModel: ViewModel) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -83,31 +83,42 @@ fun TwoColumnScreen(viewModel: ViewModel) {
     }
     val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
     val isRunning by viewModel.observeAsState<Boolean>(RUNNING)
-    Row(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FirstColumn(
-            device = device,
-            address = address,
-            port = portAsString,
-            portEnabled = !isRunning
-        ) { newValue ->
-            with(newValue.filter { it.isDigit() }) {
-                if (isEmpty())
-                    viewModel.port = null
-                else
-                    viewModel.port = min(this.toInt(), 65535)
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().weight(1.0F).padding(16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            FirstColumn(
+                device = device,
+                address = address,
+                port = portAsString,
+                portEnabled = !isRunning
+            ) { newValue ->
+                with(newValue.filter { it.isDigit() }) {
+                    if (isEmpty())
+                        viewModel.port = null
+                    else
+                        viewModel.port = min(this.toInt(), 65535)
+                }
+            }
+            SecondColumn(
+                lastCommand = lastCommand,
+                isRunning = isRunning,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                viewModel.isRunning = !isRunning
+            }
+            if (isRunning) {
+                viewModel.startServer()
+            } else {
+                viewModel.stopServer()
             }
         }
-        SecondColumn(lastCommand, isRunning) {
-            viewModel.isRunning = !isRunning
-        }
-        if (isRunning) {
-            viewModel.startServer()
-        } else {
-            viewModel.stopServer()
-        }
+        Text(
+            modifier = Modifier.padding(8.dp),
+            style = MaterialTheme.typography.caption,
+            text = "Version: $VERSION"
+        )
     }
 }
 
@@ -147,13 +158,18 @@ fun FirstColumn(
 }
 
 @Composable
-fun RowScope.SecondColumn(lastCommand: String?, isRunning: Boolean, onStartStopClick: () -> Unit) {
+fun RowScope.SecondColumn(
+    modifier: Modifier = Modifier,
+    lastCommand: String?,
+    isRunning: Boolean,
+    onStartStopClick: () -> Unit
+) {
     val isHomeActive by remember(lastCommand) { mutableStateOf(Server.HOME == lastCommand) }
     val isNextActive by remember(lastCommand) { mutableStateOf(Server.NEXT == lastCommand) }
     val isPreviousActive by remember(lastCommand) { mutableStateOf(Server.PREVIOUS == lastCommand) }
     val isEndActive by remember(lastCommand) { mutableStateOf(Server.END == lastCommand) }
     val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
-    Column(modifier = Modifier.weight(1.0f)) {
+    Column(modifier = modifier.weight(1.0f)) {
         Button(
             onClick = onStartStopClick,
             modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
@@ -236,10 +252,10 @@ fun main() {
         }
     }
     singleWindowApplication(
-        title = "Souffleur $VERSION",
+        title = "Souffleur",
         icon = icon,
         exitProcessOnExit = false,
-        state = WindowState(size = DpSize(600.dp, 300.dp)),
+        state = WindowState(size = DpSize(600.dp, 320.dp)),
     ) {
         MainScreen(viewModel)
     }
