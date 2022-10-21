@@ -26,6 +26,7 @@ import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.UnsupportedLookAndFeelException
 import kotlin.math.min
+import kotlin.system.exitProcess
 
 
 const val VERSION = "1.0.6"
@@ -228,8 +229,12 @@ fun main() {
     singleWindowApplication(
         title = "Souffleur $VERSION",
         icon = icon,
-        state = WindowState(size = DpSize(600.dp, 300.dp))
+        exitProcessOnExit = false,
+        state = WindowState(size = DpSize(600.dp, 300.dp)),
     ) {
         MainWindow(viewModel)
     }
+    // This feels a bit hacky, need to refactor some day
+    viewModel.stopServer()
+    exitProcess(0)
 }
