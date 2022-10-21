@@ -168,7 +168,7 @@ public class ViewModel {
     }
 
     public boolean startServer() {
-        return server.start(getAddress(), getPort(), getSecret());
+        return server.isStarted() || server.start(getAddress(), getPort(), getSecret());
     }
 
     public void stopServer() {
