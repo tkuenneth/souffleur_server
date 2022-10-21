@@ -76,7 +76,12 @@ fun MainWindow(viewModel: ViewModel) {
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FirstColumn(device, address, portAsString) { newValue ->
+                        FirstColumn(
+                            device = device,
+                            address = address,
+                            port = portAsString,
+                            portEnabled = !isRunning
+                        ) { newValue ->
                             with(newValue.filter { it.isDigit() }) {
                                 if (isEmpty())
                                     viewModel.port = null
@@ -99,7 +104,13 @@ fun MainWindow(viewModel: ViewModel) {
 }
 
 @Composable
-fun FirstColumn(device: String, address: String, port: String, onPortChange: (String) -> Unit) {
+fun FirstColumn(
+    device: String,
+    address: String,
+    port: String,
+    portEnabled: Boolean,
+    onPortChange: (String) -> Unit
+) {
     Column {
         InfoText(
             label = DEVICE, info = device
@@ -108,10 +119,13 @@ fun FirstColumn(device: String, address: String, port: String, onPortChange: (St
             label = ADDRESS, info = address,
             modifier = Modifier.padding(top = 16.dp)
         )
-        OutlinedTextField(value = port,
+        OutlinedTextField(
+            value = port,
             modifier = Modifier.padding(top = 16.dp),
             onValueChange = onPortChange,
-            label = { Text(text = "Port") })
+            label = { Text(text = "Port") },
+            enabled = portEnabled
+        )
     }
 }
 
