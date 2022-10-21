@@ -9,28 +9,28 @@ public class ViewModel {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    private static final String RUNNING = "running";
+    public static final String RUNNING = "running";
     private Boolean running = null;
 
-    private static final String DEVICE = "device";
+    public static final String DEVICE = "device";
     private String device = null;
 
-    private static final String ADDRESS = "address";
+    public static final String ADDRESS = "address";
     private String address = null;
 
-    private static final String PORT = "port";
+    public static final String PORT = "port";
     private Integer port = null;
 
-    private static final String START_STOP_BUTTON_ENABLED = "startStopButtonEnabled";
+    public static final String START_STOP_BUTTON_ENABLED = "startStopButtonEnabled";
     private Boolean startStopButtonEnabled = null;
 
-    private static final String SHOW_QR_CODE = "showQRCode";
+    public static final String SHOW_QR_CODE = "showQRCode";
     private Boolean showQRCode = null;
 
-    private static final String LAST_COMMAND = "lastCommand";
+    public static final String LAST_COMMAND = "lastCommand";
     private String lastCommand = null;
 
-    private static final String SECRET = "secret";
+    public static final String SECRET = "secret";
     private String secret = null;
 
     private Thread indicatorThread = null;
