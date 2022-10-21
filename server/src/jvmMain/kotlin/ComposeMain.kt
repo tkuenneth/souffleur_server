@@ -55,7 +55,22 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 }
 
 @Composable
-fun MainWindow(viewModel: ViewModel) {
+fun MainScreen(viewModel: ViewModel) {
+    val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Crossfade(targetState = qrCodeVisible) { isVisible ->
+                when (isVisible) {
+                    false -> TwoColumnScreen(viewModel)
+                    true -> QRCodeScreen(viewModel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TwoColumnScreen(viewModel: ViewModel) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -66,48 +81,42 @@ fun MainWindow(viewModel: ViewModel) {
             prefs.putInt(KEY_PORT, it)
         }
     }
-    val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
     val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
     val isRunning by viewModel.observeAsState<Boolean>(RUNNING)
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Crossfade(targetState = qrCodeVisible) { isVisible ->
-                when (isVisible) {
-                    false -> Row(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        FirstColumn(
-                            device = device,
-                            address = address,
-                            port = portAsString,
-                            portEnabled = !isRunning
-                        ) { newValue ->
-                            with(newValue.filter { it.isDigit() }) {
-                                if (isEmpty())
-                                    viewModel.port = null
-                                else
-                                    viewModel.port = min(this.toInt(), 65535)
-                            }
-                        }
-                        SecondColumn(lastCommand, isRunning) {
-                            viewModel.isRunning = !isRunning
-                        }
-                        if (isRunning) {
-                            viewModel.startServer()
-                        } else {
-                            viewModel.stopServer()
-                        }
-                    }
-
-                    true -> Box(modifier = Modifier.fillMaxSize()) {
-                        SwingPanel(factory = {
-                            SwingMain.createQRCodeComponent(viewModel)
-                        })
-                    }
-                }
+    Row(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FirstColumn(
+            device = device,
+            address = address,
+            port = portAsString,
+            portEnabled = !isRunning
+        ) { newValue ->
+            with(newValue.filter { it.isDigit() }) {
+                if (isEmpty())
+                    viewModel.port = null
+                else
+                    viewModel.port = min(this.toInt(), 65535)
             }
         }
+        SecondColumn(lastCommand, isRunning) {
+            viewModel.isRunning = !isRunning
+        }
+        if (isRunning) {
+            viewModel.startServer()
+        } else {
+            viewModel.stopServer()
+        }
+    }
+}
+
+@Composable
+fun QRCodeScreen(viewModel: ViewModel) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        SwingPanel(factory = {
+            SwingMain.createQRCodeComponent(viewModel)
+        })
     }
 }
 
@@ -232,7 +241,7 @@ fun main() {
         exitProcessOnExit = false,
         state = WindowState(size = DpSize(600.dp, 300.dp)),
     ) {
-        MainWindow(viewModel)
+        MainScreen(viewModel)
     }
     // This feels a bit hacky, need to refactor some day
     viewModel.stopServer()
