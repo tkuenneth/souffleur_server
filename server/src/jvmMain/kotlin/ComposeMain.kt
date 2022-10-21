@@ -25,11 +25,14 @@ import java.util.prefs.Preferences
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
 import javax.swing.UnsupportedLookAndFeelException
+import kotlin.math.min
 
 
 const val VERSION = "1.0.6"
 const val KEY_SECRET = "secret"
 const val KEY_PORT = "port"
+
+private val prefs = Preferences.userNodeForPackage(SwingMain::class.java)
 
 @Composable
 fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
@@ -54,9 +57,13 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 fun MainWindow(viewModel: ViewModel) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
-    var port = remember { mutableStateOf(viewModel.port.toString()) }
-    viewModel.observePort {
-        port.value = it.toString()
+    var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
+    viewModel.observePort { port ->
+        portAsString = Utils.nullSafeString(port)
+        viewModel.isStartStopButtonEnabled = port != null
+        port?.let {
+            prefs.putInt(KEY_PORT, it)
+        }
     }
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
     val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
@@ -69,7 +76,14 @@ fun MainWindow(viewModel: ViewModel) {
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        FirstColumn(device, address, port)
+                        FirstColumn(device, address, portAsString) { newValue ->
+                            with(newValue.filter { it.isDigit() }) {
+                                if (isEmpty())
+                                    viewModel.port = null
+                                else
+                                    viewModel.port = min(this.toInt(), 65535)
+                            }
+                        }
                         SecondColumn(lastCommand, isRunning)
                     }
 
@@ -85,7 +99,7 @@ fun MainWindow(viewModel: ViewModel) {
 }
 
 @Composable
-fun FirstColumn(device: String, address: String, port: MutableState<String>) {
+fun FirstColumn(device: String, address: String, port: String, onPortChange: (String) -> Unit) {
     Column {
         InfoText(
             label = DEVICE, info = device
@@ -94,11 +108,9 @@ fun FirstColumn(device: String, address: String, port: MutableState<String>) {
             label = ADDRESS, info = address,
             modifier = Modifier.padding(top = 16.dp)
         )
-        OutlinedTextField(value = port.value,
+        OutlinedTextField(value = port,
             modifier = Modifier.padding(top = 16.dp),
-            onValueChange = { newValue ->
-                port.value = newValue.filter { it.isDigit() }
-            },
+            onValueChange = onPortChange,
             label = { Text(text = "Port") })
     }
 }
@@ -155,7 +167,6 @@ fun InfoText(label: String, info: String, modifier: Modifier = Modifier) {
 }
 
 fun main() {
-    val prefs = Preferences.userNodeForPackage(SwingMain::class.java)
     var secret: String? = prefs.get(KEY_SECRET, null)
     if (secret == null) {
         secret = UUID.randomUUID().toString()
