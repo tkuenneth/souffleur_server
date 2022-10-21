@@ -1,7 +1,6 @@
 package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
@@ -18,6 +16,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
+import eu.thomaskuenneth.souffleur.ViewModel.*
 import java.awt.AWTException
 import java.net.SocketException
 import java.util.*
@@ -53,15 +52,15 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 
 @Composable
 fun MainWindow(viewModel: ViewModel) {
-    val device by viewModel.observeAsState<String>("device")
-    val address by viewModel.observeAsState<String>("address")
+    val device by viewModel.observeAsState<String>(DEVICE)
+    val address by viewModel.observeAsState<String>(ADDRESS)
     var port = remember { mutableStateOf(viewModel.port.toString()) }
     viewModel.observePort {
         port.value = it.toString()
     }
-    val qrCodeVisible by viewModel.observeAsState<Boolean>("showQRCode")
-    val lastCommand by viewModel.observeAsState<String?>("lastCommand")
-    val isRunning by viewModel.observeAsState<Boolean>("running")
+    val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
+    val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
+    val isRunning by viewModel.observeAsState<Boolean>(RUNNING)
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Crossfade(targetState = qrCodeVisible) { isVisible ->
@@ -89,10 +88,10 @@ fun MainWindow(viewModel: ViewModel) {
 fun FirstColumn(device: String, address: String, port: MutableState<String>) {
     Column {
         InfoText(
-            label = "Device", info = device
+            label = DEVICE, info = device
         )
         InfoText(
-            label = "Address", info = address,
+            label = ADDRESS, info = address,
             modifier = Modifier.padding(top = 16.dp)
         )
         OutlinedTextField(value = port.value,
