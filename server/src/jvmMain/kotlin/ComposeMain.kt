@@ -89,7 +89,14 @@ fun MainWindow(viewModel: ViewModel) {
                                     viewModel.port = min(this.toInt(), 65535)
                             }
                         }
-                        SecondColumn(lastCommand, isRunning)
+                        SecondColumn(lastCommand, isRunning) {
+                            viewModel.isRunning = !isRunning
+                        }
+                        if (isRunning) {
+                            viewModel.startServer()
+                        } else {
+                            viewModel.stopServer()
+                        }
                     }
 
                     true -> Box(modifier = Modifier.fillMaxSize()) {
@@ -130,7 +137,7 @@ fun FirstColumn(
 }
 
 @Composable
-fun RowScope.SecondColumn(lastCommand: String?, isRunning: Boolean) {
+fun RowScope.SecondColumn(lastCommand: String?, isRunning: Boolean, onStartStopClick: () -> Unit) {
     val isHomeActive by remember(lastCommand) { mutableStateOf(Server.HOME == lastCommand) }
     val isNextActive by remember(lastCommand) { mutableStateOf(Server.NEXT == lastCommand) }
     val isPreviousActive by remember(lastCommand) { mutableStateOf(Server.PREVIOUS == lastCommand) }
@@ -138,7 +145,7 @@ fun RowScope.SecondColumn(lastCommand: String?, isRunning: Boolean) {
     val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
     Column(modifier = Modifier.weight(1.0f)) {
         Button(
-            onClick = {},
+            onClick = onStartStopClick,
             modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
