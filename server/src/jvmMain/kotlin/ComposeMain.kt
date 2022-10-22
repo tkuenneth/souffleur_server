@@ -262,7 +262,8 @@ fun main() {
             },
             title = "Souffleur",
             icon = icon,
-            state = WindowState(size = DpSize(600.dp, 320.dp)),
+            resizable = false,
+            state = WindowState(size = DpSize(600.dp, 340.dp)),
         ) {
             MainScreen(viewModel)
         }
