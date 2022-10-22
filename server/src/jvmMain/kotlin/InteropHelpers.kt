@@ -9,7 +9,6 @@ inline fun <reified T> Any.observeAsState(propertyName: String): State<T> {
     val property = this.javaClass.getDeclaredField(propertyName)
     property.trySetAccessible()
     val clazz = property.type
-    println(T::class.java)
     if (T::class.java != clazz) throw IllegalArgumentException("Types do not match")
     val current = property.get(this) as T
     val state = mutableStateOf(current)
