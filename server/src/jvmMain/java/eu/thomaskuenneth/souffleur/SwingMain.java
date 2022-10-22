@@ -18,6 +18,7 @@ import java.util.prefs.Preferences;
 
 import static eu.thomaskuenneth.souffleur.ComposeMainKt.KEY_PORT;
 import static eu.thomaskuenneth.souffleur.ComposeMainKt.VERSION;
+import static eu.thomaskuenneth.souffleur.MessagesKt.*;
 
 public class SwingMain extends JFrame {
 
@@ -30,7 +31,7 @@ public class SwingMain extends JFrame {
     private final Preferences prefs;
 
     public SwingMain(ViewModel viewModel, Preferences prefs) throws AWTException, SocketException {
-        super("Souffleur");
+        super(stringResource(APP_NAME));
         this.viewModel = viewModel;
         this.prefs = prefs;
         var filenames = new String[]{
@@ -70,7 +71,7 @@ public class SwingMain extends JFrame {
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.add(new JLabel(imageIcon), BorderLayout.CENTER);
         JPanel buttonPanel = new JPanel();
-        JButton close = new JButton("Stop");
+        JButton close = new JButton(stringResource(BUTTON_STOP));
         close.addActionListener(e -> viewModel.setRunning(false));
         buttonPanel.add(close);
         contentPane.add(buttonPanel, BorderLayout.SOUTH);
@@ -138,18 +139,18 @@ public class SwingMain extends JFrame {
             viewModel.setShowQRCode(value);
             if (value) {
                 if (viewModel.startServer()) {
-                    startStop.setText("Stop");
+                    startStop.setText(stringResource(BUTTON_STOP));
                 } else {
                     JOptionPane.showMessageDialog(this,
                             "Could not start server",
-                            "Souffleur",
+                            stringResource(APP_NAME),
                             JOptionPane.WARNING_MESSAGE);
                     viewModel.setRunning(false);
                     LOGGER.log(Level.SEVERE, "startServer() failed");
                 }
             } else {
                 viewModel.stopServer();
-                startStop.setText("Start");
+                startStop.setText(stringResource(BUTTON_START));
             }
         });
         viewModel.observeStartStopButtonEnabled(startStop::setEnabled);

@@ -178,7 +178,7 @@ fun RowScope.SecondColumn(
             modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Text(text = if (isRunning) "Stop" else "Start")
+            Text(text = stringResource(key = if (isRunning) BUTTON_STOP else BUTTON_START))
         }
         Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             IndicatorIcon(indicator = Server.HOME, isActive = isHomeActive)
@@ -260,7 +260,7 @@ fun main() {
                 viewModel.stopServer()
                 exitApplication()
             },
-            title = "Souffleur",
+            title = stringResource(key = APP_NAME),
             icon = icon,
             resizable = false,
             state = WindowState(size = DpSize(600.dp, 340.dp)),

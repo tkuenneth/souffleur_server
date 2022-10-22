@@ -2,7 +2,9 @@
 
 ## 1.0.6
 
-- Start migration to Compose for Desktop
+- Migration to Compose for Desktop
+- Refactoring for easier code sharing
+- Extracted texts for internationalization
 
 ## 1.0.5
 - Again using the system look and feel
