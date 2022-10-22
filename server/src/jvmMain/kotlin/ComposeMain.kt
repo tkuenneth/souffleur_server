@@ -9,8 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -250,9 +250,9 @@ fun main() {
         }
     }
     application {
-        val icon = useResource("/eu/thomaskuenneth/souffleur/appicon.png") {
+        val icon = useResource("/eu/thomaskuenneth/souffleur/appicon.svg") {
             it.buffered().use { stream ->
-                BitmapPainter(loadImageBitmap(stream))
+                loadSvgPainter(stream, LocalDensity.current)
             }
         }
         Window(
