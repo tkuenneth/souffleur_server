@@ -69,6 +69,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: theme,
         home: Builder(builder: (BuildContext context) {
           return Scaffold(
