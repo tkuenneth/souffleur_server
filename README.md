@@ -1,4 +1,4 @@
-# Welcome to Souffleur
+### Welcome to Souffleur
 
 *Souffleur* is a cross platform remote control for presentations.
 
@@ -16,4 +16,4 @@ This repository contains:
 
 **docs**: The *Souffleur* GitHub Pages
 
-*Souffleur is open source. It is licensed unter the terms of the Apache License 2.0.
+*Souffleur* is open source. It is licensed unter the terms of the Apache License 2.0.
