@@ -1,7 +1,7 @@
-name: Souffleur
+name: souffleur
 description: A cross platform remote control for presentations
 
-version: 1.0.0+1
+version: 1.0.6+1
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
