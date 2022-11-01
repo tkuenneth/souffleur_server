@@ -47,6 +47,20 @@ jobs:
       run: chmod +x gradlew
     - name: Run packageDmg with Gradle Wrapper
       run: ./gradlew packageDmg
+    - name: Codesign executable
+      env: 
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+      run: |
+        echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+        security create-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
+        security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PASSWORD -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
+        SECURITY_ID=$(security find-identity -v | cut -d '"' -f2 | head -1)
+        echo $SECURITY_ID
+        /usr/bin/codesign --force -s "$SECURITY_ID" /Users/runner/work/souffleur/souffleur/server/build/compose/binaries/main/app/Souffleur.app -v    
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
