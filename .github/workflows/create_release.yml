@@ -64,6 +64,7 @@ jobs:
         PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
         PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
       run: |
+        security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
         PATH_TO_APP=/Users/runner/work/souffleur/souffleur/server/build/compose/binaries/main-release/app/Souffleur.app
         echo "Create keychain profile"
         xcrun notarytool store-credentials "notarytool-profile" --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" --password "$PROD_MACOS_NOTARIZATION_PWD"
