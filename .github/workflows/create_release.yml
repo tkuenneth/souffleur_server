@@ -5,7 +5,7 @@ on:
       - 'v*'
 
 jobs:
-  create-package-msi:
+  create-windows-installer:
     runs-on: windows-latest
     defaults:
       run:
@@ -21,7 +21,7 @@ jobs:
         java-version: 17
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Run packageDmg with Gradle Wrapper
+    - name: Run packageMsi with Gradle Wrapper
       run: ./gradlew packageMsi
     - name: Upload asset
       uses: actions/upload-artifact@v3
@@ -29,7 +29,7 @@ jobs:
         path: ./server/build/compose/binaries/main/msi/*.msi
         name: souffleur.msi
 
-  create-package-dmg:
+  create-macos-installer:
     runs-on: macos-latest
     defaults:
       run:
@@ -45,9 +45,7 @@ jobs:
         java-version: 17
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Run packageDmg with Gradle Wrapper
-      run: ./gradlew packageDmg
-    - name: Codesign executable
+    - name: Setup keychain, certificates and passwords
       env: 
         MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
         MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -58,23 +56,39 @@ jobs:
         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
         security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PASSWORD -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
-        SECURITY_ID=$(security find-identity -v | cut -d '"' -f2 | head -1)
-        echo $SECURITY_ID
-        /usr/bin/codesign --force -s "$SECURITY_ID" /Users/runner/work/souffleur/souffleur/server/build/compose/binaries/main/app/Souffleur.app -v    
+    - name: Run createReleaseDistributable with Gradle Wrapper
+      run: ./gradlew createReleaseDistributable
+    - name: "Notarize app bundle"
+      env:
+        PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
+        PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
+        PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
+      run: |
+        PATH_TO_APP=/Users/runner/work/souffleur/souffleur/server/build/compose/binaries/main-release/app/Souffleur.app
+        echo "Create keychain profile"
+        xcrun notarytool store-credentials "notarytool-profile" --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" --password "$PROD_MACOS_NOTARIZATION_PWD"
+        echo "Creating temp notarization archive"
+        ditto -c -k --keepParent $PATH_TO_APP "notarization.zip"
+        echo "Notarize app"
+        xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait
+        echo "Attach staple"
+        xcrun stapler staple $PATH_TO_APP
+        ditto -c -k --keepParent $PATH_TO_APP /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
+        echo `pwd`
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: ./server/build/compose/binaries/main/dmg/*.dmg
-        name: souffleur.dmg
-
+        path: /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
+        name: souffleur_macos.zip
+        
   create-release:
     runs-on: macos-latest
-    needs: [ create-package-msi,  create-package-dmg]
+    needs: [ create-windows-installer,  create-macos-installer]
     steps:
-    - name: Download dmg
+    - name: Download macOS zip
       uses: actions/download-artifact@v3
       with:
-        name: souffleur.dmg
+        name: souffleur_macos.zip
     - name: Download msi
       uses: actions/download-artifact@v3
       with:
@@ -82,4 +96,4 @@ jobs:
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "/Users/runner/work/souffleur/souffleur/*.dmg,/Users/runner/work/souffleur/souffleur/*.msi"
+        artifacts: "/Users/runner/work/souffleur/souffleur/souffleur_macos.zip,/Users/runner/work/souffleur/souffleur/*.msi"
