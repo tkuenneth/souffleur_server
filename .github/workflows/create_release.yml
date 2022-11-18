@@ -79,6 +79,7 @@ jobs:
         cp -R $PATH_TO_APP dmg
         cd dmg
         ln -s /Applications/ Applications
+        cd ..
         hdiutil create -volname Souffleur -srcfolder dmg -ov -format UDZO Souffleur.dmg
         ditto -c -k Souffleur.dmg /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
         echo `pwd`
