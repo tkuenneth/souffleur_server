@@ -1,1 +1,0 @@
-- Background of app icons should be transparent
