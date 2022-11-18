@@ -74,7 +74,13 @@ jobs:
         xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait
         echo "Attach staple"
         xcrun stapler staple $PATH_TO_APP
-        ditto -c -k --keepParent $PATH_TO_APP /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
+        echo "Create .dmg"
+        mkdir dmg
+        cp -R $PATH_TO_APP dmg
+        cd dmg
+        ln -s /Applications/ Applications
+        hdiutil create -volname Souffleur -srcfolder dmg -ov -format UDZO Souffleur.dmg
+        ditto -c -k Souffleur.dmg /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
         echo `pwd`
     - name: Upload asset
       uses: actions/upload-artifact@v3
