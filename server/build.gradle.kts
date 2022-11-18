@@ -44,7 +44,16 @@ compose.desktop {
             copyright = "2019 - 2022 Thomas Kuenneth. All rights reserved."
             vendor = "Thomas Kuenneth"
             macOS {
+                bundleID = "eu.thomaskuenneth.souffleur"
                 iconFile.set(project.file("artwork/Souffleur.icns"))
+                signing {
+                    sign.set(true)
+                    identity.set("Thomas Kuenneth")
+                }
+                notarization {
+                    appleID.set("thomas.kuenneth@icloud.com")
+                    password.set("@keychain:NOTARIZATION_PASSWORD")
+                }
             }
             windows {
                 iconFile.set(project.file("artwork/Souffleur.ico"))

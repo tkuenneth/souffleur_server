@@ -57,7 +57,7 @@ jobs:
         security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PASSWORD -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
     - name: Run createReleaseDistributable with Gradle Wrapper
-      run: ./gradlew packageReleaseDmg
+      run: ./gradlew createReleaseDistributable
     - name: "Notarize app bundle"
       env:
         PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
