@@ -8,8 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String _souffleurHomepage = "https://www.thomaskuenneth.eu/souffleur";
-
-const String KeyLastKnownUrl = 'lastKnownUrl';
+const String _keyLastKnownUrl = 'lastKnownUrl';
+const String _appName = "Souffleur";
+const String protocolHttp = "http";
 
 void main() {
   runApp(SouffleurClient());
@@ -22,7 +23,7 @@ class SouffleurClient extends StatefulWidget {
 
 class _SouffleurClientState extends State<SouffleurClient>
     with WidgetsBindingObserver {
-  String lastKnownUrl;
+  String lastKnownUrl = "";
   ThemeData theme;
   BuildContext scaffoldContext;
 
@@ -40,7 +41,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       };
     }
     SharedPreferences.getInstance().then((prefs) {
-      updateLastKnownUrl(prefs.getString(KeyLastKnownUrl), false);
+      updateLastKnownUrl(prefs.getString(_keyLastKnownUrl), false);
     });
     WidgetsBinding.instance.addObserver(this);
   }
@@ -57,17 +58,19 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   bool isLastKnownUrlValid() {
-    return lastKnownUrl != null && lastKnownUrl.contains("http");
+    return lastKnownUrl != null && lastKnownUrl.contains(protocolHttp);
   }
 
   void updateLastKnownUrl(String url, bool shouldUpdatePrefs) async {
+    if (url == null) url = "";
     setState(() {
       lastKnownUrl = url;
       _sendCommandHello();
     });
     if (shouldUpdatePrefs) {
-      var prefs = await SharedPreferences.getInstance();
-      prefs.setString(KeyLastKnownUrl, url);
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setString(_keyLastKnownUrl, url);
+      });
     }
   }
 
@@ -81,7 +84,7 @@ class _SouffleurClientState extends State<SouffleurClient>
         home: Builder(builder: (BuildContext context) {
           return Scaffold(
               appBar: AppBar(
-                title: const Text("Souffleur"),
+                title: const Text(_appName),
                 actions: [
                   PopupMenuButton(itemBuilder: (context) {
                     return [
@@ -169,7 +172,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       );
     else {
       final TextTheme theme = Theme.of(context).textTheme;
-      return Column(
+      return SingleChildScrollView(child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -201,10 +204,13 @@ class _SouffleurClientState extends State<SouffleurClient>
           _createTextWithMaxWidth(AppLocalizations.of(context).instructions_03,
               TextAlign.center, theme.bodyLarge),
           _createTextWithMaxWidth(AppLocalizations.of(context).instructions_04,
-              TextAlign.center, theme.bodyLarge),
-          TextButton(onPressed: _scanQRCode, child: Text("Scan")),
+              TextAlign.center, theme.bodyLarge,
+              padding: EdgeInsets.only(top: 16, bottom: 24)),
+          TextButton(
+              onPressed: _scanQRCode,
+              child: Text(AppLocalizations.of(context).scan)),
         ],
-      );
+      ));
     }
   }
 
@@ -212,7 +218,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       String text, TextAlign textAlign, TextStyle style,
       {EdgeInsets padding = const EdgeInsets.only(top: 16)}) {
     return Container(
-        constraints: BoxConstraints(maxWidth: 300),
+        constraints: BoxConstraints(maxWidth: 400),
         child: Padding(
             padding: padding,
             child: Text(text, textAlign: textAlign, style: style)));
