@@ -3,8 +3,8 @@
   "scan": "Scan QR code",
   "unlink": "Unlink",
   "not_linked": "The app is not linked to a Souffleur server.",
-  "instructions_01": "If you have not done so already, please visit",
-  "instructions_02": "on your Linux, macOS, or Windows machine to download and install the server.",
-  "instructions_03": "When you have installed the Souffler server, run it and press the Start button in its main window.",
-  "instructions_04": "Click below to scan the QR code your Souffleur server is showing on screen."
+  "instructions_01": "If you have not done so already, please visit the website",
+  "instructions_02": "with your Linux, macOS, or Windows machine and download the Souffleur server. Please install the software once the download is complete.",
+  "instructions_03": "When the Souffler server is installed on your Linux, macOS, or Windows machine, run it and press the Start button in the Souffleur server main window.",
+  "instructions_04": "Tap on the button below this instructions and scan the QR code your Souffleur server is showing on screen."
 }

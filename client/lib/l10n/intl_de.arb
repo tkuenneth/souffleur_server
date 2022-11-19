@@ -1,4 +1,10 @@
 {
   "welcome": "Willkommen zu Souffleur",
-  "scan": "QR Code scannen"
+  "scan": "QR Code scannen",
+  "unlink": "Verknüpfung aufheben",
+  "not_linked": "Die App ist nicht mit einem Souffleur Server verknüpft.",
+  "instructions_01": "Falls Sie dies noch nicht getan haben, surfen Sie bitte auf Ihrem Linux-, macOS-, oder Windows-Computer zur Seite",
+  "instructions_02": "und laden den Souffleur Server herunter. Nach dem Download installieren Sie ihn bitte.",
+  "instructions_03": "Ist der Souffleur Server auf Ihrem Linux-, macOS-, oder Windows-Computer installiert, starten Sie ihn bitte. Klicken Sie dann im Hauptfenster des Souffleur Servers auf Start.",
+  "instructions_04": "Tippen Sie nun den Button unterhalb dieser Anleitung and und scannen den QR Code, den der Souffleur Server anzeigt."
 }
