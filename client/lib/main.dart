@@ -2,11 +2,14 @@ import 'dart:io';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String _souffleurHomepage = "https://github.com/tkuenneth/souffleur";
+const String _souffleurHomepage = "https://www.thomaskuenneth.eu/souffleur";
+
+const String KeyLastKnownUrl = 'lastKnownUrl';
 
 void main() {
   runApp(SouffleurClient());
@@ -19,7 +22,7 @@ class SouffleurClient extends StatefulWidget {
 
 class _SouffleurClientState extends State<SouffleurClient>
     with WidgetsBindingObserver {
-  String lastKnownUrl = "";
+  String lastKnownUrl;
   ThemeData theme;
   BuildContext scaffoldContext;
 
@@ -37,9 +40,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       };
     }
     SharedPreferences.getInstance().then((prefs) {
-      updateLastKnownUrl(prefs.getString('lastKnownUrl'));
-      // updateLastKnownUrl(
-      //     "https://192.168.178.33:8087/souffleur/d66b1991-d02e-4bfb-af6a-9835ee7b71a8/");
+      updateLastKnownUrl(prefs.getString(KeyLastKnownUrl), false);
     });
     WidgetsBinding.instance.addObserver(this);
   }
@@ -59,11 +60,15 @@ class _SouffleurClientState extends State<SouffleurClient>
     return lastKnownUrl != null && lastKnownUrl.contains("http");
   }
 
-  void updateLastKnownUrl(String url) {
+  void updateLastKnownUrl(String url, bool shouldUpdatePrefs) async {
     setState(() {
       lastKnownUrl = url;
       _sendCommandHello();
     });
+    if (shouldUpdatePrefs) {
+      var prefs = await SharedPreferences.getInstance();
+      prefs.setString(KeyLastKnownUrl, url);
+    }
   }
 
   @override
@@ -71,6 +76,8 @@ class _SouffleurClientState extends State<SouffleurClient>
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: theme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(builder: (BuildContext context) {
           return Scaffold(
               appBar: AppBar(
@@ -80,12 +87,21 @@ class _SouffleurClientState extends State<SouffleurClient>
                     return [
                       PopupMenuItem<int>(
                         value: 0,
-                        child: Text("Scan"),
+                        child: Text(AppLocalizations.of(context).scan),
+                      ),
+                      PopupMenuItem<int>(
+                        value: 1,
+                        child: Text(AppLocalizations.of(context).unlink),
                       ),
                     ];
                   }, onSelected: (value) {
-                    if (value == 0) {
-                      _scanQRCode();
+                    switch (value) {
+                      case 0:
+                        _scanQRCode();
+                        break;
+                      case 1:
+                        updateLastKnownUrl("", true);
+                        break;
                     }
                   }),
                 ],
@@ -157,15 +173,16 @@ class _SouffleurClientState extends State<SouffleurClient>
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: Text("Welcome to Souffleur",
-                  textAlign: TextAlign.center, style: theme.headline4)),
-          Text("The app is not linked with a Souffleur server. Please visit",
-              textAlign: TextAlign.center, style: theme.bodyLarge),
+          _createTextWithMaxWidth(AppLocalizations.of(context).welcome,
+              TextAlign.center, theme.headline4,
+              padding: EdgeInsets.zero),
+          _createTextWithMaxWidth(AppLocalizations.of(context).not_linked,
+              TextAlign.center, theme.bodyLarge),
+          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_01,
+              TextAlign.center, theme.bodyLarge),
           GestureDetector(
             child: Padding(
-                padding: EdgeInsets.only(top: 16, bottom: 16),
+                padding: EdgeInsets.only(top: 16),
                 child: Text(
                   _souffleurHomepage,
                   style: theme.bodyLarge
@@ -179,21 +196,26 @@ class _SouffleurClientState extends State<SouffleurClient>
               }
             },
           ),
-          Text(
-              "to download and install one on your Linux, macOS, or Windows machine.",
-              textAlign: TextAlign.center,
-              style: theme.bodyLarge),
-          Padding(
-            padding: EdgeInsets.only(top: 16, bottom: 8),
-            child: Text(
-                "Click below to scan the QR code your Souffleur server is showing on screen.",
-                textAlign: TextAlign.center,
-                style: theme.bodyLarge),
-          ),
+          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_02,
+              TextAlign.center, theme.bodyLarge),
+          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_03,
+              TextAlign.center, theme.bodyLarge),
+          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_04,
+              TextAlign.center, theme.bodyLarge),
           TextButton(onPressed: _scanQRCode, child: Text("Scan")),
         ],
       );
     }
+  }
+
+  Widget _createTextWithMaxWidth(
+      String text, TextAlign textAlign, TextStyle style,
+      {EdgeInsets padding = const EdgeInsets.only(top: 16)}) {
+    return Container(
+        constraints: BoxConstraints(maxWidth: 300),
+        child: Padding(
+            padding: padding,
+            child: Text(text, textAlign: textAlign, style: style)));
   }
 
   Widget _createRoundedButton(
@@ -218,11 +240,9 @@ class _SouffleurClientState extends State<SouffleurClient>
   void _scanQRCode() async {
     try {
       var scanResult = await BarcodeScanner.scan();
-      var prefs = await SharedPreferences.getInstance();
       String strResult = scanResult.rawContent;
       if (strResult.isNotEmpty) {
-        prefs.setString('lastKnownUrl', strResult);
-        updateLastKnownUrl(scanResult.rawContent);
+        updateLastKnownUrl(scanResult.rawContent, true);
       }
     } on Exception catch (e) {
       debugPrint('$e');
