@@ -26,7 +26,10 @@ server/.idea/uiDesigner.xml
 **/out/
 **/.DS_Store
 **/Browse.plb
-server/stdout.txt
-server/stderr.txt
-client/.flutter-plugins-dependencies
-client/android/key.properties
+
+**/server/stdout.txt
+**/server/stderr.txt
+
+**/client/.flutter-plugins-dependencies
+**/client/android/key.properties
+**/client/lib/generated
