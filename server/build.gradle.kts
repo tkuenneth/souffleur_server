@@ -66,5 +66,8 @@ compose.desktop {
                 "jdk.unsupported"
             )
         }
+        buildTypes.release.proguard {
+            configurationFiles.from("rules.pro")
+        }
     }
 }
