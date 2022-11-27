@@ -104,8 +104,10 @@ public class Utils {
 
     private static void sendKeycode(Robot r, int keycode) {
         SwingUtilities.invokeLater(() -> {
-            r.keyPress(keycode);
-            r.keyRelease(keycode);
+            new Thread(() -> {
+                r.keyPress(keycode);
+                r.keyRelease(keycode);
+            }).start();
         });
     }
 }
