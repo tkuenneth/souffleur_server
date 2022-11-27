@@ -8,6 +8,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -28,23 +29,19 @@ public class Utils {
     private static final Logger LOGGER = Logger.getLogger(Utils.class.getName());
 
     public static void sendCursorLeft(Robot r) {
-        r.keyPress(KeyEvent.VK_LEFT);
-        r.keyRelease(KeyEvent.VK_LEFT);
+        sendKeycode(r, KeyEvent.VK_LEFT);
     }
 
     public static void sendCursorRight(Robot r) {
-        r.keyPress(KeyEvent.VK_RIGHT);
-        r.keyRelease(KeyEvent.VK_RIGHT);
+        sendKeycode(r, KeyEvent.VK_RIGHT);
     }
 
     public static void sendHome(Robot r) {
-        r.keyPress(KeyEvent.VK_HOME);
-        r.keyRelease(KeyEvent.VK_HOME);
+        sendKeycode(r, KeyEvent.VK_HOME);
     }
 
     public static void sendEnd(Robot r) {
-        r.keyPress(KeyEvent.VK_END);
-        r.keyRelease(KeyEvent.VK_END);
+        sendKeycode(r, KeyEvent.VK_END);
     }
 
     public static BufferedImage generateQRCode(String text) {
@@ -103,5 +100,12 @@ public class Utils {
             LOGGER.log(Level.SEVERE, "loadImage()", e);
         }
         return null;
+    }
+
+    private static void sendKeycode(Robot r, int keycode) {
+        SwingUtilities.invokeLater(() -> {
+            r.keyPress(keycode);
+            r.keyRelease(keycode);
+        });
     }
 }
