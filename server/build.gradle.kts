@@ -21,8 +21,20 @@ kotlin {
         }
         withJava()
     }
+    val macos = listOf(macosX64(), macosArm64())
+    configure(macos) {
+        binaries {
+            framework {
+                baseName = "shared"
+            }
+        }
+    }
     sourceSets {
+        val commonMain by getting
+        val commonTest by getting
+
         val jvmMain by getting {
+            dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("com.google.zxing:javase:3.4.1")
@@ -30,6 +42,16 @@ kotlin {
             }
         }
         val jvmTest by getting
+
+        val macosX64Main by getting {
+            dependsOn(commonMain)
+        }
+        val macosX64Test by getting
+
+        val macosArm64Main by getting {
+            dependsOn(macosX64Main)
+        }
+        val macosArm64Test by getting
     }
 }
 
