@@ -12,14 +12,11 @@ layout: home
 Are you frequently doing presentations, for example during workshops or at meetups and conferences? And have you ever wondered if you really need a physical remote control to flip through slides?
 </p>
 
-<p><em>Souffleur</em> allows you to use your smartphone, foldable, or tablet instead. Just download and install the <em>Souffleur</em> server app on your computer and pair it with the client app.
+<p><em>Souffleur</em> allows you to use your smartphone, foldable, or tablet instead. Just <a href="./install.html">download and install</a> the <em>Souffleur</em> server app on your computer and pair it with the client app.
 </p>
 
 <p>
-It's so simple.
-</p>
-
-<p>But most important:</p>
+It's so simple. But most importantly:</p>
 
 <ul>
 <li>No in-app purchases</li>
