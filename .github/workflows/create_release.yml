@@ -21,12 +21,12 @@ jobs:
         java-version: 17
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Run packageMsi with Gradle Wrapper
-      run: ./gradlew packageMsi
+    - name: Run packageReleaseMsi with Gradle Wrapper
+      run: ./gradlew packageReleaseMsi
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: ./server/build/compose/binaries/main/msi/*.msi
+        path: ./server/build/compose/binaries/main-release/msi/*.msi
         name: souffleur.msi
 
   create-macos-installer:
