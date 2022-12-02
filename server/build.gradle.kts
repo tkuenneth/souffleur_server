@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "eu.thomaskuenneth.souffleur"
-version = "1.0.6"
+version = "1.0.7"
 
 repositories {
     google()
@@ -61,7 +61,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Souffleur"
-            packageVersion = "1.0.6"
+            packageVersion = "1.0.7"
             description = "A cross platform remote control for presentations"
             copyright = "2019 - 2022 Thomas Kuenneth. All rights reserved."
             vendor = "Thomas Kuenneth"

@@ -1,5 +1,12 @@
 # What's new?
 
+## 1.0.7
+
+- UI refinements in client and server
+- macOS version (server) is now notarized
+- Refactoring
+- installables are created from release builds
+
 ## 1.0.6
 
 - Migration to Compose for Desktop
