@@ -22,6 +22,7 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 server/.idea/uiDesigner.xml
+server/.idea/artifacts/server_*
 
 **/out/
 **/.DS_Store
@@ -33,3 +34,4 @@ server/.idea/uiDesigner.xml
 **/client/.flutter-plugins-dependencies
 **/client/android/key.properties
 **/client/lib/generated
+client/pubspec.lock
