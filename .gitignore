@@ -35,3 +35,4 @@ server/.idea/artifacts/server_*
 **/client/android/key.properties
 **/client/lib/generated
 client/pubspec.lock
+server/.idea/workspace.xml
