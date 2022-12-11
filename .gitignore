@@ -36,3 +36,4 @@ server/.idea/artifacts/server_*
 **/client/lib/generated
 client/pubspec.lock
 server/.idea/workspace.xml
+server/.idea/gradle.xml
