@@ -8,16 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.*
 import eu.thomaskuenneth.souffleur.ViewModel.*
 import java.awt.AWTException
 import java.net.SocketException
@@ -55,10 +56,31 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MainScreen(viewModel: ViewModel) {
+fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
+    val showAboutDialog = remember { mutableStateOf(false) }
     MaterialTheme {
+        if (!IS_MACOS) {
+            MenuBar {
+                Menu(text = stringResource(MENU_FILE)) {
+                    Item(
+                        text = stringResource(MENU_ITEM_QUIT),
+                        onClick = exit,
+                        shortcut = KeyShortcut(Key.F4, alt = true)
+                    )
+                }
+                Menu(text = stringResource(MENU_HELP)) {
+                    Item(
+                        text = stringResource(MENU_ITEM_ABOUT),
+                        onClick = {
+                            showAboutDialog.value = true
+                        }
+                    )
+                }
+            }
+        }
         Surface(modifier = Modifier.fillMaxSize()) {
             Crossfade(targetState = qrCodeVisible) { isVisible ->
                 when (isVisible) {
@@ -67,6 +89,7 @@ fun MainScreen(viewModel: ViewModel) {
                 }
             }
         }
+        AboutDialog(showAboutDialog)
     }
 }
 
@@ -118,11 +141,6 @@ fun MainControlsScreen(viewModel: ViewModel) {
                 viewModel.stopServer()
             }
         }
-        Text(
-            modifier = Modifier.padding(8.dp),
-            style = MaterialTheme.typography.caption,
-            text = "Version: $VERSION"
-        )
     }
 }
 
@@ -265,17 +283,25 @@ fun main() {
                 loadSvgPainter(stream, LocalDensity.current)
             }
         }
+        val exit = {
+            viewModel.stopServer()
+            exitApplication()
+        }
         Window(
-            onCloseRequest = {
-                viewModel.stopServer()
-                exitApplication()
-            },
+            onCloseRequest = exit,
             title = stringResource(key = APP_NAME),
             icon = icon,
             resizable = false,
             state = WindowState(size = DpSize(600.dp, 340.dp)),
         ) {
-            MainScreen(viewModel)
+            MainScreen(viewModel, exit)
         }
+    }
+}
+
+@Composable
+fun getAppIcon() = useResource("/eu/thomaskuenneth/souffleur/appicon.svg") {
+    it.buffered().use { stream ->
+        loadSvgPainter(stream, LocalDensity.current)
     }
 }

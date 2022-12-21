@@ -1,6 +1,7 @@
 package eu.thomaskuenneth.souffleur
 
 import java.net.*
+import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -23,3 +24,7 @@ fun setDeviceAndAddress(viewModel: ViewModel) {
         LOGGER.log(Level.SEVERE, null, e)
     }
 }
+
+private val osNameLowerCase = System.getProperty("os.name", "").lowercase(Locale.getDefault())
+
+val IS_MACOS = osNameLowerCase.contains("mac os x")
