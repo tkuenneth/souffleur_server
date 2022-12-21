@@ -1,6 +1,7 @@
 package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -8,7 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
@@ -127,10 +128,19 @@ fun MainControlsScreen(viewModel: ViewModel) {
 
 @Composable
 fun QRCodeScreen(viewModel: ViewModel) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        SwingPanel(factory = {
-            SwingMain.createQRCodeComponent(viewModel)
-        })
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            val qrCode = Utils.generateQRCode(viewModel.qrCodeAsString)
+            Image(qrCode.toComposeImageBitmap(), null)
+            Button(onClick = {
+                viewModel.isRunning = false
+            }) {
+                Text(text = stringResource(BUTTON_STOP))
+            }
+        }
     }
 }
 

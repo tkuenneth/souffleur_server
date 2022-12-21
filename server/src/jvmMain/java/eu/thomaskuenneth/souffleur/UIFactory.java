@@ -23,8 +23,8 @@ public class UIFactory {
         return textField;
     }
 
-    public static JPanel createFlowPanel(int hgap) {
-        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, hgap, 8);
+    public static JPanel createFlowPanel(int horizontalGap) {
+        FlowLayout layout = new FlowLayout(FlowLayout.LEADING, horizontalGap, 8);
         layout.setAlignOnBaseline(true);
         return new JPanel(layout);
     }

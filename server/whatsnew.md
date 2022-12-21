@@ -1,5 +1,9 @@
 # What's new?
 
+## 1.0.8
+
+- Server UI refinements
+
 ## 1.0.7
 
 - UI refinements in client and server

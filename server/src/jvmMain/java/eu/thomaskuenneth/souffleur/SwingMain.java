@@ -8,7 +8,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class SwingMain extends JFrame {
 
     private final Preferences prefs;
 
-    public SwingMain(ViewModel viewModel, Preferences prefs) throws AWTException, SocketException {
+    public SwingMain(ViewModel viewModel, Preferences prefs) {
         super(stringResource(APP_NAME));
         this.viewModel = viewModel;
         this.prefs = prefs;
@@ -67,9 +66,8 @@ public class SwingMain extends JFrame {
 
     public static JComponent createQRCodeComponent(ViewModel viewModel) {
         BufferedImage image = Utils.generateQRCode(viewModel.getQRCodeAsString());
-        ImageIcon imageIcon = new ImageIcon(image);
         JPanel contentPane = new JPanel(new BorderLayout());
-        contentPane.add(new JLabel(imageIcon), BorderLayout.CENTER);
+        contentPane.add(new JLabel(new ImageIcon(image)), BorderLayout.CENTER);
         JPanel buttonPanel = new JPanel();
         JButton close = new JButton(stringResource(BUTTON_STOP));
         close.addActionListener(e -> viewModel.setRunning(false));
