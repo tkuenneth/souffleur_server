@@ -2,7 +2,10 @@ package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,6 +19,7 @@ import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
@@ -163,14 +167,14 @@ fun QRCodeScreen(viewModel: ViewModel) {
 }
 
 @Composable
-fun FirstColumn(
+fun RowScope.FirstColumn(
     device: String,
     address: String,
     port: String,
     portEnabled: Boolean,
     onPortChange: (String) -> Unit
 ) {
-    Column {
+    Column(modifier = Modifier.weight(1.0F)) {
         InfoText(
             label = DEVICE, info = device
         )
@@ -236,11 +240,15 @@ fun RowScope.SecondColumn(
 
 @Composable
 fun InfoText(label: String, info: String, modifier: Modifier = Modifier) {
-    OutlinedTextField(modifier = modifier,
+    OutlinedTextField(
+        modifier = modifier,
         value = info,
         onValueChange = {},
         readOnly = true,
-        label = { Text(text = label) }
+        singleLine = true,
+        label = {
+            Text(text = label)
+        }
     )
 }
 
