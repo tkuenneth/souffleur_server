@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.*
+import java.io.*
 
 plugins {
     kotlin("multiplatform")
@@ -6,7 +8,14 @@ plugins {
 }
 
 group = "eu.thomaskuenneth.souffleur"
-version = "1.0.7"
+val properties = Properties()
+val file = rootProject.file("src/jvmMain/resources/version.properties")
+if (file.isFile) {
+    InputStreamReader(FileInputStream(file), Charsets.UTF_8).use { reader ->
+        properties.load(reader)
+    }
+} else error("${file.absolutePath} not found")
+version = properties.getProperty("VERSION")
 
 repositories {
     google()
@@ -61,9 +70,9 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Souffleur"
-            packageVersion = "1.0.7"
+            packageVersion = version.toString()
             description = "A cross platform remote control for presentations"
-            copyright = "2019 - 2022 Thomas Kuenneth. All rights reserved."
+            copyright = "2019 - 2023 Thomas Kuenneth. All rights reserved."
             vendor = "Thomas Kuenneth"
             macOS {
                 bundleID = "eu.thomaskuenneth.souffleur"

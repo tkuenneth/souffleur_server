@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import java.awt.AWTException
 import java.net.SocketException
 import java.util.*
+import java.util.ResourceBundle.getBundle
 import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.prefs.Preferences
@@ -34,8 +35,8 @@ import kotlin.math.min
 
 
 val LOGGER: Logger = Logger.getLogger("eu.thomaskuenneth.souffleur")
+val VERSION: String = getBundle("version").getString("VERSION")
 
-const val VERSION = "1.0.8"
 const val KEY_SECRET = "secret"
 const val KEY_PORT = "port"
 

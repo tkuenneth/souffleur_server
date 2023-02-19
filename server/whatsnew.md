@@ -1,5 +1,8 @@
 # What's new?
 
+## 1.0.9
+- Got rid of hardcoded version numbers ;-)
+
 ## 1.0.8
 
 - Server UI refinements
