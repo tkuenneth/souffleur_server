@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shake/shake.dart';
 
 const String _souffleurHomepage = "https://www.thomaskuenneth.eu/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
@@ -26,6 +27,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   String lastKnownUrl = "";
   ThemeData theme;
   BuildContext scaffoldContext;
+  ShakeDetector detector;
 
   @override
   void initState() {
@@ -44,6 +46,16 @@ class _SouffleurClientState extends State<SouffleurClient>
       updateLastKnownUrl(prefs.getString(_keyLastKnownUrl), false);
     });
     WidgetsBinding.instance.addObserver(this);
+    // Detect phone shakes
+    detector = ShakeDetector.autoStart(
+      onPhoneShake: () {
+        _sendCommandNext();
+      },
+      minimumShakeCount: 1,
+      shakeSlopTimeMS: 500,
+      shakeCountResetTime: 3000,
+      shakeThresholdGravity: 2.7,
+    );
   }
 
   @override
@@ -62,7 +74,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   void updateLastKnownUrl(String url, bool shouldUpdatePrefs) async {
-    if (url == null) url = "";
+    url ??= "";
     setState(() {
       lastKnownUrl = url;
       _sendCommandHello();
@@ -121,7 +133,7 @@ class _SouffleurClientState extends State<SouffleurClient>
         child: Container(
             decoration: BoxDecoration(color: theme?.colorScheme?.surface),
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Column(
@@ -139,7 +151,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   Widget _createButtons(BuildContext context) {
-    if (isLastKnownUrlValid())
+    if (isLastKnownUrlValid()) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -150,6 +162,7 @@ class _SouffleurClientState extends State<SouffleurClient>
           Expanded(
               flex: 3,
               child: Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 8),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -159,20 +172,20 @@ class _SouffleurClientState extends State<SouffleurClient>
                               _sendCommandPrevious, "\u25c0", context)),
                       Expanded(
                           child: Padding(
+                              padding: const EdgeInsets.only(left: 8),
                               child: _createRoundedButton(
-                                  _sendCommandNext, "\u25b6", context),
-                              padding: EdgeInsets.only(left: 8))),
+                                  _sendCommandNext, "\u25b6", context))),
                     ],
-                  ),
-                  padding: EdgeInsets.only(top: 8, bottom: 8))),
+                  ))),
           Expanded(
             child: _createRoundedButton(_sendCommandEnd, "\u23ed", context),
           )
         ],
       );
-    else {
+    } else {
       final TextTheme theme = Theme.of(context).textTheme;
-      return SingleChildScrollView(child: Column(
+      return SingleChildScrollView(
+          child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -205,7 +218,7 @@ class _SouffleurClientState extends State<SouffleurClient>
               TextAlign.center, theme.bodyLarge),
           _createTextWithMaxWidth(AppLocalizations.of(context).instructions_04,
               TextAlign.center, theme.bodyLarge,
-              padding: EdgeInsets.only(top: 16, bottom: 24)),
+              padding: const EdgeInsets.only(top: 16, bottom: 24)),
           TextButton(
               onPressed: _scanQRCode,
               child: Text(AppLocalizations.of(context).scan)),
@@ -218,7 +231,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       String text, TextAlign textAlign, TextStyle style,
       {EdgeInsets padding = const EdgeInsets.only(top: 16)}) {
     return Container(
-        constraints: BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: Padding(
             padding: padding,
             child: Text(text, textAlign: textAlign, style: style)));
@@ -229,18 +242,18 @@ class _SouffleurClientState extends State<SouffleurClient>
     var color = theme?.colorScheme?.primary;
     return TextButton(
         onPressed: command,
+        style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
+                    side: BorderSide(color: color)))),
         child: FittedBox(
             fit: BoxFit.contain,
             child: Text(text,
                 style: TextStyle(
                     fontSize: 72,
                     color: color,
-                    textBaseline: TextBaseline.ideographic))),
-        style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: color)))));
+                    textBaseline: TextBaseline.ideographic))));
   }
 
   void _scanQRCode() async {
@@ -265,7 +278,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       } on Exception catch (e) {
         debugPrint('$e');
       }
-      final snackBar = SnackBar(content: const Text("Server did not respond"));
+      const snackBar = SnackBar(content: Text("Server did not respond"));
       ScaffoldMessenger.of(scaffoldContext).showSnackBar(snackBar);
     }
   }
