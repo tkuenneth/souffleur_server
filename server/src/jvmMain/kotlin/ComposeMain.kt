@@ -2,10 +2,7 @@ package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,15 +16,16 @@ import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import eu.thomaskuenneth.souffleur.ViewModel.*
+import kotlinx.coroutines.launch
 import java.awt.AWTException
 import java.net.SocketException
 import java.util.*
 import java.util.logging.Level
+import java.util.logging.Logger
 import java.util.prefs.Preferences
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
@@ -35,11 +33,14 @@ import javax.swing.UnsupportedLookAndFeelException
 import kotlin.math.min
 
 
+val LOGGER: Logger = Logger.getLogger("eu.thomaskuenneth.souffleur")
+
 const val VERSION = "1.0.7"
 const val KEY_SECRET = "secret"
 const val KEY_PORT = "port"
 
-private val prefs = Preferences.userNodeForPackage(SwingMain::class.java)
+private const val RELATIVE_PREFS_PATH = "eu/thomaskuenneth/souffleur"
+private val prefs = Preferences.userRoot().node(RELATIVE_PREFS_PATH)
 
 @Composable
 fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
@@ -65,6 +66,7 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
     val showAboutDialog = remember { mutableStateOf(false) }
+    val scaffoldState: ScaffoldState = rememberScaffoldState()
     MaterialTheme {
         if (!IS_MACOS) {
             MenuBar {
@@ -85,20 +87,22 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                 }
             }
         }
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Crossfade(targetState = qrCodeVisible) { isVisible ->
-                when (isVisible) {
-                    false -> MainControlsScreen(viewModel)
-                    true -> QRCodeScreen(viewModel)
+        Scaffold(scaffoldState = scaffoldState) {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                Crossfade(targetState = qrCodeVisible) { isVisible ->
+                    when (isVisible) {
+                        false -> MainControlsScreen(viewModel, scaffoldState)
+                        true -> QRCodeScreen(viewModel)
+                    }
                 }
             }
+            AboutDialog(showAboutDialog)
         }
-        AboutDialog(showAboutDialog)
     }
 }
 
 @Composable
-fun MainControlsScreen(viewModel: ViewModel) {
+fun MainControlsScreen(viewModel: ViewModel, scaffoldState: ScaffoldState) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -114,6 +118,8 @@ fun MainControlsScreen(viewModel: ViewModel) {
     viewModel.observeRunning {
         viewModel.isShowQRCode = isRunning
     }
+    val coroutineScope = rememberCoroutineScope()
+    val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().weight(1.0F).padding(16.dp),
@@ -144,6 +150,13 @@ fun MainControlsScreen(viewModel: ViewModel) {
             } else {
                 viewModel.stopServer()
             }
+        }
+    }
+    if (isHelloActive) {
+        coroutineScope.launch {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = stringResource(key = SNACKBAR_OPEN_PRESENTATION)
+            )
         }
     }
 }
@@ -253,7 +266,7 @@ fun InfoText(label: String, info: String, modifier: Modifier = Modifier) {
 }
 
 fun main() {
-    var secret: String? = prefs.get(KEY_SECRET, null)
+    var secret = prefs.get(KEY_SECRET, null)
     if (secret == null) {
         secret = UUID.randomUUID().toString()
         prefs.put(KEY_SECRET, secret)
@@ -262,15 +275,11 @@ fun main() {
     SwingUtilities.invokeLater {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-            // val ui = SwingMain(viewModel, prefs)
             setDeviceAndAddress(viewModel = viewModel)
             viewModel.isRunning = false
             viewModel.secret = secret
             viewModel.port = prefs.getInt(KEY_PORT, 8087)
             viewModel.isShowQRCode = false
-//            ui.setLocationRelativeTo(null)
-//            ui.pack()
-//            ui.isVisible = true
         } catch (e: UnsupportedLookAndFeelException) {
             LOGGER.log(Level.SEVERE, "setLookAndFeel()", e)
         } catch (e: AWTException) {

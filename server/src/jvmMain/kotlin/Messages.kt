@@ -17,6 +17,8 @@ const val MENU_ITEM_ABOUT = "menu.item.about"
 
 const val TITLE_ABOUT = "title.about"
 
+const val SNACKBAR_OPEN_PRESENTATION = "snackbar.open_presentation"
+
 fun stringResource(key: String): String {
     return resourceBundle.getString(key)
 }

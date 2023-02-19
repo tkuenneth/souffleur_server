@@ -3,9 +3,6 @@ package eu.thomaskuenneth.souffleur
 import java.net.*
 import java.util.*
 import java.util.logging.Level
-import java.util.logging.Logger
-
-val LOGGER: Logger = Logger.getLogger(SwingMain::class.java.name)
 
 // See https://stackoverflow.com/a/69160376
 fun setDeviceAndAddress(viewModel: ViewModel) {
