@@ -35,7 +35,7 @@ import kotlin.math.min
 
 val LOGGER: Logger = Logger.getLogger("eu.thomaskuenneth.souffleur")
 
-const val VERSION = "1.0.7"
+const val VERSION = "1.0.8"
 const val KEY_SECRET = "secret"
 const val KEY_PORT = "port"
 
