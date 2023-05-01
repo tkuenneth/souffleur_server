@@ -43,6 +43,8 @@ const val KEY_PORT = "port"
 private const val RELATIVE_PREFS_PATH = "eu/thomaskuenneth/souffleur"
 private val prefs = Preferences.userRoot().node(RELATIVE_PREFS_PATH)
 
+private const val APP_ICON = "/eu/thomaskuenneth/souffleur/appicon.svg"
+
 @Composable
 fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
     Icon(
@@ -66,7 +68,7 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 @Composable
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
-    val showAboutDialog = remember { mutableStateOf(false) }
+    var showAboutDialog by remember { mutableStateOf(false) }
     val scaffoldState: ScaffoldState = rememberScaffoldState()
     MaterialTheme {
         if (!IS_MACOS) {
@@ -82,7 +84,7 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                     Item(
                         text = stringResource(MENU_ITEM_ABOUT),
                         onClick = {
-                            showAboutDialog.value = true
+                            showAboutDialog = true
                         }
                     )
                 }
@@ -97,7 +99,7 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                     }
                 }
             }
-            AboutDialog(showAboutDialog)
+            if (showAboutDialog) AboutDialog(APP_ICON) { showAboutDialog = false }
         }
     }
 }
@@ -296,11 +298,7 @@ fun main() {
         }
     }
     application {
-        val icon = useResource("/eu/thomaskuenneth/souffleur/appicon.svg") {
-            it.buffered().use { stream ->
-                loadSvgPainter(stream, LocalDensity.current)
-            }
-        }
+        val icon = getAppIcon(APP_ICON)
         val exit = {
             viewModel.stopServer()
             exitApplication()
@@ -318,7 +316,7 @@ fun main() {
 }
 
 @Composable
-fun getAppIcon() = useResource("/eu/thomaskuenneth/souffleur/appicon.svg") {
+fun getAppIcon(res: String) = useResource(res) {
     it.buffered().use { stream ->
         loadSvgPainter(stream, LocalDensity.current)
     }
