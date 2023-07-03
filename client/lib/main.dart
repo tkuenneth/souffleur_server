@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shake/shake.dart';
 
-const String _souffleurHomepage = "https://www.thomaskuenneth.eu/souffleur";
+const String _urlHomepage = "https://tkuenneth.github.io/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
 const String _appName = "Souffleur";
 const String protocolHttp = "http";
@@ -34,16 +34,14 @@ class _SouffleurClientState extends State<SouffleurClient>
   @override
   void initState() {
     super.initState();
-    HttpOverrides.global = SouffleurHttpOverrides(this);
-    var window = WidgetsBinding.instance?.window;
-    if (window != null) {
-      _updateThemeData(window.platformBrightness);
-      window.onPlatformBrightnessChanged = () {
-        setState(() {
-          _updateThemeData(window.platformBrightness);
-        });
-      };
-    }
+    HttpOverrides.global = _SouffleurHttpOverrides(this);
+    var window = WidgetsBinding.instance.window;
+    _updateThemeData(window.platformBrightness);
+    window.onPlatformBrightnessChanged = () {
+      setState(() {
+        _updateThemeData(window.platformBrightness);
+      });
+    };
     SharedPreferences.getInstance().then((prefs) {
       updateLastKnownUrl(prefs.getString(_keyLastKnownUrl), false);
     });
@@ -202,13 +200,13 @@ class _SouffleurClientState extends State<SouffleurClient>
             child: Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text(
-                  _souffleurHomepage,
+                  _urlHomepage,
                   style: theme.bodyLarge!
                       .copyWith(decoration: TextDecoration.underline),
                 )),
             onTap: () async {
               try {
-                await launchUrl(Uri.parse(_souffleurHomepage));
+                await launchUrl(Uri.parse(_urlHomepage));
               } catch (err) {
                 debugPrint('Something bad happened');
               }
@@ -314,10 +312,10 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 }
 
-class SouffleurHttpOverrides extends HttpOverrides {
+class _SouffleurHttpOverrides extends HttpOverrides {
   _SouffleurClientState state;
 
-  SouffleurHttpOverrides(this.state);
+  _SouffleurHttpOverrides(this.state);
 
   @override
   HttpClient createHttpClient(SecurityContext? context) {
