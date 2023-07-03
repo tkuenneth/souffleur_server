@@ -14,10 +14,12 @@ const String _appName = "Souffleur";
 const String protocolHttp = "http";
 
 void main() {
-  runApp(SouffleurClient());
+  runApp(const SouffleurClient());
 }
 
 class SouffleurClient extends StatefulWidget {
+  const SouffleurClient({Key? key}) : super(key: key);
+
   @override
   State<SouffleurClient> createState() => _SouffleurClientState();
 }
@@ -25,9 +27,9 @@ class SouffleurClient extends StatefulWidget {
 class _SouffleurClientState extends State<SouffleurClient>
     with WidgetsBindingObserver {
   String lastKnownUrl = "";
-  ThemeData theme;
-  BuildContext scaffoldContext;
-  ShakeDetector detector;
+  ThemeData? theme;
+  BuildContext? scaffoldContext;
+  ShakeDetector? detector;
 
   @override
   void initState() {
@@ -70,18 +72,18 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   bool isLastKnownUrlValid() {
-    return lastKnownUrl != null && lastKnownUrl.contains(protocolHttp);
+      return lastKnownUrl.contains(protocolHttp);
   }
 
-  void updateLastKnownUrl(String url, bool shouldUpdatePrefs) async {
+  void updateLastKnownUrl(String? url, bool shouldUpdatePrefs) async {
     url ??= "";
     setState(() {
-      lastKnownUrl = url;
+      lastKnownUrl = url ?? "";
       _sendCommandHello();
     });
     if (shouldUpdatePrefs) {
       SharedPreferences.getInstance().then((prefs) {
-        prefs.setString(_keyLastKnownUrl, url);
+        prefs.setString(_keyLastKnownUrl, url!);
       });
     }
   }
@@ -102,11 +104,11 @@ class _SouffleurClientState extends State<SouffleurClient>
                     return [
                       PopupMenuItem<int>(
                         value: 0,
-                        child: Text(AppLocalizations.of(context).scan),
+                        child: Text(AppLocalizations.of(context)!.scan),
                       ),
                       PopupMenuItem<int>(
                         value: 1,
-                        child: Text(AppLocalizations.of(context).unlink),
+                        child: Text(AppLocalizations.of(context)!.unlink),
                       ),
                     ];
                   }, onSelected: (value) {
@@ -131,7 +133,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   Widget _createBody(BuildContext context) {
     return SafeArea(
         child: Container(
-            decoration: BoxDecoration(color: theme?.colorScheme?.surface),
+            decoration: BoxDecoration(color: theme?.colorScheme.surface),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Directionality(
@@ -189,19 +191,19 @@ class _SouffleurClientState extends State<SouffleurClient>
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _createTextWithMaxWidth(AppLocalizations.of(context).welcome,
-              TextAlign.center, theme.headline4,
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.welcome,
+              TextAlign.center, theme.headlineMedium!,
               padding: EdgeInsets.zero),
-          _createTextWithMaxWidth(AppLocalizations.of(context).not_linked,
-              TextAlign.center, theme.bodyLarge),
-          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_01,
-              TextAlign.center, theme.bodyLarge),
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.not_linked,
+              TextAlign.center, theme.bodyLarge!),
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.instructions_01,
+              TextAlign.center, theme.bodyLarge!),
           GestureDetector(
             child: Padding(
-                padding: EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 16),
                 child: Text(
                   _souffleurHomepage,
-                  style: theme.bodyLarge
+                  style: theme.bodyLarge!
                       .copyWith(decoration: TextDecoration.underline),
                 )),
             onTap: () async {
@@ -212,16 +214,16 @@ class _SouffleurClientState extends State<SouffleurClient>
               }
             },
           ),
-          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_02,
-              TextAlign.center, theme.bodyLarge),
-          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_03,
-              TextAlign.center, theme.bodyLarge),
-          _createTextWithMaxWidth(AppLocalizations.of(context).instructions_04,
-              TextAlign.center, theme.bodyLarge,
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.instructions_02,
+              TextAlign.center, theme.bodyLarge!),
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.instructions_03,
+              TextAlign.center, theme.bodyLarge!),
+          _createTextWithMaxWidth(AppLocalizations.of(context)!.instructions_04,
+              TextAlign.center, theme.bodyLarge!,
               padding: const EdgeInsets.only(top: 16, bottom: 24)),
           TextButton(
               onPressed: _scanQRCode,
-              child: Text(AppLocalizations.of(context).scan)),
+              child: Text(AppLocalizations.of(context)!.scan)),
         ],
       ));
     }
@@ -238,8 +240,8 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   Widget _createRoundedButton(
-      void command(), String text, BuildContext context) {
-    var color = theme?.colorScheme?.primary;
+      void Function() command, String text, BuildContext context) {
+    var color = theme!.colorScheme.primary;
     return TextButton(
         onPressed: command,
         style: ButtonStyle(
@@ -279,7 +281,7 @@ class _SouffleurClientState extends State<SouffleurClient>
         debugPrint('$e');
       }
       const snackBar = SnackBar(content: Text("Server did not respond"));
-      ScaffoldMessenger.of(scaffoldContext).showSnackBar(snackBar);
+      ScaffoldMessenger.of(scaffoldContext!).showSnackBar(snackBar);
     }
   }
 
@@ -318,7 +320,7 @@ class SouffleurHttpOverrides extends HttpOverrides {
   SouffleurHttpOverrides(this.state);
 
   @override
-  HttpClient createHttpClient(SecurityContext context) {
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) =>
