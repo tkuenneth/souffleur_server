@@ -1,9 +1,9 @@
 # What's new?
 
-## 1.0.10
+## 1.1.0
 - Libraries and tools upgrades
 - Refactoring
-- On iOS, the client uses SF Symbols
+- Using Material3
 
 ## 1.0.9
 - Got rid of hardcoded version numbers ;-)

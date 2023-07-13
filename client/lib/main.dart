@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
@@ -8,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shake/shake.dart';
-import 'package:sf_symbols/sf_symbols.dart';
 
 const String _urlHomepage = "https://tkuenneth.github.io/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
@@ -16,10 +14,10 @@ const String _keyShakeEnabled = "shakeEnabled";
 const String _appName = "Souffleur";
 const String protocolHttp = "http";
 
-const _symbolNext = "\u25b6";
-const _symbolPrevious = "\u25c0";
-const _symbolHome = "\u23ee";
-const _symbolEnd = "\u23ed";
+const _symbolNext = Icons.arrow_forward_ios_rounded;
+const _symbolPrevious = Icons.arrow_back_ios_rounded;
+const _symbolHome = Icons.first_page;
+const _symbolEnd = Icons.last_page;
 
 void main() {
   runApp(const SouffleurClient());
@@ -268,33 +266,17 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   Widget _createRoundedButton(
-      void Function() command, String text, BuildContext context) {
+      void Function() command, IconData iconData, BuildContext context) {
     var color = theme!.colorScheme.primary;
-    if (Platform.isIOS) {
-      return SizedBox(
-        width: 48,
-        child: SfSymbol(
-          size: 48,
-          weight: FontWeight.normal,
-          color: color,
-          name: "",
-        ),
-      );
-    }
-    return TextButton(
-        onPressed: command,
-        style: ButtonStyle(
-            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: color)))),
-        child: FittedBox(
-            fit: BoxFit.contain,
-            child: Text(text,
-                style: TextStyle(
-                    fontSize: 72,
-                    color: color,
-                    textBaseline: TextBaseline.ideographic))));
+    return IconButton(
+      icon: Icon(iconData),
+      onPressed: command,
+      style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0),
+                  side: BorderSide(color: color)))),
+    );
   }
 
   void _scanQRCode() async {
@@ -349,7 +331,10 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   void _updateThemeData(Brightness brightness) {
-    theme = ThemeData(brightness: brightness);
+    theme = ThemeData(
+      brightness: brightness,
+      useMaterial3: true,
+    );
   }
 
   void _toggleShakeEnabled() {
