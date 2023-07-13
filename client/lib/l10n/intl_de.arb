@@ -2,6 +2,8 @@
   "welcome": "Willkommen zu Souffleur",
   "scan": "QR Code scannen",
   "unlink": "Verknüpfung aufheben",
+  "enable_shake": "Schütteln einschalten",
+  "disable_shake": "Schütteln ausschalten",
   "not_linked": "Die App ist nicht mit einem Souffleur Server verknüpft.",
   "instructions_01": "Falls Sie dies noch nicht getan haben, surfen Sie bitte auf Ihrem Linux-, macOS-, oder Windows-Computer zur Seite",
   "instructions_02": "und laden den Souffleur Server herunter. Nach dem Download installieren Sie ihn bitte.",

@@ -46,6 +46,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(compose.material3)
                 implementation("com.google.zxing:javase:3.4.1")
                 implementation( "org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
             }

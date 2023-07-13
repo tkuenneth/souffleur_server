@@ -1,5 +1,10 @@
 # What's new?
 
+## 1.0.10
+- Libraries and tools upgrades
+- Refactoring
+- On iOS, the client uses SF Symbols
+
 ## 1.0.9
 - Got rid of hardcoded version numbers ;-)
 

@@ -1,6 +1,6 @@
 package eu.thomaskuenneth.souffleur
 
-import java.util.*
+import java.util.ResourceBundle
 
 private val resourceBundle = ResourceBundle
     .getBundle("eu.thomaskuenneth.souffleur.messages")

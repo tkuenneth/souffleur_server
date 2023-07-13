@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
@@ -7,11 +8,18 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shake/shake.dart';
+import 'package:sf_symbols/sf_symbols.dart';
 
 const String _urlHomepage = "https://tkuenneth.github.io/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
+const String _keyShakeEnabled = "shakeEnabled";
 const String _appName = "Souffleur";
 const String protocolHttp = "http";
+
+const _symbolNext = "\u25b6";
+const _symbolPrevious = "\u25c0";
+const _symbolHome = "\u23ee";
+const _symbolEnd = "\u23ed";
 
 void main() {
   runApp(const SouffleurClient());
@@ -30,6 +38,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   ThemeData? theme;
   BuildContext? scaffoldContext;
   ShakeDetector? detector;
+  bool shakeEnabled = false;
 
   @override
   void initState() {
@@ -44,10 +53,13 @@ class _SouffleurClientState extends State<SouffleurClient>
     };
     SharedPreferences.getInstance().then((prefs) {
       updateLastKnownUrl(prefs.getString(_keyLastKnownUrl), false);
+      setState(() {
+        shakeEnabled = prefs.getBool(_keyShakeEnabled) ?? false;
+        _startOrStopListening();
+      });
     });
     WidgetsBinding.instance.addObserver(this);
-    // Detect phone shakes
-    detector = ShakeDetector.autoStart(
+    detector = ShakeDetector.waitForStart(
       onPhoneShake: () {
         _sendCommandNext();
       },
@@ -70,7 +82,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   bool isLastKnownUrlValid() {
-      return lastKnownUrl.contains(protocolHttp);
+    return lastKnownUrl.contains(protocolHttp);
   }
 
   void updateLastKnownUrl(String? url, bool shouldUpdatePrefs) async {
@@ -108,6 +120,21 @@ class _SouffleurClientState extends State<SouffleurClient>
                         value: 1,
                         child: Text(AppLocalizations.of(context)!.unlink),
                       ),
+                      PopupMenuItem<int>(
+                        value: 2,
+                        child: Text(AppLocalizations.of(context)!.unlink),
+                      ),
+                      shakeEnabled
+                          ? PopupMenuItem<int>(
+                              value: 2,
+                              child: Text(
+                                  AppLocalizations.of(context)!.disable_shake),
+                            )
+                          : PopupMenuItem<int>(
+                              value: 2,
+                              child: Text(
+                                  AppLocalizations.of(context)!.enable_shake),
+                            ),
                     ];
                   }, onSelected: (value) {
                     switch (value) {
@@ -116,6 +143,9 @@ class _SouffleurClientState extends State<SouffleurClient>
                         break;
                       case 1:
                         updateLastKnownUrl("", true);
+                        break;
+                      case 2:
+                        _toggleShakeEnabled();
                         break;
                     }
                   }),
@@ -157,7 +187,7 @@ class _SouffleurClientState extends State<SouffleurClient>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: _createRoundedButton(_sendCommandHome, "\u23ee", context),
+            child: _createRoundedButton(_sendCommandHome, _symbolHome, context),
           ),
           Expanded(
               flex: 3,
@@ -169,16 +199,16 @@ class _SouffleurClientState extends State<SouffleurClient>
                     children: [
                       Expanded(
                           child: _createRoundedButton(
-                              _sendCommandPrevious, "\u25c0", context)),
+                              _sendCommandPrevious, _symbolPrevious, context)),
                       Expanded(
                           child: Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: _createRoundedButton(
-                                  _sendCommandNext, "\u25b6", context))),
+                                  _sendCommandNext, _symbolNext, context))),
                     ],
                   ))),
           Expanded(
-            child: _createRoundedButton(_sendCommandEnd, "\u23ed", context),
+            child: _createRoundedButton(_sendCommandEnd, _symbolEnd, context),
           )
         ],
       );
@@ -240,6 +270,17 @@ class _SouffleurClientState extends State<SouffleurClient>
   Widget _createRoundedButton(
       void Function() command, String text, BuildContext context) {
     var color = theme!.colorScheme.primary;
+    if (Platform.isIOS) {
+      return SizedBox(
+        width: 48,
+        child: SfSymbol(
+          size: 48,
+          weight: FontWeight.normal,
+          color: color,
+          name: "",
+        ),
+      );
+    }
     return TextButton(
         onPressed: command,
         style: ButtonStyle(
@@ -273,7 +314,7 @@ class _SouffleurClientState extends State<SouffleurClient>
       try {
         final response = await http
             .get(Uri.parse(lastKnownUrl + suffix))
-            .timeout(const Duration(seconds: 2));
+            .timeout(const Duration(seconds: 10));
         if (response.statusCode == 200) return;
       } on Exception catch (e) {
         debugPrint('$e');
@@ -309,6 +350,24 @@ class _SouffleurClientState extends State<SouffleurClient>
 
   void _updateThemeData(Brightness brightness) {
     theme = ThemeData(brightness: brightness);
+  }
+
+  void _toggleShakeEnabled() {
+    setState(() {
+      shakeEnabled = !shakeEnabled;
+      SharedPreferences.getInstance().then((prefs) {
+        prefs.setBool(_keyShakeEnabled, shakeEnabled);
+      });
+      _startOrStopListening();
+    });
+  }
+
+  void _startOrStopListening() {
+    if (shakeEnabled) {
+      detector?.startListening();
+    } else {
+      detector?.stopListening();
+    }
   }
 }
 

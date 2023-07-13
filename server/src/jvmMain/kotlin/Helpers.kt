@@ -1,7 +1,11 @@
 package eu.thomaskuenneth.souffleur
 
-import java.net.*
-import java.util.*
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.NetworkInterface
+import java.net.SocketException
+import java.net.UnknownHostException
+import java.util.Locale
 import java.util.logging.Level
 
 // See https://stackoverflow.com/a/69160376

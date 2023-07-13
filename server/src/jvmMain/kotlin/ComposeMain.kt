@@ -2,11 +2,34 @@ package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FirstPage
+import androidx.compose.material.icons.filled.LastPage
+import androidx.compose.material.icons.filled.NavigateBefore
+import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,13 +41,21 @@ import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
-import eu.thomaskuenneth.souffleur.ViewModel.*
+import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.MenuBar
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.window.application
+import eu.thomaskuenneth.souffleur.ViewModel.ADDRESS
+import eu.thomaskuenneth.souffleur.ViewModel.DEVICE
+import eu.thomaskuenneth.souffleur.ViewModel.LAST_COMMAND
+import eu.thomaskuenneth.souffleur.ViewModel.RUNNING
+import eu.thomaskuenneth.souffleur.ViewModel.SHOW_QR_CODE
 import kotlinx.coroutines.launch
 import java.awt.AWTException
 import java.net.SocketException
-import java.util.*
 import java.util.ResourceBundle.getBundle
+import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.prefs.Preferences
@@ -58,18 +89,17 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
         },
         contentDescription = indicator,
         tint = if (isActive)
-            MaterialTheme.colors.primary
+            MaterialTheme.colorScheme.primary
         else
-            MaterialTheme.colors.onBackground,
+            MaterialTheme.colorScheme.onBackground,
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
     var showAboutDialog by remember { mutableStateOf(false) }
-    val scaffoldState: ScaffoldState = rememberScaffoldState()
     MaterialTheme {
         if (!IS_MACOS) {
             MenuBar {
@@ -90,11 +120,11 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                 }
             }
         }
-        Scaffold(scaffoldState = scaffoldState) {
+        Scaffold {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Crossfade(targetState = qrCodeVisible) { isVisible ->
                     when (isVisible) {
-                        false -> MainControlsScreen(viewModel, scaffoldState)
+                        false -> MainControlsScreen(viewModel)
                         true -> QRCodeScreen(viewModel)
                     }
                 }
@@ -105,7 +135,7 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
 }
 
 @Composable
-fun MainControlsScreen(viewModel: ViewModel, scaffoldState: ScaffoldState) {
+fun MainControlsScreen(viewModel: ViewModel) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -156,8 +186,9 @@ fun MainControlsScreen(viewModel: ViewModel, scaffoldState: ScaffoldState) {
         }
     }
     if (isHelloActive) {
+        val snackbarHostState = remember { SnackbarHostState() }
         coroutineScope.launch {
-            scaffoldState.snackbarHostState.showSnackbar(
+            snackbarHostState.showSnackbar(
                 message = stringResource(key = SNACKBAR_OPEN_PRESENTATION)
             )
         }
@@ -182,6 +213,7 @@ fun QRCodeScreen(viewModel: ViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.FirstColumn(
     device: String,
@@ -254,6 +286,7 @@ fun RowScope.SecondColumn(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoText(label: String, info: String, modifier: Modifier = Modifier) {
     OutlinedTextField(

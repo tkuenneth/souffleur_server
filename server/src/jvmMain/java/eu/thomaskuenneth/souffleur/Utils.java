@@ -7,19 +7,13 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -79,27 +73,6 @@ public class Utils {
 
     public static String nullSafeString(Object s) {
         return (s == null) ? "" : s.toString();
-    }
-
-    public static List<Image> loadIconImages(String[] paths) {
-        List<Image> iconImages = new ArrayList<>();
-        for (String path : paths) {
-            Image image = loadImage(path);
-            if (image != null) {
-                iconImages.add(image);
-            }
-        }
-        return iconImages;
-    }
-
-    public static Image loadImage(String path) {
-        try (InputStream in = UIFactory.class.getResourceAsStream(path)) {
-            if (in != null)
-                return ImageIO.read(in);
-        } catch (IOException | IllegalArgumentException e) {
-            LOGGER.log(Level.SEVERE, "loadImage()", e);
-        }
-        return null;
     }
 
     private static void sendKeycode(Robot r, int keycode) {
