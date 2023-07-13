@@ -2,7 +2,7 @@ name: souffleur
 description: A cross platform remote control for presentations
 publish_to: 'none'
 
-version: 1.0.7+1
+version: 1.0.10+1
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
@@ -13,8 +13,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.0
-  barcode_scan2: any
-  http: ^0.13.4
+  barcode_scan2: ^4.2.4
+  http: ^1.1.0
   shared_preferences: ^2.0.15
   url_launcher: ^6.1.4
   shake: ^2.2.0
