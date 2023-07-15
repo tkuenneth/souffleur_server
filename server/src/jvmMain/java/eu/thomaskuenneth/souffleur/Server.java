@@ -7,10 +7,9 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.time.LocalTime;
@@ -18,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 /**
  * The Souffleur server utilizes {@code com.sun.net.httpserver.HttpsServer} to listen to
@@ -32,6 +30,10 @@ import java.util.logging.Logger;
  * In this case, the password would be <strong>password</strong>.
  */
 public class Server implements HttpHandler {
+
+    static {
+        System.setProperty("sun.net.httpserver.nodelay", "true");
+    }
 
     public static final String END = "end";
     public static final String NEXT = "next";
@@ -53,40 +55,44 @@ public class Server implements HttpHandler {
 
     @Override
     public void handle(HttpExchange t) {
-        URI requestUri = t.getRequestURI();
-        String path = requestUri.getPath();
-        switch (path.substring(path.lastIndexOf('/') + 1).toLowerCase()) {
-            case HOME -> {
-                Utils.sendHome(robot);
-                callback.commandReceived(HOME);
-                sendStatus(t, 200);
+        try {
+            String path = t.getRequestURI().getPath();
+            switch (path.substring(path.lastIndexOf('/') + 1).toLowerCase()) {
+                case HOME -> {
+                    Utils.sendHome(robot);
+                    callback.commandReceived(HOME);
+                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                }
+                case PREVIOUS -> {
+                    Utils.sendCursorLeft(robot);
+                    callback.commandReceived(PREVIOUS);
+                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                }
+                case NEXT -> {
+                    Utils.sendCursorRight(robot);
+                    callback.commandReceived(NEXT);
+                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                }
+                case END -> {
+                    Utils.sendEnd(robot);
+                    callback.commandReceived(END);
+                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                }
+                case HELLO -> {
+                    sendStringResult(t,
+                            String.format("Hello, world! It's %s.",
+                                    DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(LocalTime.now())));
+                    callback.commandReceived(HELLO);
+                }
+                default -> sendStatus(t, HttpURLConnection.HTTP_NOT_FOUND);
             }
-            case PREVIOUS -> {
-                Utils.sendCursorLeft(robot);
-                callback.commandReceived(PREVIOUS);
-                sendStatus(t, 200);
-            }
-            case NEXT -> {
-                Utils.sendCursorRight(robot);
-                callback.commandReceived(NEXT);
-                sendStatus(t, 200);
-            }
-            case END -> {
-                Utils.sendEnd(robot);
-                callback.commandReceived(END);
-                sendStatus(t, 200);
-            }
-            case HELLO -> {
-                sendStringResult(t, String.format("Hello, world! It's %s.",
-                        DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).format(LocalTime.now())));
-                callback.commandReceived(HELLO);
-            }
-            default -> sendStatus(t, 404);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "handle()", e);
+            sendStatus(t, HttpURLConnection.HTTP_BAD_REQUEST);
         }
     }
 
     public boolean start(String address, int port, String secret) {
-        boolean success = false;
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
             InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
@@ -116,13 +122,13 @@ public class Server implements HttpHandler {
             this.httpServer.createContext("/souffleur/" + secret, this);
             this.httpServer.setExecutor(null);
             this.httpServer.start();
-            success = true;
+            return true;
         } catch (IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException |
                  UnrecoverableKeyException | CertificateException e) {
-            LOGGER.log(Level.SEVERE, null, e);
+            LOGGER.log(Level.SEVERE, "start()", e);
             stop();
         }
-        return success;
+        return false;
     }
 
     public void stop() {
@@ -137,19 +143,21 @@ public class Server implements HttpHandler {
     }
 
     private void sendStringResult(HttpExchange t, String text) {
-        byte[] result = text.getBytes();
-        try (OutputStream os = t.getResponseBody()) {
-            t.sendResponseHeaders(200, result.length);
-            os.write(result);
+        try {
+            byte[] result = text.getBytes();
             t.getResponseHeaders().add("Content-Type", "text/plain");
+            t.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length);
+            t.getResponseBody().write(result);
+            t.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }
     }
 
     private void sendStatus(HttpExchange t, int status) {
-        try (OutputStream ignored = t.getResponseBody()) {
-            t.sendResponseHeaders(status, 0);
+        try {
+            t.sendResponseHeaders(status, -1);
+            t.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }

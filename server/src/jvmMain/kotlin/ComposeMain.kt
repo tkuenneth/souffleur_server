@@ -2,6 +2,7 @@ package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,8 @@ import eu.thomaskuenneth.souffleur.ViewModel.RUNNING
 import eu.thomaskuenneth.souffleur.ViewModel.SHOW_QR_CODE
 import kotlinx.coroutines.launch
 import java.awt.AWTException
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import java.net.SocketException
 import java.util.ResourceBundle.getBundle
 import java.util.UUID
@@ -203,7 +206,16 @@ fun QRCodeScreen(viewModel: ViewModel) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val qrCode = Utils.generateQRCode(viewModel.qrCodeAsString)
-            Image(qrCode.toComposeImageBitmap(), null)
+            Image(
+                bitmap = qrCode.toComposeImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    SwingUtilities.invokeLater {
+                        val selection = StringSelection(viewModel.qrCodeAsString)
+                        val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                        clipboard.setContents(selection, selection)
+                    }
+                })
             Button(onClick = {
                 viewModel.isRunning = false
             }) {

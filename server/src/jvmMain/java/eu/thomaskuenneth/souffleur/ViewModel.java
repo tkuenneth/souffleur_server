@@ -40,8 +40,9 @@ public class ViewModel {
     public ViewModel() throws AWTException {
         server = new Server(command -> {
             setShowQRCode(false);
-            if (indicatorThread != null)
+            if (indicatorThread != null) {
                 indicatorThread.interrupt();
+            }
             indicatorThread = new Thread(() -> {
                 SwingUtilities.invokeLater(() -> setLastCommand(command));
                 try {

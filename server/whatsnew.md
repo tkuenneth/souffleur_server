@@ -1,5 +1,7 @@
 # What's new?
 
+- Clicking on the QR code pastes the url to the system clipboard
+
 ## 1.1.0
 - Libraries and tools upgrades
 - Refactoring
