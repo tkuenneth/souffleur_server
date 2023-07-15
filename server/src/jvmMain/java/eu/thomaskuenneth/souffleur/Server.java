@@ -1,12 +1,18 @@
 package eu.thomaskuenneth.souffleur;
 
-import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 
-import javax.net.ssl.*;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -33,6 +39,7 @@ public class Server implements HttpHandler {
 
     static {
         System.setProperty("sun.net.httpserver.nodelay", "true");
+        System.setProperty("sun.net.httpserver.debug", "false");
     }
 
     public static final String END = "end";
@@ -61,34 +68,35 @@ public class Server implements HttpHandler {
                 case HOME -> {
                     Utils.sendHome(robot);
                     callback.commandReceived(HOME);
-                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                    sendResult(t, "", HttpURLConnection.HTTP_OK);
                 }
                 case PREVIOUS -> {
                     Utils.sendCursorLeft(robot);
                     callback.commandReceived(PREVIOUS);
-                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                    sendResult(t, "", HttpURLConnection.HTTP_OK);
                 }
                 case NEXT -> {
                     Utils.sendCursorRight(robot);
                     callback.commandReceived(NEXT);
-                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                    sendResult(t, "", HttpURLConnection.HTTP_OK);
                 }
                 case END -> {
                     Utils.sendEnd(robot);
                     callback.commandReceived(END);
-                    sendStatus(t, HttpURLConnection.HTTP_OK);
+                    sendResult(t, "", HttpURLConnection.HTTP_OK);
                 }
                 case HELLO -> {
-                    sendStringResult(t,
+                    sendResult(t,
                             String.format("Hello, world! It's %s.",
-                                    DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(LocalTime.now())));
+                                    DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(LocalTime.now())),
+                            HttpURLConnection.HTTP_OK);
                     callback.commandReceived(HELLO);
                 }
-                default -> sendStatus(t, HttpURLConnection.HTTP_NOT_FOUND);
+                default -> sendResult(t, "", HttpURLConnection.HTTP_NOT_FOUND);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "handle()", e);
-            sendStatus(t, HttpURLConnection.HTTP_BAD_REQUEST);
+            sendResult(t, "", HttpURLConnection.HTTP_BAD_REQUEST);
         }
     }
 
@@ -97,7 +105,6 @@ public class Server implements HttpHandler {
             InetAddress inetAddress = InetAddress.getByName(address);
             InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
             this.httpServer = HttpsServer.create(socketAddress, 0);
-            SSLContext sslContext = SSLContext.getInstance("TLS");
             char[] password = "password".toCharArray();
             KeyStore ks = KeyStore.getInstance("JKS");
             InputStream is = getClass().getResourceAsStream("/souffleur.jks");
@@ -106,19 +113,9 @@ public class Server implements HttpHandler {
             kmf.init(ks, password);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(ks);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-            this.httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
-                @Override
-                public void configure(HttpsParameters params) {
-                    SSLContext c = getSSLContext();
-                    SSLEngine engine = c.createSSLEngine();
-                    params.setNeedClientAuth(false);
-                    params.setCipherSuites(engine.getEnabledCipherSuites());
-                    params.setProtocols(engine.getEnabledProtocols());
-                    SSLParameters sslParameters = c.getDefaultSSLParameters();
-                    params.setSSLParameters(sslParameters);
-                }
-            });
+            this.httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext));
             this.httpServer.createContext("/souffleur/" + secret, this);
             this.httpServer.setExecutor(null);
             this.httpServer.start();
@@ -142,22 +139,16 @@ public class Server implements HttpHandler {
         return httpServer != null;
     }
 
-    private void sendStringResult(HttpExchange t, String text) {
+    private void sendResult(HttpExchange t, String text, int status) {
         try {
+            t.getRequestBody().close();
             byte[] result = text.getBytes();
             t.getResponseHeaders().add("Content-Type", "text/plain");
-            t.sendResponseHeaders(HttpURLConnection.HTTP_OK, result.length);
-            t.getResponseBody().write(result);
-            t.close();
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "sendStringResult()", e);
-        }
-    }
-
-    private void sendStatus(HttpExchange t, int status) {
-        try {
-            t.sendResponseHeaders(status, -1);
-            t.close();
+            t.sendResponseHeaders(status, result.length);
+            OutputStream out = t.getResponseBody();
+            out.write(result);
+            out.flush();
+            out.close();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "sendStringResult()", e);
         }
