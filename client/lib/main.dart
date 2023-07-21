@@ -12,7 +12,7 @@ const String _urlHomepage = "https://tkuenneth.github.io/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
 const String _keyShakeEnabled = "shakeEnabled";
 const String _appName = "Souffleur";
-const String protocolHttp = "http";
+const String _protocolHttps = "https";
 
 const _symbolNext = Icons.arrow_forward_ios_rounded;
 const _symbolPrevious = Icons.arrow_back_ios_rounded;
@@ -80,7 +80,7 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   bool isLastKnownUrlValid() {
-    return lastKnownUrl.contains(protocolHttp);
+    return lastKnownUrl.contains(_protocolHttps);
   }
 
   void updateLastKnownUrl(String? url, bool shouldUpdatePrefs) async {
@@ -116,10 +116,6 @@ class _SouffleurClientState extends State<SouffleurClient>
                       ),
                       PopupMenuItem<int>(
                         value: 1,
-                        child: Text(AppLocalizations.of(context)!.unlink),
-                      ),
-                      PopupMenuItem<int>(
-                        value: 2,
                         child: Text(AppLocalizations.of(context)!.unlink),
                       ),
                       shakeEnabled
