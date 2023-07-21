@@ -1,14 +1,18 @@
 package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -140,7 +144,9 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                         )
 
                         true -> QRCodeScreen(
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            scope = coroutineScope,
+                            snackbarHostState = snackbarHostState
                         )
                     }
                 }
@@ -214,7 +220,11 @@ fun MainControlsScreen(
 }
 
 @Composable
-fun QRCodeScreen(viewModel: ViewModel) {
+fun QRCodeScreen(
+    viewModel: ViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -230,10 +240,22 @@ fun QRCodeScreen(viewModel: ViewModel) {
                         val clipboard = Toolkit.getDefaultToolkit().systemClipboard
                         clipboard.setContents(selection, selection)
                     }
-                })
-            Button(onClick = {
-                viewModel.isRunning = false
-            }) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = stringResource(key = SNACKBAR_URL_COPIED_TO_CLIPBOARD)
+                        )
+                    }
+                }
+                    .border(
+                        BorderStroke
+                            (
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { viewModel.isRunning = false }) {
                 Text(text = stringResource(BUTTON_STOP))
             }
         }

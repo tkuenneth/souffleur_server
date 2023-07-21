@@ -1,6 +1,7 @@
 # What's new?
 
 - Clicking on the QR code pastes the url to the system clipboard
+- We now show a snackbar when the server url is copied to the clipboard
 
 ## 1.1.0
 - Libraries and tools upgrades
@@ -19,7 +20,7 @@
 - UI refinements in client and server
 - macOS version (server) is now notarized
 - Refactoring
-- installables are created from release builds
+- Installers are created from release builds
 
 ## 1.0.6
 
