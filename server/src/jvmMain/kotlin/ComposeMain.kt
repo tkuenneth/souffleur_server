@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +53,7 @@ import eu.thomaskuenneth.souffleur.ViewModel.DEVICE
 import eu.thomaskuenneth.souffleur.ViewModel.LAST_COMMAND
 import eu.thomaskuenneth.souffleur.ViewModel.RUNNING
 import eu.thomaskuenneth.souffleur.ViewModel.SHOW_QR_CODE
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.awt.AWTException
 import java.awt.Toolkit
@@ -123,12 +125,23 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                 }
             }
         }
-        Scaffold {
+        val snackbarHostState = remember { SnackbarHostState() }
+        val coroutineScope = rememberCoroutineScope()
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Crossfade(targetState = qrCodeVisible) { isVisible ->
                     when (isVisible) {
-                        false -> MainControlsScreen(viewModel)
-                        true -> QRCodeScreen(viewModel)
+                        false -> MainControlsScreen(
+                            viewModel = viewModel,
+                            scope = coroutineScope,
+                            snackbarHostState = snackbarHostState
+                        )
+
+                        true -> QRCodeScreen(
+                            viewModel = viewModel
+                        )
                     }
                 }
             }
@@ -138,7 +151,11 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
 }
 
 @Composable
-fun MainControlsScreen(viewModel: ViewModel) {
+fun MainControlsScreen(
+    viewModel: ViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -150,12 +167,11 @@ fun MainControlsScreen(viewModel: ViewModel) {
         }
     }
     val lastCommand by viewModel.observeAsState<String?>(LAST_COMMAND)
+    val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
     val isRunning by viewModel.observeAsState<Boolean>(RUNNING)
     viewModel.observeRunning {
         viewModel.isShowQRCode = isRunning
     }
-    val coroutineScope = rememberCoroutineScope()
-    val isHelloActive by remember(lastCommand) { mutableStateOf(Server.HELLO == lastCommand) }
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().weight(1.0F).padding(16.dp),
@@ -189,8 +205,7 @@ fun MainControlsScreen(viewModel: ViewModel) {
         }
     }
     if (isHelloActive) {
-        val snackbarHostState = remember { SnackbarHostState() }
-        coroutineScope.launch {
+        scope.launch {
             snackbarHostState.showSnackbar(
                 message = stringResource(key = SNACKBAR_OPEN_PRESENTATION)
             )
