@@ -61,42 +61,42 @@ public class Server implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange t) {
+    public void handle(HttpExchange exchange) {
         try {
-            String path = t.getRequestURI().getPath();
+            String path = exchange.getRequestURI().getPath();
             switch (path.substring(path.lastIndexOf('/') + 1).toLowerCase()) {
                 case HOME -> {
                     Utils.sendHome(robot);
                     callback.commandReceived(HOME);
-                    sendResult(t, "", HttpURLConnection.HTTP_OK);
+                    sendResult(exchange, HttpURLConnection.HTTP_OK);
                 }
                 case PREVIOUS -> {
                     Utils.sendCursorLeft(robot);
                     callback.commandReceived(PREVIOUS);
-                    sendResult(t, "", HttpURLConnection.HTTP_OK);
+                    sendResult(exchange, HttpURLConnection.HTTP_OK);
                 }
                 case NEXT -> {
                     Utils.sendCursorRight(robot);
                     callback.commandReceived(NEXT);
-                    sendResult(t, "", HttpURLConnection.HTTP_OK);
+                    sendResult(exchange, HttpURLConnection.HTTP_OK);
                 }
                 case END -> {
                     Utils.sendEnd(robot);
                     callback.commandReceived(END);
-                    sendResult(t, "", HttpURLConnection.HTTP_OK);
+                    sendResult(exchange, HttpURLConnection.HTTP_OK);
                 }
                 case HELLO -> {
-                    sendResult(t,
+                    sendResult(exchange,
                             String.format("Hello, world! It's %s.",
                                     DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(LocalTime.now())),
                             HttpURLConnection.HTTP_OK);
                     callback.commandReceived(HELLO);
                 }
-                default -> sendResult(t, "", HttpURLConnection.HTTP_NOT_FOUND);
+                default -> sendResult(exchange, HttpURLConnection.HTTP_NOT_FOUND);
             }
         } catch (Exception e) {
+            sendResult(exchange, HttpURLConnection.HTTP_BAD_REQUEST);
             LOGGER.log(Level.SEVERE, "handle()", e);
-            sendResult(t, "", HttpURLConnection.HTTP_BAD_REQUEST);
         }
     }
 
@@ -104,7 +104,7 @@ public class Server implements HttpHandler {
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
             InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
-            this.httpServer = HttpsServer.create(socketAddress, 0);
+            httpServer = HttpsServer.create(socketAddress, 0);
             char[] password = "password".toCharArray();
             KeyStore ks = KeyStore.getInstance("JKS");
             InputStream is = getClass().getResourceAsStream("/souffleur.jks");
@@ -115,10 +115,10 @@ public class Server implements HttpHandler {
             tmf.init(ks);
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-            this.httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext));
-            this.httpServer.createContext("/souffleur/" + secret, this);
-            this.httpServer.setExecutor(null);
-            this.httpServer.start();
+            httpServer.setHttpsConfigurator(new HttpsConfigurator(sslContext));
+            httpServer.createContext("/souffleur/" + secret, this);
+            httpServer.setExecutor(null);
+            httpServer.start();
             return true;
         } catch (IOException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException |
                  UnrecoverableKeyException | CertificateException e) {
@@ -139,18 +139,22 @@ public class Server implements HttpHandler {
         return httpServer != null;
     }
 
-    private void sendResult(HttpExchange t, String text, int status) {
+    private void sendResult(HttpExchange exchange, int status) {
+        sendResult(exchange, "", status);
+    }
+
+    private void sendResult(HttpExchange exchange, String message, int status) {
         try {
-            t.getRequestBody().close();
-            byte[] result = text.getBytes();
-            t.getResponseHeaders().add("Content-Type", "text/plain");
-            t.sendResponseHeaders(status, result.length);
-            OutputStream out = t.getResponseBody();
+            exchange.getRequestBody().close();
+            byte[] result = message.getBytes();
+            exchange.getResponseHeaders().add("Content-Type", "text/plain");
+            exchange.sendResponseHeaders(status, result.length);
+            OutputStream out = exchange.getResponseBody();
             out.write(result);
             out.flush();
             out.close();
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "sendStringResult()", e);
+            LOGGER.log(Level.SEVERE, "sendResult()", e);
         }
     }
 }
