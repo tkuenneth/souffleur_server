@@ -18,6 +18,7 @@ dependencies:
   shared_preferences: ^2.0.15
   url_launcher: ^6.1.4
   shake: ^2.2.0
+  vibration: ^1.8.1
 
 dev_dependencies:
   flutter_test:

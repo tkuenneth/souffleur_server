@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shake/shake.dart';
+import 'package:vibration/vibration.dart';
 
 const String _urlHomepage = "https://tkuenneth.github.io/souffleur";
 const String _keyLastKnownUrl = 'lastKnownUrl';
@@ -18,6 +19,12 @@ const _symbolNext = Icons.arrow_forward_ios_rounded;
 const _symbolPrevious = Icons.arrow_back_ios_rounded;
 const _symbolHome = Icons.first_page;
 const _symbolEnd = Icons.last_page;
+
+const _strHello = "hello";
+const _strNext = "next";
+const _strPrevious = "previous";
+const _strHome = "home";
+const _strEnd = "end";
 
 void main() {
   runApp(const SouffleurClient());
@@ -303,26 +310,29 @@ class _SouffleurClientState extends State<SouffleurClient>
   }
 
   void _sendCommandHello() {
-    _sendCommand("hello");
+    _sendCommand(_strHello);
   }
 
   void _sendCommandHome() {
-    _sendCommand("home");
+    _sendCommand(_strHome);
   }
 
   void _sendCommandEnd() {
-    _sendCommand("end");
+    _sendCommand(_strEnd);
   }
 
   void _sendCommandPrevious() {
-    _sendCommand("previous");
+    _sendCommand(_strPrevious);
   }
 
   void _sendCommandNext() {
-    _sendCommand("next");
+    _sendCommand(_strNext);
   }
 
   void _sendCommand(String cmd) async {
+    if ((cmd != _strHello) && (await Vibration.hasVibrator() == true)) {
+      Vibration.vibrate();
+    }
     _getFromServer(lastKnownUrl, cmd);
   }
 

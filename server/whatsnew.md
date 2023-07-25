@@ -1,5 +1,8 @@
 # What's new?
 
+- Vibrate after shaking and clicks on the next/previous/home/end buttons
+- iOS app icon improved
+
 ## 1.1.1
 - Clicking on the QR code pastes the url to the system clipboard
 - We now show a snack bar when the server url is copied to the clipboard
