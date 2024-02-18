@@ -24,11 +24,12 @@ jobs:
       run: chmod +x gradlew
     - name: Run packageReleaseMsi with Gradle Wrapper
       run: ./gradlew packageReleaseMsi
+    - run: Compress-Archive -Path ./build/compose/binaries/main-release/msi/*.msi -DestinationPath ./souffleur_windows.zip
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: ./server/build/compose/binaries/main-release/msi/*.msi
-        name: souffleur.msi
+        path: ./souffleur_windows.zip
+        name: souffleur_windows.zip
 
   create-macos-installer:
     runs-on: macos-latest
@@ -83,12 +84,12 @@ jobs:
         ln -s /Applications/ Applications
         cd ..
         hdiutil create -volname Souffleur -srcfolder dmg -ov -format UDZO Souffleur.dmg
-        ditto -c -k Souffleur.dmg ./souffleur_macos.zip
+        ditto -c -k Souffleur.dmg souffleur_macos.zip
         echo `pwd`
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: ./souffleur_macos.zip
+        path: /Users/runner/work/souffleur_server/souffleur_server/server/souffleur_macos.zip
         name: souffleur_macos.zip
         
   create-release:
@@ -99,11 +100,11 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: souffleur_macos.zip
-    - name: Download msi
+    - name: Download Windows zip
       uses: actions/download-artifact@v3
       with:
-        name: souffleur.msi
+        name: souffleur_windows.zip
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "souffleur_macos.zip,*.msi"
+        artifacts: "souffleur_macos.zip,souffleur_windows.zip"
