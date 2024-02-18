@@ -67,7 +67,7 @@ jobs:
         PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
       run: |
         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
-        PATH_TO_APP=/Users/runner/work/souffleur/souffleur/server/build/compose/binaries/main-release/app/Souffleur.app
+        PATH_TO_APP=./build/compose/binaries/main-release/app/Souffleur.app
         echo "Create keychain profile"
         xcrun notarytool store-credentials "notarytool-profile" --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" --password "$PROD_MACOS_NOTARIZATION_PWD"
         echo "Creating temp notarization archive"
@@ -83,12 +83,12 @@ jobs:
         ln -s /Applications/ Applications
         cd ..
         hdiutil create -volname Souffleur -srcfolder dmg -ov -format UDZO Souffleur.dmg
-        ditto -c -k Souffleur.dmg /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
+        ditto -c -k Souffleur.dmg ./souffleur_macos.zip
         echo `pwd`
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: /Users/runner/work/souffleur/souffleur/server/souffleur_macos.zip
+        path: ./souffleur_macos.zip
         name: souffleur_macos.zip
         
   create-release:
@@ -106,4 +106,4 @@ jobs:
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "/Users/runner/work/souffleur/souffleur/souffleur_macos.zip,/Users/runner/work/souffleur/souffleur/*.msi"
+        artifacts: "souffleur_macos.zip,*.msi"
