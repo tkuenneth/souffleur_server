@@ -24,11 +24,11 @@ jobs:
       run: chmod +x gradlew
     - name: Run packageReleaseMsi with Gradle Wrapper
       run: ./gradlew packageReleaseMsi
-    - run: Compress-Archive -Path ./build/compose/binaries/main-release/msi/*.msi -DestinationPath ./souffleur_windows.zip
+    - run: Compress-Archive -Path ./build/compose/binaries/main-release/msi/*.msi -DestinationPath "${{ github.workspace }}/souffleur_windows.zip"
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: ./souffleur_windows.zip
+        path: "${{ github.workspace }}/souffleur_windows.zip"
         name: souffleur_windows.zip
 
   create-macos-installer:
