@@ -38,12 +38,11 @@ kotlin {
             }
         }
     }
+    applyDefaultHierarchyTemplate()
     sourceSets {
         val commonMain by getting
         val commonTest by getting
-
         val jvmMain by getting {
-            dependsOn(commonMain)
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(compose.material3)
@@ -52,15 +51,9 @@ kotlin {
             }
         }
         val jvmTest by getting
-
-        val macosX64Main by getting {
-            dependsOn(commonMain)
-        }
+        val macosX64Main by getting
         val macosX64Test by getting
-
-        val macosArm64Main by getting {
-            dependsOn(macosX64Main)
-        }
+        val macosArm64Main by getting
         val macosArm64Test by getting
     }
 }
