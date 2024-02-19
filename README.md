@@ -6,14 +6,8 @@ I beg your pardon 🤔
 
 Are you frequently doing presentations, for example during workshops or at meetups and conferences? And have you ever wondered if you really need a physical remote control to flip through slides?
 
-*Souffleur* allows you to use your smartphone, foldable, or tablet instead. Just download and install the Souffleur server app on your computer and pair it with the client app. You can find more information regarding installation, setup, and usage at https://www.thomaskuenneth.eu/souffleur/
+*Souffleur* allows you to use your smartphone, foldable, or tablet instead. Just download and install the Souffleur server app on your computer and pair it with your mobile device. You can find more information regarding installation, setup, and usage at https://www.thomaskuenneth.de/souffleur/install.html
 
-This repository contains:
-
-**server**: The Souffleur server (written in Java and Kotlin)
-
-**client**: The Souffleur app (Flutter)
-
-**docs**: The *Souffleur* GitHub Pages
+This repository contains the Souffleur server (written in Java and Kotlin). The mobile app is also open source. You can find it on [GitHub](https://github.com/tkuenneth/souffleur_app), too.
 
 *Souffleur* is open source. It is licensed unter the terms of the Apache License 2.0.
