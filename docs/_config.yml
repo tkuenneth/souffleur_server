@@ -1,8 +1,0 @@
-theme: minima
-title: Souffleur
-description: An open source remote control for presentations
-email: thomas@thomaskuenneth.eu
-author: Thomas Künneth
-header_pages:
-  - install.md
-  - privacy.md
