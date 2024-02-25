@@ -66,7 +66,7 @@ compose.desktop {
             packageName = "Souffleur"
             packageVersion = version.toString()
             description = "A cross platform remote control for presentations"
-            copyright = "2019 - 2023 Thomas Kuenneth. All rights reserved."
+            copyright = "2019 - 2024 Thomas Kuenneth. All rights reserved."
             vendor = "Thomas Kuenneth"
             macOS {
                 bundleID = "eu.thomaskuenneth.souffleur"
