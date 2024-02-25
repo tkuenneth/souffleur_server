@@ -12,4 +12,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "server"
+rootProject.name = "souffleur_server"
