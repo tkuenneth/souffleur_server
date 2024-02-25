@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: ./server
+        working-directory: .
     steps:
     - name: Checkout project sources
       uses: actions/checkout@v3
@@ -35,7 +35,7 @@ jobs:
     runs-on: macos-latest
     defaults:
       run:
-        working-directory: ./server
+        working-directory: .
     steps:
     - name: Checkout project sources
       uses: actions/checkout@v3
@@ -89,7 +89,7 @@ jobs:
     - name: Upload asset
       uses: actions/upload-artifact@v3
       with:
-        path: /Users/runner/work/souffleur_server/souffleur_server/server/souffleur_macos.zip
+        path: /Users/runner/work/souffleur_server/souffleur_server/souffleur_macos.zip
         name: souffleur_macos.zip
         
   create-release:
