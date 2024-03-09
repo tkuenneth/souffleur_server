@@ -17,8 +17,19 @@ if (file.isFile) {
 } else error("${file.absolutePath} not found")
 version = properties.getProperty("VERSION")
 
+val appleId = System.getenv("PROD_MACOS_NOTARIZATION_APPLE_ID") ?: "".also {
+    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_APPLE_ID is empty")
+}
+val appleTeamId = System.getenv("PROD_MACOS_NOTARIZATION_TEAM_ID") ?: "".also {
+    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_TEAM_ID is empty")
+}
+val notarizationPassword = System.getenv("NOTARIZATION_PASSWORD") ?: "".also {
+    if (it.isEmpty()) error("NOTARIZATION_PASSWORD is empty")
+}
+
 repositories {
     google()
+    gradlePluginPortal()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
@@ -76,8 +87,9 @@ compose.desktop {
                     identity.set("Thomas Kuenneth")
                 }
                 notarization {
-                    appleID.set("thomas.kuenneth@icloud.com")
-                    password.set("@keychain:NOTARIZATION_PASSWORD")
+                    appleID.set(appleId)
+                    password.set(notarizationPassword)
+                    teamID.set(appleTeamId)
                 }
             }
             windows {
