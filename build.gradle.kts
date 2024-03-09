@@ -17,15 +17,9 @@ if (file.isFile) {
 } else error("${file.absolutePath} not found")
 version = properties.getProperty("VERSION")
 
-val appleId = System.getenv("PROD_MACOS_NOTARIZATION_APPLE_ID") ?: "".also {
-    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_APPLE_ID is empty")
-}
-val appleTeamId = System.getenv("PROD_MACOS_NOTARIZATION_TEAM_ID") ?: "".also {
-    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_TEAM_ID is empty")
-}
-val notarizationPassword = System.getenv("PROD_MACOS_NOTARIZATION_PWD") ?: "".also {
-    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_PWD is empty")
-}
+val appleId = System.getenv("PROD_MACOS_NOTARIZATION_APPLE_ID") ?: ""
+val appleTeamId = System.getenv("PROD_MACOS_NOTARIZATION_TEAM_ID") ?: ""
+val notarizationPassword = System.getenv("PROD_MACOS_NOTARIZATION_PWD") ?: ""
 
 repositories {
     google()
