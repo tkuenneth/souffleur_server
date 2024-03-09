@@ -23,8 +23,8 @@ val appleId = System.getenv("PROD_MACOS_NOTARIZATION_APPLE_ID") ?: "".also {
 val appleTeamId = System.getenv("PROD_MACOS_NOTARIZATION_TEAM_ID") ?: "".also {
     if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_TEAM_ID is empty")
 }
-val notarizationPassword = System.getenv("NOTARIZATION_PASSWORD") ?: "".also {
-    if (it.isEmpty()) error("NOTARIZATION_PASSWORD is empty")
+val notarizationPassword = System.getenv("PROD_MACOS_NOTARIZATION_PWD") ?: "".also {
+    if (it.isEmpty()) error("PROD_MACOS_NOTARIZATION_PWD is empty")
 }
 
 repositories {
