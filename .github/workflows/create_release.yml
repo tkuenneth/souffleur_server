@@ -59,32 +59,16 @@ jobs:
         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
         security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PASSWORD -T /usr/bin/codesign
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
-    - name: Run createReleaseDistributable with Gradle Wrapper
-      run: ./gradlew createReleaseDistributable
-    - name: "Notarize app bundle"
+    - name: "Build and notarize release app bundle"
       env:
         PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}
         PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}
         PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}
       run: |
         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} build.keychain
-        PATH_TO_APP=./build/compose/binaries/main-release/app/Souffleur.app
-        echo "Create keychain profile"
         xcrun notarytool store-credentials "notarytool-profile" --apple-id "$PROD_MACOS_NOTARIZATION_APPLE_ID" --team-id "$PROD_MACOS_NOTARIZATION_TEAM_ID" --password "$PROD_MACOS_NOTARIZATION_PWD"
-        echo "Creating temp notarization archive"
-        ditto -c -k --keepParent $PATH_TO_APP "notarization.zip"
-        echo "Notarize app"
-        xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait
-        echo "Attach staple"
-        xcrun stapler staple $PATH_TO_APP
-        echo "Create .dmg"
-        mkdir dmg
-        cp -R $PATH_TO_APP dmg
-        cd dmg
-        ln -s /Applications/ Applications
-        cd ..
-        hdiutil create -volname Souffleur -srcfolder dmg -ov -format UDZO Souffleur.dmg
-        ditto -c -k Souffleur.dmg souffleur_macos.zip
+        ./gradlew notarizeReleaseDmg
+        ditto -c -k ./build/compose/binaries/main-release/dmg/Souffleur*.dmg souffleur_macos.zip
         echo `pwd`
     - name: Upload asset
       uses: actions/upload-artifact@v3
