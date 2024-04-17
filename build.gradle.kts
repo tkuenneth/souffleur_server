@@ -30,9 +30,6 @@ repositories {
 
 kotlin {
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "17"
-        }
         withJava()
     }
     val macos = listOf(macosX64(), macosArm64())
