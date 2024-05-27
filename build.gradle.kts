@@ -5,6 +5,7 @@ import java.io.*
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 group = "eu.thomaskuenneth.souffleur"
