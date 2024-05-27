@@ -3,14 +3,14 @@ import java.util.*
 import java.io.*
 
 plugins {
-    kotlin("multiplatform")
+    kotlin("jvm")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
 group = "eu.thomaskuenneth.souffleur"
 val properties = Properties()
-val file = rootProject.file("src/jvmMain/resources/version.properties")
+val file = rootProject.file("src/main/resources/version.properties")
 if (file.isFile) {
     InputStreamReader(FileInputStream(file), Charsets.UTF_8).use { reader ->
         properties.load(reader)
@@ -29,36 +29,12 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
-kotlin {
-    jvm {
-        withJava()
-    }
-    val macos = listOf(macosX64(), macosArm64())
-    configure(macos) {
-        binaries {
-            framework {
-                baseName = "shared"
-            }
-        }
-    }
-    applyDefaultHierarchyTemplate()
-    sourceSets {
-        val commonMain by getting
-        val commonTest by getting
-        val jvmMain by getting {
-            dependencies {
-                implementation(compose.desktop.currentOs)
-                implementation(compose.material3)
-                implementation("com.google.zxing:javase:3.4.1")
-                implementation( "org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
-            }
-        }
-        val jvmTest by getting
-        val macosX64Main by getting
-        val macosX64Test by getting
-        val macosArm64Main by getting
-        val macosArm64Test by getting
-    }
+dependencies {
+    implementation(compose.desktop.currentOs)
+    implementation(compose.components.resources)
+    implementation(compose.material3)
+    implementation("com.google.zxing:javase:3.4.1")
+    implementation( "org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
 }
 
 compose.desktop {
