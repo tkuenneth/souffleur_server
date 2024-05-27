@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Souffleur</string>
+
+    <string name="file">File</string>
+    <string name="quit">Quit</string>
+
+    <string name="help">Help</string>
+    <string name="about">About Souffleur\u2026</string>
+
+    <string name="about_title">About this app</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+
+    <string name="open_presentation">You can now open your presentation</string>
+    <string name="url_copied_to_clipboard">URL copied to clipboard</string>
+</resources>

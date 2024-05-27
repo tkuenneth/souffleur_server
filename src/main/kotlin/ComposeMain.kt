@@ -5,66 +5,33 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FirstPage
-import androidx.compose.material.icons.filled.LastPage
-import androidx.compose.material.icons.filled.NavigateBefore
-import androidx.compose.material.icons.filled.NavigateNext
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.loadSvgPainter
-import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.FrameWindowScope
-import androidx.compose.ui.window.MenuBar
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowState
-import androidx.compose.ui.window.application
-import eu.thomaskuenneth.souffleur.ViewModel.ADDRESS
-import eu.thomaskuenneth.souffleur.ViewModel.DEVICE
-import eu.thomaskuenneth.souffleur.ViewModel.LAST_COMMAND
-import eu.thomaskuenneth.souffleur.ViewModel.RUNNING
-import eu.thomaskuenneth.souffleur.ViewModel.SHOW_QR_CODE
+import androidx.compose.ui.window.*
+import eu.thomaskuenneth.souffleur.ViewModel.*
+import eu.thomaskuenneth.souffleur.souffleur_server.generated.resources.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import java.awt.AWTException
+import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.net.SocketException
+import java.util.*
 import java.util.ResourceBundle.getBundle
-import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.prefs.Preferences
@@ -82,8 +49,6 @@ const val KEY_PORT = "port"
 
 private const val RELATIVE_PREFS_PATH = "eu/thomaskuenneth/souffleur"
 private val prefs = Preferences.userRoot().node(RELATIVE_PREFS_PATH)
-
-private const val APP_ICON = "/eu/thomaskuenneth/souffleur/appicon.svg"
 
 @Composable
 fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
@@ -109,19 +74,24 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
     var showAboutDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        with(Desktop.getDesktop()) {
+            installAboutHandler { showAboutDialog = true }
+        }
+    }
     MaterialTheme {
         if (!IS_MACOS) {
             MenuBar {
-                Menu(text = stringResource(MENU_FILE)) {
+                Menu(text = stringResource(Res.string.file)) {
                     Item(
-                        text = stringResource(MENU_ITEM_QUIT),
+                        text = stringResource(Res.string.quit),
                         onClick = exit,
                         shortcut = KeyShortcut(Key.F4, alt = true)
                     )
                 }
-                Menu(text = stringResource(MENU_HELP)) {
+                Menu(text = stringResource(Res.string.help)) {
                     Item(
-                        text = stringResource(MENU_ITEM_ABOUT),
+                        text = stringResource(Res.string.about),
                         onClick = {
                             showAboutDialog = true
                         }
@@ -151,7 +121,7 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
                     }
                 }
             }
-            if (showAboutDialog) AboutDialog(APP_ICON) { showAboutDialog = false }
+            if (showAboutDialog) AboutDialog { showAboutDialog = false }
         }
     }
 }
@@ -162,6 +132,7 @@ fun MainControlsScreen(
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState
 ) {
+    val openPresentation = stringResource(Res.string.open_presentation)
     val device by viewModel.observeAsState<String>(DEVICE)
     val address by viewModel.observeAsState<String>(ADDRESS)
     var portAsString by remember { mutableStateOf(Utils.nullSafeString(viewModel.port)) }
@@ -213,7 +184,7 @@ fun MainControlsScreen(
     if (isHelloActive) {
         scope.launch {
             snackbarHostState.showSnackbar(
-                message = stringResource(key = SNACKBAR_OPEN_PRESENTATION)
+                message = openPresentation
             )
         }
     }
@@ -225,6 +196,7 @@ fun QRCodeScreen(
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState
 ) {
+    val urlCopiedToClipboard = stringResource(Res.string.url_copied_to_clipboard)
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -242,7 +214,7 @@ fun QRCodeScreen(
                     }
                     scope.launch {
                         snackbarHostState.showSnackbar(
-                            message = stringResource(key = SNACKBAR_URL_COPIED_TO_CLIPBOARD)
+                            message = urlCopiedToClipboard
                         )
                     }
                 }
@@ -256,13 +228,12 @@ fun QRCodeScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { viewModel.isRunning = false }) {
-                Text(text = stringResource(BUTTON_STOP))
+                Text(text = stringResource(Res.string.stop))
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.FirstColumn(
     device: String,
@@ -307,7 +278,7 @@ fun RowScope.SecondColumn(
             modifier = Modifier.padding(top = 32.dp, bottom = 32.dp)
                 .align(Alignment.CenterHorizontally)
         ) {
-            Text(text = stringResource(key = if (isRunning) BUTTON_STOP else BUTTON_START))
+            Text(text = stringResource(if (isRunning) Res.string.stop else Res.string.start))
         }
         Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             IndicatorIcon(indicator = Server.HOME, isActive = isHomeActive)
@@ -380,26 +351,18 @@ fun main() {
         }
     }
     application {
-        val icon = getAppIcon(APP_ICON)
         val exit = {
             viewModel.stopServer()
             exitApplication()
         }
         Window(
             onCloseRequest = exit,
-            title = stringResource(key = APP_NAME),
-            icon = icon,
+            title = stringResource(Res.string.app_name),
+            icon = painterResource(Res.drawable.logo),
             resizable = false,
             state = WindowState(size = DpSize(600.dp, 340.dp)),
         ) {
             MainScreen(viewModel, exit)
         }
-    }
-}
-
-@Composable
-fun getAppIcon(res: String) = useResource(res) {
-    it.buffered().use { stream ->
-        loadSvgPainter(stream, LocalDensity.current)
     }
 }

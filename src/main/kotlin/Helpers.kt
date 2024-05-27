@@ -1,5 +1,7 @@
 package eu.thomaskuenneth.souffleur
 
+import java.awt.Desktop
+import java.awt.desktop.AboutHandler
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -29,3 +31,9 @@ fun setDeviceAndAddress(viewModel: ViewModel) {
 private val osNameLowerCase = System.getProperty("os.name", "").lowercase(Locale.getDefault())
 
 val IS_MACOS = osNameLowerCase.contains("mac os x")
+
+fun Desktop.installAboutHandler(handler: AboutHandler) {
+    if (isSupported(Desktop.Action.APP_ABOUT)) {
+        setAboutHandler(handler)
+    }
+}
