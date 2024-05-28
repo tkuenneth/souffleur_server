@@ -1,17 +1,13 @@
 package eu.thomaskuenneth.souffleur
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
@@ -69,7 +65,6 @@ fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Mod
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
     val qrCodeVisible by viewModel.observeAsState<Boolean>(SHOW_QR_CODE)
@@ -79,7 +74,13 @@ fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
             installAboutHandler { showAboutDialog = true }
         }
     }
-    MaterialTheme {
+    MaterialTheme(
+        colorScheme = if (isSystemInDarkTheme()) {
+            darkColorScheme()
+        } else {
+            lightColorScheme()
+        }
+    ) {
         if (!IS_MACOS) {
             MenuBar {
                 Menu(text = stringResource(Res.string.file)) {
