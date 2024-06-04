@@ -34,7 +34,8 @@ dependencies {
     implementation(compose.components.resources)
     implementation(compose.material3)
     implementation("com.google.zxing:javase:3.4.1")
-    implementation( "org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
+    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.2.0")
+    implementation("com.github.tkuenneth:nativeparameterstoreaccess:0.1.3")
 }
 
 compose.desktop {
