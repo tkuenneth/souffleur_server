@@ -1,4 +1,3 @@
 # What's new?
 
-- Starting with this version (v1.2.0), `whatsnew.md` mentions only changes since the previous version
-- We upgraded libraries and tools
+- Changing Light mode / Dark mode while the app is running will now switch colors accordingly
