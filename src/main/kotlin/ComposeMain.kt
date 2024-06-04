@@ -3,8 +3,6 @@ package eu.thomaskuenneth.souffleur
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,25 +43,6 @@ const val KEY_PORT = "port"
 
 private const val RELATIVE_PREFS_PATH = "eu/thomaskuenneth/souffleur"
 private val prefs = Preferences.userRoot().node(RELATIVE_PREFS_PATH)
-
-@Composable
-fun IndicatorIcon(indicator: String, isActive: Boolean, modifier: Modifier = Modifier) {
-    Icon(
-        modifier = modifier,
-        imageVector = when (indicator) {
-            Server.HOME -> Icons.Default.FirstPage
-            Server.PREVIOUS -> Icons.Default.NavigateBefore
-            Server.NEXT -> Icons.Default.NavigateNext
-            Server.END -> Icons.Default.LastPage
-            else -> Icons.Default.Favorite
-        },
-        contentDescription = indicator,
-        tint = if (isActive)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.onBackground,
-    )
-}
 
 @Composable
 fun FrameWindowScope.MainScreen(viewModel: ViewModel, exit: () -> Unit) {
