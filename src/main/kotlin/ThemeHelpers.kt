@@ -8,7 +8,6 @@ import com.github.tkuenneth.nativeparameterstoreaccess.NativeParameterStoreAcces
 import com.github.tkuenneth.nativeparameterstoreaccess.WindowsRegistry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
@@ -16,12 +15,10 @@ fun isSystemInDarkTheme(): Boolean {
     var toggle by remember { mutableStateOf(true) }
     val result by remember(toggle) { mutableStateOf(getFromNativeParameterStore()) }
     LaunchedEffect(result) {
-        launch {
-            while (isActive) {
-                delay(1000)
-                if (getFromNativeParameterStore() != result) {
-                    toggle = !toggle
-                }
+        while (isActive) {
+            delay(1000)
+            if (getFromNativeParameterStore() != result) {
+                toggle = !toggle
             }
         }
     }
