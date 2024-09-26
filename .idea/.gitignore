@@ -6,3 +6,14 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+/modules.xml
+/jarRepositories.xml
+/compiler.xml
+/libraries/
+/artifacts/
+/codeStyles/
+/codeStyles/
+/kotlinc.xml
+/misc.xml
+/gradle.xml
