@@ -7,8 +7,8 @@ On this page, I'll explain how to download, install, and setup the *Souffleur* s
 
 *Souffleur* consists of two parts:
 
-1. You use the **mobile app** to flip through slides. When you press its *next page* button, the app sends a command to the **Souffleur server**
-- The **Souffleur server** runs on your laptop. It receives commands from the **mobile app** and instructs the operating system of your laptop to send key strokes to the topmost window. If this is your presentation software, this will flip the slides.
+1. The **mobile app**: you'll be using it to flip through slides. When you press its *next page* button, the app sends a command to the **Souffleur server**
+2. The **Souffleur server**: it runs on your laptop. It receives commands from the **mobile app** and instructs the operating system of your laptop to send key strokes to the topmost window. If this is your presentation software, this will flip the slides.
 
 ## Download and install
 
