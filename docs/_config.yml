@@ -1,0 +1,9 @@
+title: Souffleur
+description: A cross platform remote control for presentations
+theme: minima
+author: Thomas Künneth
+email: mail@tkuenneth.dev
+header_pages:
+  - index.md
+  - install.md
+  - privacy.md
