@@ -6,3 +6,4 @@ build/
 *.ipr
 out/
 .DS_Store
+docs/Gemfile.lock
